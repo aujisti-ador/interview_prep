@@ -1,352 +1,433 @@
 ```markdown
-# Phase 1: Core Programming & Languages - Detailed Interview Answers
+# Phase 1: Core Programming & Languages - Detailed Interview Answers (Expanded with Advanced JS/TS)
 **Prepared for: Fazle Rabbi Ador**  
-**Target Role**: Senior / Lead Backend Engineer  
-**Focus**: Deep understanding + real-world application (your Agora live streaming, Banglalink 41M users, Daraz performance work)  
+**Target Role**: Senior / Lead Backend Engineer (Node.js, NestJS, TypeScript heavy)  
+**Focus**: Deep JS internals + TypeScript mastery + real-world application (your Agora live streaming, Banglalink 41M users, Daraz performance)  
 **Date**: February 2026  
 
-**How to study this file**:
-- Read one major section per day.
-- Speak every answer out loud (record yourself on phone).
-- Type & run every code example.
-- After each section, ask yourself the "Follow-up Questions".
+**How to study**:
+- One major section per day.
+- Speak every answer out loud + record.
+- Run/type every code example.
+- After each Q, think of 1 follow-up question.
 - Mark [x] when confident.
+
 ```
 
-## 1. JavaScript / TypeScript Deep Dive
+## 1. JavaScript Deep Dive – Advanced Questions
 
-### Q1: Explain the JavaScript Event Loop in detail. How does it make JavaScript asynchronous even though it's single-threaded?
+### Q1: Explain the JavaScript Event Loop in detail, including microtasks vs macrotasks. What happens in a starvation scenario?
 
 **Detailed Answer**:
-JavaScript runs on a single thread (main thread) but appears asynchronous because of the **Event Loop + Libuv (in Node.js)**.
+JavaScript is single-threaded but non-blocking thanks to the **Event Loop**.
 
-**Core Components**:
-1. **Call Stack** — Executes synchronous code (LIFO).
-2. **Web APIs / Libuv** — Handles async operations (setTimeout, HTTP, DB, file I/O, Agora SDK calls).
-3. **Microtask Queue** — High priority (Promises, async/await, queueMicrotask, MutationObserver).
-4. **Macrotask Queue (Task Queue)** — Lower priority (setTimeout, setInterval, I/O callbacks, DOM events).
-5. **Event Loop** — Continuously checks: "Is Call Stack empty? → If yes, move one microtask, then one macrotask."
+**Components**:
+- **Call Stack** — synchronous execution (LIFO).
+- **Web APIs / Libuv** (Node) — async ops (timers, I/O, HTTP, DNS, crypto).
+- **Microtask Queue** — Promise.then, async/await resolution, queueMicrotask.
+- **Macrotask Queue** — setTimeout, setInterval, setImmediate (Node), I/O callbacks, UI rendering (browser).
+- **Event Loop phases** (Node): timers → pending callbacks → idle/prepare → poll → check → close callbacks.
 
-**Visual Execution Order**:
+**Execution priority**:
+1. Execute current script (call stack).
+2. Clear **all** microtasks.
+3. Take **one** macrotask.
+4. Repeat.
+
+**Code example**:
 ```js
-console.log("1");                    // Call Stack
+console.log('Start');
 
-setTimeout(() => console.log("2"), 0); // Macrotask Queue
+setTimeout(() => console.log('setTimeout'), 0);           // macrotask
 
-Promise.resolve().then(() => console.log("3")); // Microtask Queue
+Promise.resolve().then(() => console.log('Promise 1'))     // microtask
+  .then(() => console.log('Promise 2'));                   // chained microtask
 
-console.log("4");                    // Call Stack
+queueMicrotask(() => console.log('queueMicrotask'));
+
+console.log('End');
 ```
 **Output**:
 ```
-1
-4
-3
-2
+Start
+End
+Promise 1
+Promise 2
+queueMicrotask
+setTimeout
 ```
 
-**Why this matters in your projects**:
-- In your **Right Tracks live streaming app**, when 500 viewers join simultaneously:
-  - Agora token generation + DynamoDB write = async I/O.
-  - Event Loop keeps the main thread free → no blocking → 99.9% uptime.
-- If you used blocking code (e.g., `for` loop for 1M users), the whole server would freeze.
-
-**Follow-up Questions interviewers ask**:
-- What is the difference between microtask and macrotask? (Microtasks run after current script, before next macrotask)
-- What happens if you have an infinite microtask loop? (Starves the macrotask queue → UI freeze in browser, starvation in Node)
-- How does `await` work under the hood? (It returns a Promise and pauses the function via microtask)
-
-**Best Resources**:
-- MDN Official: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Event_loop
-- Excellent 2025 Explanation: https://dev.to/buildwithgagan/javascript-event-loop-explained-a-beginners-guide-with-examples-4kae
-- YouTube (visual): https://www.youtube.com/watch?v=WNrHrwm1wkU (4 min)
-
----
-
-### Q2: var vs let vs const — Explain with memory and hoisting differences. When to use each in production backend code?
-
-**Detailed Answer**:
-| Feature       | var                  | let                     | const                     |
-|---------------|----------------------|-------------------------|---------------------------|
-| Scope         | Function             | Block                   | Block                     |
-| Hoisting      | Yes (undefined)      | Yes (TDZ)               | Yes (TDZ)                 |
-| Re-declare    | Yes                  | No                      | No                        |
-| Re-assign     | Yes                  | Yes                     | No (but object mutation OK)|
-| Temporal Dead Zone | No              | Yes                     | Yes                       |
-
-**Production Rule (NestJS style)**:
-```ts
-// ✅ Good
-const MAX_CONCURRENT_STREAMS = 5000;           // never changes
-let activeViewers = 0;                         // changes often
-// Never use var
-
-// Object example
-const config = { db: "dynamo" };
-config.port = 3000;   // Allowed (mutation)
-```
-
-**Your resume connection**: In Banglalink Notification Service, you used `const` for Redis client and `let` for dynamic counters.
-
-**Follow-up**:
-- What is Temporal Dead Zone? (Time between declaration and initialization where accessing throws error)
-
----
-
-### Q3: What is Hoisting? Show with code and explain why it can cause bugs in large codebases.
-
-**Detailed Answer**:
-Hoisting = JavaScript engine moves all variable and function declarations to the top of their scope **before** execution.
-
+**Starvation example** (infinite microtasks):
 ```js
-// What you write
-console.log(x);   // undefined
-var x = 10;
-
-// What JS actually runs
-var x;
-console.log(x);   // undefined
-x = 10;
+Promise.resolve().then(function loop() {
+  console.log('Microtask');
+  Promise.resolve().then(loop);   // keeps adding microtasks
+});
 ```
+→ Macrotasks (like setTimeout) never run → timers starve. In production: infinite loop in Promise chain blocks timers, health checks, etc.
 
-**let/const are hoisted but in Temporal Dead Zone** → ReferenceError.
-
-**Real bug you might face**:
-In a large NestJS module, if you use `var` in a service and call it before declaration → silent `undefined` bug → hard to debug in production.
-
----
-
-### Q4: async/await vs Promises vs Callbacks. Show a real NestJS controller example.
-
-**Detailed Answer**:
-```ts
-// 1. Callbacks (avoid)
-getUser(id, (err, user) => { ... });
-
-// 2. Promises (better)
-getUser(id).then(user => ...).catch(err => ...);
-
-// 3. async/await (best for readability)
-async function getUserOrders(req: Request) {
-  try {
-    const user = await this.userService.findOne(req.params.id);
-    const orders = await this.orderService.findByUser(user.id);
-    return { user, orders };
-  } catch (err) {
-    throw new HttpException(err.message, 500);
-  }
-}
-```
-
-**Your experience**: You used async/await heavily in Agora token generation endpoints.
-
-**Follow-up**:
-- How to handle multiple awaits in parallel? → `Promise.all([await1, await2])`
-
-**Resource**: https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Asynchronous/Async_await
-
----
-
-## 2. Node.js Fundamentals
-
-### Q5: Node.js is single-threaded. How does it handle thousands of concurrent requests?
-
-**Detailed Answer**:
-- Single thread for JavaScript execution.
-- **Libuv** (C++ library) provides thread pool (default 4 threads) for I/O operations.
-- Non-blocking I/O → requests are offloaded to OS/kernel.
-
-**Real example from your live streaming app**:
-- 1000 viewers → 1000 WebSocket connections.
-- Each Agora token + S3 upload = I/O → handled by Libuv thread pool.
-- Main event loop stays free → handles new connections instantly.
-
-**When it fails**: CPU-heavy work (image processing, JSON parsing 10MB payload) → blocks the loop.
-
----
-
-### Q6: Explain Node.js Clustering vs Worker Threads. When to use which?
-
-**Detailed Answer**:
-**Clustering** (for scaling across CPU cores):
-```js
-const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
-
-if (cluster.isPrimary) {
-  console.log(`Master ${process.pid} is running`);
-  for (let i = 0; i < numCPUs; i++) cluster.fork();
-} else {
-  require('./app'); // NestJS starts here on each core
-}
-```
-
-**Worker Threads** (for CPU-intensive tasks inside same process):
-```js
-const { Worker } = require('worker_threads');
-const worker = new Worker('./heavy-calc.js');
-```
-
-**Your decision matrix**:
-- I/O heavy (your apps) → PM2 cluster or AWS Auto Scaling
-- CPU heavy (video transcoding) → Worker Threads
+**Your resume connection**: In live streaming (Agora + WebSockets), heavy microtask usage (subscriptions via AppSync) can delay token expiry timers if not careful.
 
 **Resources**:
-- Official: https://nodejs.org/api/cluster.html
-- Excellent guide: https://medium.com/@obada.almaleh/scaling-node-js-applications-with-clustering-and-worker-threads-2ae8695e663a
+- Node.js Event Loop docs: https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick
+- Excellent visual: https://www.youtube.com/watch?v=WNrHrwm1wkU
 
 ---
 
-## 3. NestJS Mastery (Most Important for Senior/Lead)
-
-### Q7: What is Dependency Injection in NestJS? Show full example.
+### Q2: Explain Closures in depth. Why are they useful in Node.js backends? Show memory leak risk.
 
 **Detailed Answer**:
-NestJS uses **Inversion of Control** via decorators.
+A closure is a function that remembers its outer scope even after the outer function has returned.
 
+**Classic example**:
+```js
+function createCounter() {
+  let count = 0;
+  return function() {
+    return ++count;   // remembers count
+  };
+}
+
+const counter = createCounter();
+console.log(counter()); // 1
+console.log(counter()); // 2
+```
+
+**Benefits in backend**:
+- Data privacy (private variables without classes).
+- Factory functions (your NestJS services often use them implicitly).
+- Memoization / caching (e.g., rate limiter per user).
+- Event handlers that need context (WebSocket onMessage).
+
+**Memory leak risk** (common in Node):
+```js
+const users = new Map();
+
+app.get('/subscribe/:id', (req, res) => {
+  const id = req.params.id;
+  users.set(id, req);   // request object kept alive forever
+
+  setInterval(() => {
+    console.log(users.get(id).ip);   // closure keeps req alive
+  }, 10000);
+});
+```
+→ Huge memory leak: each request object (headers, body, socket) stays in heap forever.
+
+**Fix**: Use weak references or avoid capturing large objects in closures.
+
+**Your experience**: In Banglalink notification service, closures in Redis pub/sub handlers must not capture large payloads → use weak refs or explicit cleanup.
+
+---
+
+### Q3: Explain Prototypal Inheritance vs ES6 Classes. When to prefer one over the other in Node.js?
+
+**Detailed Answer**:
+**Prototypal** (classic):
+```js
+function User(name) {
+  this.name = name;
+}
+User.prototype.greet = function() { return `Hi ${this.name}`; };
+
+const u = new User('Fazle');
+console.log(u.greet());
+```
+
+**ES6 Class** (syntactic sugar over prototypes):
+```js
+class User {
+  constructor(name) {
+    this.name = name;
+  }
+  greet() {
+    return `Hi ${this.name}`;
+  }
+}
+```
+
+**Key differences**:
+- Classes are stricter (no hoisting, strict mode, no calling without new).
+- Classes support `super()`, `extends`, static methods easily.
+- Prototypes allow dynamic modification (monkey patching) — useful but dangerous.
+
+**When to use in backend**:
+- **Classes** — default in NestJS (decorators work best), readability, team consistency.
+- **Prototypes** — performance-critical hot paths (rare), extending built-ins, or legacy code.
+
+**Your resume**: NestJS uses classes everywhere → interviewers expect you to know it's still prototypal under the hood.
+
+---
+
+### Q4: What are Iterators and Generators in JS? Show a real backend use case.
+
+**Detailed Answer**:
+**Iterator** — object with `next()` method returning `{value, done}`.
+
+**Generator** — function* that can pause/resume with yield.
+
+```js
+function* idGenerator() {
+  let id = 1;
+  while (true) yield id++;
+}
+
+const gen = idGenerator();
+console.log(gen.next().value); // 1
+console.log(gen.next().value); // 2
+```
+
+**Backend use cases**:
+- Streaming large datasets (e.g., paginated DynamoDB scan without loading all).
+- Custom async iterators for processing Kafka messages in batches.
+- Rate-limited API calls (yield after each request).
+
+**Async generator example** (your streaming context):
+```js
+async function* streamViewerIds() {
+  while (true) {
+    const viewers = await fetchActiveViewersFromDynamo(); // paginated
+    for (const v of viewers) yield v.id;
+    await delay(5000);
+  }
+}
+```
+
+**ES2025 note**: Iterator helpers (.map, .filter, .take) are now standard.
+
+---
+
+### Q5: Explain 'this' keyword pitfalls in Node.js. How does NestJS avoid them?
+
+**Detailed Answer**:
+`this` depends on **call site**:
+- Arrow function → lexical this (no own this).
+- Regular function → dynamic this.
+
+**Common pitfall**:
+```js
+class StreamService {
+  active = 0;
+
+  startMonitoring() {
+    setInterval(function() {
+      this.active++;   // this = global / undefined in strict mode
+    }, 1000);
+  }
+}
+```
+
+**Fixes**:
+- Arrow: `setInterval(() => this.active++)`
+- bind: `setInterval(this.increment.bind(this))`
+- NestJS: Dependency injection + class methods usually use arrow or class fields → safe.
+
+**Your code style**: In NestJS controllers/services, prefer arrow functions for callbacks.
+
+---
+
+### Q6: What is Memoization? Implement a simple memoized function for expensive computation.
+
+**Detailed Answer**:
+Memoization = caching function results for same inputs.
+
+**Implementation**:
+```js
+function memoize(fn) {
+  const cache = new Map();
+  return function(...args) {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) return cache.get(key);
+    const result = fn(...args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+const expensiveCalc = memoize((n) => {
+  console.log('Computing...');
+  return n * n; // pretend heavy
+});
+
+console.log(expensiveCalc(5)); // Computing... 25
+console.log(expensiveCalc(5)); // 25 (cached)
+```
+
+**Backend use**: Cache Agora token generation per channel (if tokens are expensive to mint).
+
+---
+
+### Q7: Explain Temporal Dead Zone (TDZ). Why is it better than var hoisting?
+
+**Detailed Answer**:
+TDZ = time between entering scope and variable declaration where let/const throw ReferenceError.
+
+```js
+console.log(a); // ReferenceError (TDZ)
+let a = 10;
+```
+
+**Why better**:
+- Prevents bugs from using variables before init.
+- Forces better code discipline (declare before use).
+
+**In NestJS**: TypeScript + let/const everywhere → no TDZ surprises.
+
+---
+
+## 2. Advanced TypeScript for Node.js / NestJS
+
+### Q8: Explain Generics in TypeScript. Show a real NestJS service example.
+
+**Detailed Answer**:
+Generics = reusable components with type safety.
+
+**Example**:
 ```ts
-// user.service.ts
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
 @Injectable()
 export class UserService {
-  constructor(
-    private readonly prisma: PrismaService,   // ← Injected
-    private readonly agoraService: AgoraService
-  ) {}
-}
-
-// user.controller.ts
-@Controller('users')
-export class UserController {
-  constructor(private readonly userService: UserService) {} // ← DI magic
-
-  @Post('token')
-  async generateToken(@Body() dto: TokenDto) {
-    return this.userService.generateAgoraToken(dto); // uses injected service
+  async findOne<T>(id: string): Promise<ApiResponse<T>> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    return { success: true, data: user as T };
   }
 }
 ```
 
-**Why interviewers love this**:
-- Testable (easy to mock)
-- Scalable for 10+ member teams
-- Used in your Right Tracks project for separating concerns (Agora logic separate from DB)
+**NestJS built-in**: Many modules use generics (e.g., `Repository<T>` in TypeORM).
 
 ---
 
-### Q8: Explain Guards, Interceptors, Pipes, Exception Filters with real use cases from your projects.
+### Q9: What are Decorators in TypeScript? How does NestJS use them?
 
 **Detailed Answer**:
+Decorators = functions that modify classes/methods/properties at design time (metadata reflection).
 
-| Feature            | Purpose                              | Your Real Use Case                              |
-|--------------------|--------------------------------------|-------------------------------------------------|
-| **Guard**          | Authorization before handler         | JwtAuthGuard on streaming endpoints             |
-| **Interceptor**    | Transform response / logging         | Log every Agora token request + response time   |
-| **Pipe**           | Validation & transformation          | ValidationPipe + class-validator for subscription tiers |
-| **Exception Filter**| Custom error format                  | Global filter: { "status": "error", "message": ..., "code": "STREAM_NOT_FOUND" } |
-
-**Code for Global Exception Filter** (you should know this):
+**Example**:
 ```ts
-@Catch(HttpException)
-export class GlobalExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-    response.status(400).json({
-      status: 'error',
-      message: exception.message,
-      timestamp: new Date().toISOString()
-    });
+function Log(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  const original = descriptor.value;
+  descriptor.value = async function (...args: any[]) {
+    console.log(`Calling ${propertyKey}`);
+    return original.apply(this, args);
+  };
+}
+
+class Service {
+  @Log
+  async heavyTask() { /* ... */ }
+}
+```
+
+**NestJS usage**:
+- `@Injectable()`, `@Controller()`, `@Get()`, `@UseGuards()`, `@Body()` — all decorators.
+- Enable via `experimentalDecorators` + `emitDecoratorMetadata` in tsconfig.
+
+**Why powerful**: DI, routing, validation all declarative.
+
+---
+
+### Q10: Explain Type Narrowing. Give 3 ways + NestJS validation example.
+
+**Detailed Answer**:
+Narrowing = TypeScript refines type inside block.
+
+**Ways**:
+1. `typeof` guard
+2. `instanceof`
+3. User-defined type guard
+4. `in` operator
+5. Discriminated unions
+
+**Example**:
+```ts
+type StreamEvent = { type: 'join'; userId: string } | { type: 'leave'; userId: string };
+
+function handleEvent(event: StreamEvent) {
+  if (event.type === 'join') {
+    // event narrowed to { type: 'join'; userId: string }
+    console.log(`User ${event.userId} joined`);
   }
 }
 ```
 
----
-
-### Q9: How do you structure a large NestJS project for a team of 8+ developers?
-
-**Answer** (draw this on whiteboard):
-```
-src/
-├── common/          # filters, guards, interceptors, decorators, constants
-├── config/          # configuration module (ConfigModule)
-├── database/        # Prisma / TypeORM module
-├── modules/
-│   ├── auth/
-│   ├── user/
-│   ├── stream/      # your live streaming module
-│   ├── subscription/
-│   └── notification/
-├── shared/          # shared services (Redis, Agora)
-└── main.ts
-```
-
-This is exactly how enterprise teams (Banglalink, Daraz) structure code.
+**In NestJS**: DTO validation with class-validator + ValidationPipe narrows types automatically.
 
 ---
 
-### Q10: NestJS vs Express vs Fastify. Why did you choose NestJS?
+### Q11: What is `never` type? When do you use it in backend code?
 
-**Answer**:
-- Express → simple but no structure
-- Fastify → fastest but less features
-- NestJS → TypeScript first, modular, built-in DI, testing, GraphQL support, microservices ready → perfect for scalable backend (your choice)
+**Detailed Answer**:
+`never` = type that never occurs (exhaustive checks, impossible values).
 
----
+**Uses**:
+```ts
+function throwError(msg: string): never {
+  throw new Error(msg);
+}
 
-## 4. Django / Python (Quick but Important)
+function assertNever(x: never): never {
+  throw new Error("Unexpected: " + x);
+}
 
-### Q11: When would you choose Django over NestJS in 2026?
-
-**Answer**:
-- Need powerful Admin panel quickly → Django Admin
-- Heavy data science / reporting → Python ecosystem
-- Your Banglalink experience: Used Django REST Framework for reporting microservices because of excellent ORM and admin.
-
-### Q12: Explain Django Signals with a real example.
-
-**Answer**:
-```python
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-        send_welcome_notification.delay(instance.id)  # Celery task
+// Exhaustive switch
+function getStatus(code: 'ok' | 'error' | 'pending'): string {
+  switch (code) {
+    case 'ok': return 'OK';
+    case 'error': return 'Error';
+    case 'pending': return 'Pending';
+    default: return assertNever(code); // TypeScript knows if new case added → error
+  }
+}
 ```
 
-Used in your Banglalink IAM system for automatic profile + notification.
+**Your use case**: In error handling filters or exhaustive event handlers in streaming.
 
 ---
 
-## 5. Practice Tasks for Phase 1 (Must Complete)
+### Q12: Explain `unknown` vs `any`. How should you use them in NestJS?
 
-1. Build a NestJS + Prisma CRUD API for "Subscription" module (with validation, exception filter, interceptor).
-2. Implement custom JwtAuthGuard.
-3. Add clustering to your local NestJS app using PM2.
-4. Solve these LeetCode problems in TypeScript (medium-hard):
-   - Two Sum, LRU Cache, Group Anagrams, Word Break, Course Schedule (Graph)
-   - Target: 25 problems this week
+**Detailed Answer**:
+- `any` → disables type checking (dangerous).
+- `unknown` → safer: you must narrow before using.
 
-**Resources for Practice**:
-- NestJS Official Docs: https://docs.nestjs.com/
-- TypeScript Handbook: https://www.typescriptlang.org/docs/handbook/intro.html
-- Advanced TS: https://dev.to/niharikaa/top-10-advanced-typescript-concepts-that-every-developer-should-know-4kg4
-
----
-
-**You have now completed Phase 1 preparation!**
-
-Copy this entire content into your folder:
-`Phase_1_Core_Programming/answers.md`
-
-When you are ready, reply with **"Phase 2"** and I will give you the full detailed `answers.md` for Phase 2 (GraphQL, AppSync, Agora, Event-Driven Architecture, Kafka, RabbitMQ, etc.) with even more code examples and your resume connections.
-
-You are building a very strong foundation. Keep speaking the answers daily — you will sound extremely confident in interviews.
-
-Good luck, Fazle! You've got this. 🚀
+**Best practice**:
+```ts
+async handleRawData(data: unknown) {
+  if (typeof data === 'object' && data !== null && 'userId' in data) {
+    // safe access
+  } else {
+    throw new BadRequestException('Invalid payload');
+  }
+}
 ```
 
-**Copy everything above** and paste directly into your `answers.md` file.  
-Let me know when you want **Phase 2**!
+**NestJS**: Use `unknown` for raw body parsers, then validate with DTOs.
+
+---
+
+## 3. Practice Tasks – Advanced Level
+1. Implement a memoized rate limiter using closure + Map<userId, {count, resetTime}>.
+2. Create an async generator that yields paginated DynamoDB results.
+3. Write a custom NestJS decorator `@RateLimit(100)` using metadata reflection.
+4. Solve these LeetCode (JS/TS): LRU Cache, Median of Two Sorted Arrays, Word Ladder, Trapping Rain Water (hard level).
+
+**Extra Resources (2025–2026 focus)**:
+- Advanced TS: https://www.typescriptlang.org/docs/handbook/2/generics.html
+- JS Patterns: https://javascript.info/
+- Event Loop deep dive: https://www.youtube.com/watch?v=cCOL7MC4Pl0
+- GreatFrontend advanced JS: https://www.greatfrontend.com/
+
+---
+
+You now have a **very strong, senior-level Phase 1** with 12+ advanced questions.
+
+When ready, reply **"Phase 2"** for GraphQL + AppSync + Agora + Event-Driven deep dive.
+
+Good luck — you're building elite-level knowledge! 🚀
+```
