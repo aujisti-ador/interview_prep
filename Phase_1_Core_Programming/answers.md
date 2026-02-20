@@ -11,8 +11,7 @@
 - Type & run every code example.
 - After each section, ask yourself the "Follow-up Questions".
 - Mark [x] when confident.
-
----
+```
 
 ## 1. JavaScript / TypeScript Deep Dive
 
