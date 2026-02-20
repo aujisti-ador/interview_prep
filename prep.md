@@ -10,8 +10,8 @@
 - **Daily Split**: 40% theory/concepts, 30% coding practice, 20% system design, 10% behavioral + resume stories
 - **Core Resources**:
   - Coding: LeetCode (medium-hard), HackerRank
-  - System Design: "Grokking the System Design Interview", "System Design Interview – An Insider's Guide" (Alex Xu)
-  - Backend: Official docs (NestJS, Node.js, Django), YouTube (Traversy Media, freeCodeCamp, Hussein Nasser)
+  - System Design: "Grokking the System Design Interview", "System Design Interview – An Insider's Guide" (Alex Xu), microservices.io patterns
+  - Backend: Official docs (NestJS, Node.js, Django, Kafka/Confluent), YouTube (Traversy Media, freeCodeCamp, Hussein Nasser, ByteByteGo)
   - Mock Interviews: Pramp, Interviewing.io, friends/colleagues
   - BD-specific: BDJobs forums, LinkedIn Bangladesh groups, discuss local constraints (cost, network, power issues)
 - **Track Progress**: Use this MD file — check off items as you complete them
@@ -49,9 +49,18 @@
   - Token generation, channel management, RTMP ingest
   - WebSockets vs long polling vs SSE
   - Live streaming architecture trade-offs (low latency vs cost)
+- [ ] **Event-Driven Architecture (EDA) Fundamentals**
+  - Core concepts: Events vs commands, producers/consumers, event sourcing, CQRS basics
+  - Event brokers: Kafka (topics, partitions, consumers), RabbitMQ (exchanges/queues), Redis pub/sub
+  - Benefits: Loose coupling, resilience (replay events), scalability via async processing
+  - Drawbacks: Eventual consistency, debugging complexity, duplicate/idempotency handling
+  - Patterns: Publish-Subscribe, Event Sourcing, Outbox Pattern, Saga (choreography vs orchestration)
+  - EDA vs Request-Response: Temporal decoupling, pull vs push models
+  - Tie to your experience: Notification Service (Banglalink), real-time sync in live streaming
 - [ ] Mini Project Ideas to Build/Review
-  - Real-time notification system (NestJS + WebSocket)
+  - Real-time notification system (NestJS + Kafka/WebSocket)
   - GraphQL subscription-based chat or live counter
+  - Simple event-driven order processing (e.g., publish "OrderPlaced" → trigger payment/shipping)
 
 ## Phase 3: Databases & Data Management (Week 3–4)
 - [ ] Relational Databases (MySQL / PostgreSQL)
@@ -116,6 +125,30 @@
   - E-commerce Voucher / Coupon System (Daraz experience)
   - Identity & Access Management (IAM-like)
   - High-traffic Order Processing Microservice
+- [ ] **Microservices Architecture Deep Dive**
+  - Core principles: Bounded contexts, single responsibility, independent deployability
+  - Communication patterns: Synchronous (REST/gRPC) vs Asynchronous (events/messages)
+  - Key Design Patterns (must-know for interviews):
+    - API Gateway (e.g., AWS API Gateway)
+    - Service Discovery & Registry
+    - Circuit Breaker, Retry, Timeout (Resilience4j / Hystrix style)
+    - Saga Pattern (Choreography vs Orchestration)
+    - Database per Service vs Shared DB
+    - CQRS + Event Sourcing
+    - Strangler Fig (monolith to microservices migration)
+    - Sidecar / Service Mesh (Istio/Linkerd basics)
+    - BFF (Backend for Frontend)
+  - Trade-offs: Increased complexity, distributed transactions, network latency, observability challenges
+  - Monolith vs Microservices: When to choose each (scale, team size, BD startup context)
+- [ ] **Event-Driven Architecture in System Design**
+  - When to use EDA over request-response (decoupling, scalability, real-time reactivity)
+  - EDA in microservices: Combining for event-driven microservices
+  - Common interview questions:
+    - Design an event-driven notification system
+    - Handle idempotency, ordering, duplicates in EDA
+    - Event sourcing vs traditional CRUD
+    - Load balancing async messages across consumers
+  - Resilience: Dead-letter queues, replayability, exactly-once processing
 - [ ] Key Topics
   - Microservices vs Monolith trade-offs
   - API Gateway pattern, service discovery, circuit breaker
@@ -133,8 +166,8 @@
 
 ## Phase 6: Behavioral, Leadership & BD Market Fit (Week 6–8)
 - [ ] Prepare STAR Stories (from your resume)
-  - Leading live streaming architecture (Right Tracks)
-  - Scaling backend for 41M users (Banglalink BL-Power)
+  - Leading live streaming architecture (Right Tracks) — highlight EDA elements if applicable
+  - Scaling backend for 41M users (Banglalink BL-Power) — microservices + Kafka/Redis
   - Daraz voucher revamp & metrics impact
   - Mentoring juniors / code reviews
   - Handling production incidents
@@ -144,15 +177,16 @@
   - Data privacy compliance (Bangladesh Digital Security Act, Bangladesh Bank guidelines)
   - Working with mixed-skill teams (juniors + seniors)
   - Containerization strategies for legacy apps
+  - When would you choose event-driven over synchronous microservices?
 - [ ] Mock Interviews
   - 3–5 full mocks (technical + behavioral)
-  - Practice explaining your live streaming project in 5–7 minutes
+  - Practice explaining your live streaming project in 5–7 minutes (include EDA/microservices aspects)
 
 ## Final Checklist Before Interviews
-- [ ] Update LinkedIn & resume with latest metrics/keywords
+- [ ] Update LinkedIn & resume with latest metrics/keywords (add EDA, microservices, Kafka)
 - [ ] Review GitHub — clean up / add READMEs for key projects
-- [ ] Prepare 2–3 questions to ask interviewer (e.g., team structure, current challenges)
+- [ ] Prepare 2–3 questions to ask interviewer (e.g., team structure, current challenges, use of EDA/microservices)
 - [ ] Rest well the day before
 
-Good luck, Fazle! You have strong real-world experience — focus on explaining trade-offs clearly and showing leadership. You've got this.  
-Feel free to mark progress here or ask for deeper dives on any topic.
+Good luck, Fazle! Your experience with real-time systems (Agora, notifications, Kafka/RabbitMQ) gives you a natural edge in EDA and microservices discussions. Focus on trade-offs and real-world examples from your roles. You've got this.  
+Feel free to mark progress or ask for deeper dives (e.g., specific patterns or mock questions).
