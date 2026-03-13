@@ -2135,3 +2135,1643 @@ export class ProblemDetailsFilter implements ExceptionFilter {
 8. What HTTP status code would you use for [scenario]?
 9. How do you handle long-running operations?
 10. What security headers should you set?
+11. How do you design a reliable webhook system?
+12. Explain API gateway patterns and when to use them.
+13. How do you handle backward compatibility and deprecation in APIs?
+14. How do you document REST APIs with OpenAPI/Swagger?
+
+---
+
+## Webhook Design Patterns
+
+### Q12: Webhook Design Patterns
+
+**Answer:**
+
+Webhooks are HTTP callbacks that notify external systems when events occur. Instead of consumers polling your API for changes, you push notifications to their registered endpoints.
+
+**Webhooks vs Polling:**
+
+| Aspect | Webhooks (Push) | Polling (Pull) |
+|--------|----------------|----------------|
+| Latency | Near real-time | Depends on interval |
+| Server Load | Low (event-driven) | High (constant requests) |
+| Complexity | Higher (delivery guarantees) | Lower (simple GET) |
+| Reliability | Needs retry logic | Client controls retries |
+| Network | Efficient | Wasteful (most polls return nothing) |
+| Best for | Event-driven systems, integrations | Simple status checks, low-frequency |
+
+```typescript
+// 1. Webhook Event Types and Payload Design
+interface WebhookEvent {
+  id: string;              // Unique event ID (for idempotency)
+  type: string;            // Event type (e.g., "order.created")
+  createdAt: string;       // ISO 8601 timestamp
+  data: Record<string, any>;  // Event payload
+  version: string;         // API version (e.g., "2026-03-01")
+}
+
+// Example event types:
+// order.created, order.updated, order.cancelled
+// payment.succeeded, payment.failed, payment.refunded
+// user.registered, user.deactivated
+
+// Example payload
+const exampleEvent: WebhookEvent = {
+  id: 'evt_abc123',
+  type: 'order.created',
+  createdAt: '2026-03-13T10:30:00Z',
+  version: '2026-03-01',
+  data: {
+    orderId: 'ord_xyz789',
+    customerId: 'cust_456',
+    total: 99.99,
+    currency: 'USD',
+    items: [
+      { productId: 'prod_001', quantity: 2, price: 49.99 },
+    ],
+  },
+};
+
+// 2. Webhook Registration Entity
+@Entity()
+export class WebhookSubscription {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  userId: string;          // Who owns this subscription
+
+  @Column()
+  url: string;             // Delivery URL (must be HTTPS)
+
+  @Column('simple-array')
+  events: string[];        // Subscribed event types
+
+  @Column()
+  secret: string;          // HMAC signing secret
+
+  @Column({ default: true })
+  active: boolean;
+
+  @Column({ default: 0 })
+  failureCount: number;
+
+  @Column({ nullable: true })
+  disabledAt: Date;        // Auto-disabled after too many failures
+
+  @CreateDateColumn()
+  createdAt: Date;
+}
+
+// 3. Webhook Sender with Retry (Exponential Backoff)
+@Injectable()
+export class WebhookSenderService {
+  private readonly logger = new Logger(WebhookSenderService.name);
+
+  constructor(
+    @InjectRepository(WebhookSubscription)
+    private readonly subscriptionRepo: Repository<WebhookSubscription>,
+    @InjectRepository(WebhookDelivery)
+    private readonly deliveryRepo: Repository<WebhookDelivery>,
+    @InjectQueue('webhooks') private readonly webhookQueue: Queue,
+  ) {}
+
+  async dispatchEvent(event: WebhookEvent): Promise<void> {
+    // Find all active subscriptions for this event type
+    const subscriptions = await this.subscriptionRepo.find({
+      where: {
+        active: true,
+        events: Like(`%${event.type}%`),
+      },
+    });
+
+    // Queue a delivery job for each subscription
+    for (const sub of subscriptions) {
+      await this.webhookQueue.add(
+        'deliver',
+        {
+          subscriptionId: sub.id,
+          event,
+        },
+        {
+          attempts: 5,
+          backoff: {
+            type: 'exponential',
+            delay: 10000, // 10s, 20s, 40s, 80s, 160s
+          },
+          removeOnComplete: 100,
+          removeOnFail: false, // Keep failed jobs for dead letter
+        },
+      );
+    }
+  }
+
+  // Webhook delivery processor
+  @Process('deliver')
+  async handleDelivery(job: Job<{ subscriptionId: string; event: WebhookEvent }>) {
+    const { subscriptionId, event } = job.data;
+    const subscription = await this.subscriptionRepo.findOneOrFail({
+      where: { id: subscriptionId },
+    });
+
+    // Generate HMAC signature
+    const payload = JSON.stringify(event);
+    const signature = this.signPayload(payload, subscription.secret);
+    const timestamp = Math.floor(Date.now() / 1000);
+
+    // Create delivery record
+    const delivery = this.deliveryRepo.create({
+      subscriptionId: subscription.id,
+      eventId: event.id,
+      eventType: event.type,
+      url: subscription.url,
+      requestBody: payload,
+      attempt: job.attemptsMade + 1,
+    });
+
+    try {
+      const response = await fetch(subscription.url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-ID': event.id,
+          'X-Webhook-Timestamp': timestamp.toString(),
+          'X-Webhook-Signature': `sha256=${signature}`,
+          'User-Agent': 'MyApp-Webhook/1.0',
+        },
+        body: payload,
+        signal: AbortSignal.timeout(30000), // 30s timeout
+      });
+
+      delivery.statusCode = response.status;
+      delivery.responseBody = await response.text().catch(() => '');
+      delivery.success = response.status >= 200 && response.status < 300;
+
+      if (!delivery.success) {
+        throw new Error(`Webhook returned ${response.status}`);
+      }
+
+      // Reset failure count on success
+      await this.subscriptionRepo.update(subscription.id, { failureCount: 0 });
+    } catch (error) {
+      delivery.success = false;
+      delivery.error = error.message;
+
+      // Increment failure count
+      const updated = await this.subscriptionRepo.increment(
+        { id: subscription.id },
+        'failureCount',
+        1,
+      );
+
+      // Auto-disable after 15 consecutive failures
+      const sub = await this.subscriptionRepo.findOne({
+        where: { id: subscription.id },
+      });
+      if (sub && sub.failureCount >= 15) {
+        await this.subscriptionRepo.update(subscription.id, {
+          active: false,
+          disabledAt: new Date(),
+        });
+        this.logger.warn(`Webhook subscription ${subscription.id} disabled after 15 failures`);
+      }
+
+      throw error; // Re-throw to trigger BullMQ retry
+    } finally {
+      await this.deliveryRepo.save(delivery);
+    }
+  }
+
+  private signPayload(payload: string, secret: string): string {
+    return createHmac('sha256', secret).update(payload).digest('hex');
+  }
+}
+
+// 4. Webhook Signature Verification (Receiver Side)
+// The consumer verifies that webhooks are genuinely from your service
+
+import { createHmac, timingSafeEqual } from 'crypto';
+
+@Controller('webhooks')
+export class WebhookReceiverController {
+  @Post('incoming')
+  async handleWebhook(
+    @Headers('x-webhook-signature') signatureHeader: string,
+    @Headers('x-webhook-timestamp') timestamp: string,
+    @Headers('x-webhook-id') eventId: string,
+    @Body() rawBody: string, // Use raw body, not parsed JSON
+  ): Promise<{ received: boolean }> {
+    // Step 1: Verify timestamp freshness (prevent replay attacks)
+    const eventTimestamp = parseInt(timestamp, 10);
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const tolerance = 300; // 5 minutes
+
+    if (Math.abs(currentTimestamp - eventTimestamp) > tolerance) {
+      throw new ForbiddenException('Webhook timestamp too old');
+    }
+
+    // Step 2: Verify HMAC signature
+    const secret = this.configService.get('WEBHOOK_SECRET');
+    const expectedSignature = createHmac('sha256', secret)
+      .update(rawBody)
+      .digest('hex');
+
+    const providedSignature = signatureHeader.replace('sha256=', '');
+
+    // Use timing-safe comparison to prevent timing attacks
+    const isValid = timingSafeEqual(
+      Buffer.from(expectedSignature, 'hex'),
+      Buffer.from(providedSignature, 'hex'),
+    );
+
+    if (!isValid) {
+      throw new ForbiddenException('Invalid webhook signature');
+    }
+
+    // Step 3: Idempotency check (prevent duplicate processing)
+    const alreadyProcessed = await this.redis.get(`webhook:${eventId}`);
+    if (alreadyProcessed) {
+      return { received: true }; // Acknowledge but skip processing
+    }
+
+    // Step 4: Process the event
+    const event: WebhookEvent = JSON.parse(rawBody);
+
+    // Process asynchronously — return 200 immediately
+    await this.eventQueue.add('process-webhook', event);
+
+    // Mark as processed (with TTL)
+    await this.redis.setex(`webhook:${eventId}`, 86400, '1'); // 24h TTL
+
+    return { received: true };
+  }
+}
+
+// 5. Dead Letter Handling
+@Injectable()
+export class WebhookDeadLetterService {
+  // Process failed webhook deliveries
+  @Cron('0 */15 * * * *') // Every 15 minutes
+  async processDeadLetters() {
+    const failedDeliveries = await this.deliveryRepo.find({
+      where: {
+        success: false,
+        retryExhausted: true,
+        processedAt: IsNull(),
+      },
+      take: 100,
+    });
+
+    for (const delivery of failedDeliveries) {
+      this.logger.warn({
+        message: 'Dead letter webhook',
+        eventId: delivery.eventId,
+        subscriptionId: delivery.subscriptionId,
+        attempts: delivery.attempt,
+        lastError: delivery.error,
+      });
+
+      // Notify subscription owner
+      await this.notificationService.sendWebhookFailureAlert(
+        delivery.subscriptionId,
+        delivery.eventId,
+        delivery.error,
+      );
+
+      delivery.processedAt = new Date();
+      await this.deliveryRepo.save(delivery);
+    }
+  }
+}
+
+// 6. Monitoring Webhook Delivery Success Rates
+@Injectable()
+export class WebhookMetricsService {
+  async getDeliveryStats(subscriptionId: string, hours = 24) {
+    const since = new Date(Date.now() - hours * 60 * 60 * 1000);
+
+    const stats = await this.deliveryRepo
+      .createQueryBuilder('d')
+      .select('COUNT(*)', 'total')
+      .addSelect('SUM(CASE WHEN d.success = true THEN 1 ELSE 0 END)', 'successful')
+      .addSelect('SUM(CASE WHEN d.success = false THEN 1 ELSE 0 END)', 'failed')
+      .addSelect('AVG(d.responseTimeMs)', 'avgResponseTime')
+      .where('d.subscriptionId = :subscriptionId', { subscriptionId })
+      .andWhere('d.createdAt >= :since', { since })
+      .getRawOne();
+
+    return {
+      total: parseInt(stats.total),
+      successful: parseInt(stats.successful),
+      failed: parseInt(stats.failed),
+      successRate: stats.total > 0
+        ? (parseInt(stats.successful) / parseInt(stats.total)) * 100
+        : 0,
+      avgResponseTimeMs: Math.round(parseFloat(stats.avgResponseTime) || 0),
+    };
+  }
+}
+```
+
+> **Interview Tip:** When discussing webhooks, always cover the reliability trifecta: HMAC signature verification, idempotent handlers, and exponential backoff retries. Explain that webhooks are "at-least-once" delivery — the receiver must handle duplicates. Mention auto-disabling subscriptions after repeated failures and dead letter queues for operational observability.
+
+---
+
+## API Gateway Patterns
+
+### Q13: API Gateway Patterns
+
+**Answer:**
+
+An API gateway is a single entry point for all client requests. It sits between clients and backend services, handling cross-cutting concerns like authentication, rate limiting, routing, and request transformation.
+
+**API Gateway vs Reverse Proxy vs Load Balancer:**
+
+| Component | Purpose | Layer | Examples |
+|-----------|---------|-------|----------|
+| Load Balancer | Distribute traffic across instances | L4/L7 | AWS ALB/NLB, HAProxy |
+| Reverse Proxy | Forward requests, SSL termination, caching | L7 | Nginx, Caddy |
+| API Gateway | Routing + auth + rate limiting + transformation | L7 | Kong, AWS API Gateway, custom |
+
+An API gateway is a specialized reverse proxy with API-specific features.
+
+```typescript
+// 1. API Gateway Responsibilities
+/*
+┌────────────────────────────────────────────────────┐
+│                   API Gateway                       │
+├────────────────────────────────────────────────────┤
+│  - Request routing (path-based, header-based)      │
+│  - Authentication & authorization                  │
+│  - Rate limiting & throttling                      │
+│  - Request/response transformation                 │
+│  - API composition (aggregate multiple services)   │
+│  - Caching                                         │
+│  - Logging & monitoring                            │
+│  - Circuit breaking                                │
+│  - CORS handling                                   │
+│  - Request validation                              │
+│  - SSL termination                                 │
+└────────────────────────────────────────────────────┘
+*/
+
+// 2. Simple API Gateway with NestJS
+// gateway/src/app.module.ts
+@Module({
+  imports: [
+    // HTTP module for proxying
+    HttpModule.register({
+      timeout: 10000,
+      maxRedirects: 3,
+    }),
+    // Rate limiting
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 100,
+    }),
+    // Caching
+    CacheModule.register({
+      store: redisStore,
+      host: 'localhost',
+      port: 6379,
+      ttl: 30,
+    }),
+  ],
+  controllers: [GatewayController],
+  providers: [
+    ServiceRegistryService,
+    AuthMiddleware,
+    CircuitBreakerService,
+  ],
+})
+export class AppModule {}
+
+// 3. Service Registry — map routes to backend services
+@Injectable()
+export class ServiceRegistryService {
+  private readonly services: Map<string, ServiceConfig> = new Map([
+    ['users', {
+      url: process.env.USERS_SERVICE_URL || 'http://localhost:3001',
+      healthCheck: '/health',
+      timeout: 5000,
+    }],
+    ['orders', {
+      url: process.env.ORDERS_SERVICE_URL || 'http://localhost:3002',
+      healthCheck: '/health',
+      timeout: 10000,
+    }],
+    ['products', {
+      url: process.env.PRODUCTS_SERVICE_URL || 'http://localhost:3003',
+      healthCheck: '/health',
+      timeout: 5000,
+    }],
+    ['payments', {
+      url: process.env.PAYMENTS_SERVICE_URL || 'http://localhost:3004',
+      healthCheck: '/health',
+      timeout: 15000,
+    }],
+  ]);
+
+  getService(name: string): ServiceConfig {
+    const service = this.services.get(name);
+    if (!service) {
+      throw new NotFoundException(`Service ${name} not found`);
+    }
+    return service;
+  }
+}
+
+// 4. Gateway Controller — route requests to backend services
+@Controller('api')
+@UseGuards(ThrottlerGuard)
+export class GatewayController {
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly registry: ServiceRegistryService,
+    private readonly circuitBreaker: CircuitBreakerService,
+  ) {}
+
+  // Proxy all requests to appropriate services
+  @All(':service/*')
+  async proxy(
+    @Param('service') serviceName: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const service = this.registry.getService(serviceName);
+    const path = req.url.replace(`/api/${serviceName}`, '');
+    const targetUrl = `${service.url}${path}`;
+
+    // Use circuit breaker to prevent cascading failures
+    return this.circuitBreaker.execute(serviceName, async () => {
+      try {
+        const response = await firstValueFrom(
+          this.httpService.request({
+            method: req.method as any,
+            url: targetUrl,
+            data: req.body,
+            headers: {
+              ...this.forwardHeaders(req),
+              'X-Request-ID': req.headers['x-request-id'] || randomUUID(),
+              'X-Forwarded-For': req.ip,
+            },
+            params: req.query,
+            timeout: service.timeout,
+          }),
+        );
+
+        // Forward response headers
+        Object.entries(response.headers).forEach(([key, value]) => {
+          if (value) res.setHeader(key, value as string);
+        });
+
+        res.status(response.status).json(response.data);
+      } catch (error) {
+        if (error.response) {
+          res.status(error.response.status).json(error.response.data);
+        } else if (error.code === 'ECONNABORTED') {
+          res.status(504).json({ message: 'Service timeout' });
+        } else {
+          res.status(502).json({ message: 'Service unavailable' });
+        }
+      }
+    });
+  }
+
+  private forwardHeaders(req: Request): Record<string, string> {
+    const headersToForward = ['authorization', 'content-type', 'accept', 'accept-language'];
+    return headersToForward.reduce((acc, header) => {
+      if (req.headers[header]) {
+        acc[header] = req.headers[header] as string;
+      }
+      return acc;
+    }, {} as Record<string, string>);
+  }
+}
+
+// 5. Authentication Offloading — verify JWT at gateway, pass user context
+@Injectable()
+export class AuthMiddleware implements NestMiddleware {
+  constructor(private readonly jwtService: JwtService) {}
+
+  async use(req: Request, res: Response, next: NextFunction) {
+    // Skip auth for public routes
+    const publicRoutes = ['/api/auth/login', '/api/auth/register', '/health'];
+    if (publicRoutes.some((route) => req.url.startsWith(route))) {
+      return next();
+    }
+
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ message: 'Missing authorization token' });
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+
+      // Inject user context into headers for downstream services
+      req.headers['x-user-id'] = payload.sub;
+      req.headers['x-user-email'] = payload.email;
+      req.headers['x-user-roles'] = JSON.stringify(payload.roles);
+
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+  }
+}
+
+// 6. API Composition Pattern — aggregate multiple service responses
+@Controller('api/dashboard')
+export class DashboardController {
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly registry: ServiceRegistryService,
+  ) {}
+
+  // Compose data from multiple services into one response
+  @Get('summary')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60) // Cache for 60 seconds
+  async getDashboardSummary(
+    @Headers('x-user-id') userId: string,
+  ): Promise<DashboardSummary> {
+    const usersService = this.registry.getService('users');
+    const ordersService = this.registry.getService('orders');
+    const productsService = this.registry.getService('products');
+
+    // Parallel requests to multiple services
+    const [userProfile, recentOrders, recommendations] = await Promise.all([
+      firstValueFrom(
+        this.httpService.get(`${usersService.url}/users/${userId}`),
+      ).then((r) => r.data),
+
+      firstValueFrom(
+        this.httpService.get(`${ordersService.url}/orders?userId=${userId}&limit=5`),
+      ).then((r) => r.data),
+
+      firstValueFrom(
+        this.httpService.get(`${productsService.url}/products/recommendations?userId=${userId}`),
+      ).then((r) => r.data).catch(() => []), // Graceful degradation
+    ]);
+
+    return {
+      user: userProfile,
+      recentOrders,
+      recommendations,
+      composedAt: new Date().toISOString(),
+    };
+  }
+}
+
+// 7. Request/Response Transformation
+@Injectable()
+export class TransformInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest();
+    const apiVersion = request.headers['api-version'] || '2';
+
+    return next.handle().pipe(
+      map((data) => {
+        // Transform response based on API version
+        if (apiVersion === '1') {
+          return this.transformToV1(data);
+        }
+        return this.wrapResponse(data, request);
+      }),
+    );
+  }
+
+  private wrapResponse(data: any, request: Request) {
+    return {
+      success: true,
+      data,
+      meta: {
+        requestId: request.headers['x-request-id'],
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
+
+  private transformToV1(data: any) {
+    // Map v2 field names to v1 for backward compatibility
+    if (data.firstName && data.lastName) {
+      data.name = `${data.firstName} ${data.lastName}`;
+      delete data.firstName;
+      delete data.lastName;
+    }
+    return data;
+  }
+}
+```
+
+**Comparison of API Gateway solutions:**
+
+| Feature | AWS API Gateway | Kong | Custom (NestJS) |
+|---------|----------------|------|-----------------|
+| Setup | Managed, zero ops | Self-hosted or cloud | Self-hosted |
+| Cost | Per-request pricing | Free (OSS) / Enterprise | Compute cost only |
+| Plugins | Limited | 100+ plugins | Unlimited (code) |
+| Customization | Low | Medium | Full control |
+| Performance | ~30ms overhead | ~2-5ms overhead | Minimal overhead |
+| Auth | Cognito, Lambda auth | JWT, OAuth, LDAP | Any (code it) |
+| Rate Limiting | Built-in | Built-in plugin | Manual (throttler) |
+| Best For | Serverless (Lambda) | Kubernetes/Docker | Small-medium teams |
+
+> **Interview Tip:** When asked about API gateways, distinguish between the gateway pattern (architecture) and gateway products (Kong, AWS). Emphasize that the gateway handles cross-cutting concerns so services stay focused on business logic. Mention the API composition pattern for BFF (Backend for Frontend) scenarios. Always note the trade-off: a gateway is a single point of failure and adds latency.
+
+---
+
+## API Backward Compatibility & Deprecation
+
+### Q14: API Backward Compatibility & Deprecation
+
+**Answer:**
+
+Backward compatibility means existing clients continue working when you update your API. Breaking this contract is the fastest way to lose consumer trust.
+
+**What constitutes a breaking change:**
+
+| Change Type | Breaking? | Example |
+|-------------|-----------|---------|
+| Add new endpoint | No | `POST /api/v2/exports` |
+| Add optional field to response | No | Add `avatarUrl` to user response |
+| Add optional query parameter | No | `?include=profile` |
+| Remove field from response | YES | Remove `name` from user response |
+| Rename field | YES | `name` -> `fullName` |
+| Change field type | YES | `id: number` -> `id: string` |
+| Remove endpoint | YES | Remove `DELETE /users/:id` |
+| Change required params | YES | Make optional param required |
+| Change error format | YES | Different error response structure |
+| Change status codes | YES | 200 -> 201 for create |
+
+```typescript
+// 1. Additive Changes (Safe)
+// Adding new fields — old clients ignore them
+
+// Before:
+// { "id": 1, "name": "John" }
+
+// After (safe — old clients just ignore new fields):
+// { "id": 1, "name": "John", "avatarUrl": "https://...", "createdAt": "2026-01-01" }
+
+// 2. Deprecation Headers
+// Signal that a feature will be removed
+
+@Injectable()
+export class DeprecationInterceptor implements NestInterceptor {
+  private readonly deprecatedEndpoints = new Map<string, {
+    sunset: string;
+    alternative: string;
+    link: string;
+  }>([
+    ['GET /api/v1/users', {
+      sunset: '2026-09-01',
+      alternative: 'GET /api/v2/users',
+      link: 'https://docs.example.com/migration/v2-users',
+    }],
+    ['POST /api/v1/orders', {
+      sunset: '2026-09-01',
+      alternative: 'POST /api/v2/orders',
+      link: 'https://docs.example.com/migration/v2-orders',
+    }],
+  ]);
+
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
+
+    const key = `${request.method} ${request.route?.path || request.url}`;
+    const deprecation = this.deprecatedEndpoints.get(key);
+
+    if (deprecation) {
+      // Standard deprecation headers (RFC 8594)
+      response.setHeader('Deprecation', 'true');
+      response.setHeader('Sunset', deprecation.sunset);
+      response.setHeader('Link', `<${deprecation.link}>; rel="deprecation"`);
+      response.setHeader(
+        'X-Deprecated-Message',
+        `This endpoint is deprecated. Use ${deprecation.alternative} instead. ` +
+        `Sunset date: ${deprecation.sunset}`,
+      );
+
+      // Track usage of deprecated endpoints
+      this.metricsService.increment('api.deprecated.usage', {
+        endpoint: key,
+      });
+    }
+
+    return next.handle();
+  }
+}
+
+// 3. Supporting Multiple API Versions Simultaneously
+// Version via URL prefix
+@Controller('v1/users')
+export class UsersV1Controller {
+  @Get(':id')
+  async getUser(@Param('id') id: string): Promise<UserV1Response> {
+    const user = await this.userService.findById(id);
+    // V1 response format
+    return {
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`, // V1 had combined name
+      email: user.email,
+    };
+  }
+}
+
+@Controller('v2/users')
+export class UsersV2Controller {
+  @Get(':id')
+  async getUser(@Param('id') id: string): Promise<UserV2Response> {
+    const user = await this.userService.findById(id);
+    // V2 response format
+    return {
+      id: user.id,
+      firstName: user.firstName,  // V2 separated name fields
+      lastName: user.lastName,
+      email: user.email,
+      avatarUrl: user.avatarUrl,  // New in V2
+      createdAt: user.createdAt,  // New in V2
+    };
+  }
+}
+
+// Both controllers share the same service layer
+// Only the response shape differs
+
+// 4. Expand-Contract Pattern for Safe Database Migrations
+/*
+Phase 1: EXPAND — Add new column alongside old
+  - Add "first_name" and "last_name" columns
+  - Write to both old ("name") and new columns
+  - Read from old column
+  - Deploy all services
+
+Phase 2: MIGRATE — Backfill data
+  - Run migration to split existing "name" into "first_name"/"last_name"
+  - Verify data integrity
+
+Phase 3: SWITCH — Read from new column
+  - Update API to read from new columns
+  - Still write to both columns (for rollback safety)
+  - Deploy all services
+
+Phase 4: CONTRACT — Remove old column
+  - Stop writing to "name" column
+  - Drop "name" column in migration
+  - Remove V1 controller after sunset date
+*/
+
+// Implementation example
+@Entity()
+export class User {
+  @Column({ nullable: true })
+  name: string; // Old column — will be removed
+
+  @Column({ nullable: true })
+  firstName: string; // New column
+
+  @Column({ nullable: true })
+  lastName: string; // New column
+
+  // During expand phase, set both
+  @BeforeInsert()
+  @BeforeUpdate()
+  syncNameFields() {
+    if (this.firstName && this.lastName && !this.name) {
+      this.name = `${this.firstName} ${this.lastName}`;
+    }
+    if (this.name && !this.firstName) {
+      const parts = this.name.split(' ');
+      this.firstName = parts[0];
+      this.lastName = parts.slice(1).join(' ');
+    }
+  }
+}
+
+// 5. API Lifecycle Management
+/*
+┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────────┐    ┌──────────┐
+│  Alpha   │───>│  Beta    │───>│  Stable  │───>│  Deprecated  │───>│  Removed │
+│          │    │          │    │          │    │              │    │          │
+│ Internal │    │ Selected │    │ General  │    │ Sunset date  │    │ 410 Gone │
+│ only     │    │ partners │    │ release  │    │ announced    │    │          │
+└──────────┘    └──────────┘    └──────────┘    └──────────────┘    └──────────┘
+   0-3 mo         1-3 mo        Indefinite       6-12 months        After sunset
+*/
+
+// After sunset date — return 410 Gone
+@Controller('v1/legacy-endpoint')
+export class LegacyController {
+  @All('*')
+  handleLegacy(@Res() res: Response) {
+    res.status(410).json({
+      error: 'Gone',
+      message: 'This API version has been removed.',
+      migration: 'https://docs.example.com/migration/v1-to-v2',
+      currentVersion: 'https://api.example.com/v2',
+    });
+  }
+}
+
+// 6. Communication Strategies for API Consumers
+/*
+ - Changelog: Maintain a public changelog for every release
+ - Email notifications: Notify registered developers of breaking changes
+ - Developer portal: Show deprecation warnings in API documentation
+ - Response headers: Deprecation and Sunset headers on every response
+ - Monitoring: Track which consumers still use deprecated endpoints
+ - Grace period: Minimum 6 months between deprecation announcement and removal
+ - Migration guide: Provide step-by-step migration documentation
+*/
+```
+
+> **Interview Tip:** When asked about API versioning and deprecation, lead with the principle "never break existing clients." Explain the expand-contract pattern for database changes and the Sunset header (RFC 8594) for communicating deprecation timelines. Mention that you track deprecated endpoint usage to know when it is safe to remove them. This shows operational maturity beyond just writing code.
+
+---
+
+## OpenAPI/Swagger Documentation
+
+### Q15: OpenAPI/Swagger Documentation
+
+**Answer:**
+
+OpenAPI (formerly Swagger) is the industry standard for describing REST APIs. It provides a machine-readable specification that powers documentation, client SDK generation, testing, and validation.
+
+**API-first vs Code-first approach:**
+
+| Approach | Description | Pros | Cons |
+|----------|-------------|------|------|
+| API-first | Write OpenAPI spec first, then implement | Better design, parallel work | Extra upfront effort |
+| Code-first | Generate spec from code decorators | Spec always matches code | Design influenced by implementation |
+
+```typescript
+// ===== CODE-FIRST APPROACH WITH NestJS (@nestjs/swagger) =====
+
+// 1. Setup in main.ts
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  const config = new DocumentBuilder()
+    .setTitle('E-Commerce API')
+    .setDescription('REST API for managing orders, products, and users')
+    .setVersion('2.0')
+    .setContact('API Team', 'https://docs.example.com', 'api@example.com')
+    .setLicense('MIT', 'https://opensource.org/licenses/MIT')
+    .addServer('https://api.example.com', 'Production')
+    .addServer('https://staging-api.example.com', 'Staging')
+    .addServer('http://localhost:3000', 'Local Development')
+    // Security schemes
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'JWT-auth',
+    )
+    .addApiKey(
+      { type: 'apiKey', name: 'X-API-Key', in: 'header' },
+      'API-key',
+    )
+    // Tags for grouping endpoints
+    .addTag('Users', 'User management operations')
+    .addTag('Orders', 'Order processing operations')
+    .addTag('Products', 'Product catalog operations')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  // Save OpenAPI spec to file (for SDK generation)
+  const fs = require('fs');
+  fs.writeFileSync('./openapi.json', JSON.stringify(document, null, 2));
+
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      filter: true,
+      displayRequestDuration: true,
+    },
+  });
+
+  await app.listen(3000);
+}
+
+// 2. Fully Documented DTOs
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class CreateOrderDto {
+  @ApiProperty({
+    description: 'Array of order items',
+    type: () => [OrderItemDto],
+    minItems: 1,
+    example: [{ productId: 'prod_001', quantity: 2 }],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @ArrayMinSize(1)
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
+
+  @ApiProperty({
+    description: 'Shipping address for the order',
+    type: () => AddressDto,
+  })
+  @ValidateNested()
+  @Type(() => AddressDto)
+  shippingAddress: AddressDto;
+
+  @ApiPropertyOptional({
+    description: 'Coupon code for discount',
+    example: 'SAVE20',
+    maxLength: 50,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  couponCode?: string;
+
+  @ApiProperty({
+    description: 'Payment method identifier',
+    example: 'pm_card_visa_4242',
+  })
+  @IsString()
+  paymentMethodId: string;
+}
+
+export class OrderItemDto {
+  @ApiProperty({
+    description: 'Product identifier',
+    example: 'prod_001',
+  })
+  @IsString()
+  productId: string;
+
+  @ApiProperty({
+    description: 'Quantity to order',
+    minimum: 1,
+    maximum: 100,
+    example: 2,
+  })
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  quantity: number;
+}
+
+// 3. Documented Response Types
+export class OrderResponse {
+  @ApiProperty({ example: 'ord_abc123' })
+  id: string;
+
+  @ApiProperty({ example: 'CONFIRMED', enum: ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'] })
+  status: string;
+
+  @ApiProperty({ example: 149.98, description: 'Total order amount in USD' })
+  total: number;
+
+  @ApiProperty({ type: () => [OrderItemResponse] })
+  items: OrderItemResponse[];
+
+  @ApiProperty({ example: '2026-03-13T10:30:00Z' })
+  createdAt: string;
+}
+
+export class PaginatedOrderResponse {
+  @ApiProperty({ type: () => [OrderResponse] })
+  data: OrderResponse[];
+
+  @ApiProperty({
+    example: { total: 150, page: 1, limit: 20, totalPages: 8 },
+  })
+  meta: PaginationMeta;
+}
+
+export class ErrorResponse {
+  @ApiProperty({ example: 400 })
+  statusCode: number;
+
+  @ApiProperty({ example: 'Bad Request' })
+  error: string;
+
+  @ApiProperty({ example: 'Validation failed' })
+  message: string;
+
+  @ApiProperty({
+    example: [{ field: 'email', message: 'must be a valid email' }],
+    required: false,
+  })
+  details?: Array<{ field: string; message: string }>;
+}
+
+// 4. Fully Documented NestJS Controller with Swagger Decorators
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiQuery,
+  ApiBody,
+  ApiHeader,
+} from '@nestjs/swagger';
+
+@ApiTags('Orders')
+@ApiBearerAuth('JWT-auth')
+@Controller('v2/orders')
+export class OrdersController {
+  constructor(private readonly orderService: OrderService) {}
+
+  @Post()
+  @ApiOperation({
+    summary: 'Create a new order',
+    description: 'Creates an order, processes payment, and reserves inventory. ' +
+      'Requires a valid payment method and at least one item.',
+  })
+  @ApiBody({ type: CreateOrderDto })
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    description: 'Unique key for idempotent order creation',
+    required: true,
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Order created successfully',
+    type: OrderResponse,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request body or insufficient stock',
+    type: ErrorResponse,
+  })
+  @ApiResponse({
+    status: 402,
+    description: 'Payment failed',
+    type: ErrorResponse,
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Duplicate idempotency key with different request body',
+    type: ErrorResponse,
+  })
+  @HttpCode(HttpStatus.CREATED)
+  async createOrder(
+    @Body() dto: CreateOrderDto,
+    @Headers('idempotency-key') idempotencyKey: string,
+    @CurrentUser() user: User,
+  ): Promise<OrderResponse> {
+    return this.orderService.create(dto, user, idempotencyKey);
+  }
+
+  @Get()
+  @ApiOperation({
+    summary: 'List orders for the authenticated user',
+    description: 'Returns paginated orders with optional status filtering.',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (max 100)',
+    example: 20,
+  })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
+    description: 'Filter by order status',
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    type: String,
+    description: 'Sort field with direction prefix (- for DESC)',
+    example: '-createdAt',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated list of orders',
+    type: PaginatedOrderResponse,
+  })
+  async listOrders(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
+    @Query('status') status?: string,
+    @Query('sort') sort?: string,
+    @CurrentUser() user?: User,
+  ): Promise<PaginatedOrderResponse> {
+    return this.orderService.findByUser(user.id, { page, limit, status, sort });
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get order by ID' })
+  @ApiParam({
+    name: 'id',
+    description: 'Order identifier',
+    example: 'ord_abc123',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Order details',
+    type: OrderResponse,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Order not found',
+    type: ErrorResponse,
+  })
+  async getOrder(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+  ): Promise<OrderResponse> {
+    return this.orderService.findOneForUser(id, user.id);
+  }
+
+  @Patch(':id/cancel')
+  @ApiOperation({
+    summary: 'Cancel an order',
+    description: 'Can only cancel orders in PENDING or CONFIRMED status. ' +
+      'Triggers refund if payment was processed.',
+  })
+  @ApiParam({ name: 'id', description: 'Order identifier' })
+  @ApiResponse({ status: 200, description: 'Order cancelled', type: OrderResponse })
+  @ApiResponse({ status: 400, description: 'Order cannot be cancelled in current status' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async cancelOrder(
+    @Param('id') id: string,
+    @CurrentUser() user: User,
+  ): Promise<OrderResponse> {
+    return this.orderService.cancel(id, user.id);
+  }
+}
+
+// 5. Generating Client SDKs from OpenAPI Spec
+// Use openapi-generator to create typed clients
+/*
+# Generate TypeScript client
+npx openapi-generator-cli generate \
+  -i http://localhost:3000/docs-json \
+  -g typescript-axios \
+  -o ./generated/api-client
+
+# Generate Python client
+npx openapi-generator-cli generate \
+  -i ./openapi.json \
+  -g python \
+  -o ./generated/python-client
+
+# Generate Go client
+npx openapi-generator-cli generate \
+  -i ./openapi.json \
+  -g go \
+  -o ./generated/go-client
+*/
+
+// Usage of generated client:
+// import { OrdersApi, Configuration } from './generated/api-client';
+//
+// const api = new OrdersApi(new Configuration({
+//   basePath: 'https://api.example.com',
+//   accessToken: 'your-jwt-token',
+// }));
+//
+// const orders = await api.listOrders(1, 20, 'CONFIRMED');
+// const order = await api.createOrder({ items: [...], shippingAddress: {...} });
+
+// 6. OpenAPI Spec Validation in Tests
+// Ensure responses match the documented schema
+import { OpenApiValidator } from 'express-openapi-validator';
+
+describe('Orders API', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const module = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = module.createNestApplication();
+
+    // Add OpenAPI validation middleware for tests
+    app.use(
+      OpenApiValidator.middleware({
+        apiSpec: './openapi.json',
+        validateRequests: true,
+        validateResponses: true,
+      }),
+    );
+
+    await app.init();
+  });
+
+  it('POST /v2/orders should match OpenAPI spec', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/v2/orders')
+      .set('Authorization', `Bearer ${token}`)
+      .set('Idempotency-Key', randomUUID())
+      .send({
+        items: [{ productId: 'prod_001', quantity: 2 }],
+        shippingAddress: { street: '123 Main St', city: 'NYC', zip: '10001' },
+        paymentMethodId: 'pm_test_123',
+      })
+      .expect(201);
+
+    // If response doesn't match OpenAPI spec, the validator
+    // middleware throws automatically
+    expect(response.body).toHaveProperty('id');
+    expect(response.body).toHaveProperty('status');
+  });
+});
+```
+
+> **Interview Tip:** When discussing API documentation, advocate for the code-first approach with NestJS/Swagger because the spec is always in sync with the code. Mention that OpenAPI enables three powerful workflows: interactive documentation (Swagger UI), client SDK generation (openapi-generator), and contract testing (validating responses against the spec). This shows you think about APIs as products, not just endpoints.
+
+---
+
+## Q12: Webhook Patterns & Reliability
+
+**Q: How do you design reliable webhook systems?**
+
+**A:**
+
+Webhooks are HTTP callbacks that notify external systems when events occur. Unlike polling, webhooks push data in real-time.
+
+### Webhook Architecture
+```
+Your Service → HTTP POST → Consumer's URL
+     ↓ (on failure)
+  Retry Queue → Exponential Backoff → Dead Letter Queue
+```
+
+### Sending Webhooks — Implementation
+```typescript
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import * as crypto from 'crypto';
+
+@Injectable()
+export class WebhookService {
+  private readonly logger = new Logger(WebhookService.name);
+
+  constructor(@InjectQueue('webhooks') private webhookQueue: Queue) {}
+
+  async dispatch(event: string, payload: any, subscriberUrl: string, secret: string) {
+    const timestamp = Date.now();
+    const body = JSON.stringify({ event, data: payload, timestamp });
+
+    // Sign the payload for verification
+    const signature = crypto
+      .createHmac('sha256', secret)
+      .update(body)
+      .digest('hex');
+
+    await this.webhookQueue.add('deliver', {
+      url: subscriberUrl,
+      body,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Webhook-Signature': `sha256=${signature}`,
+        'X-Webhook-Event': event,
+        'X-Webhook-Timestamp': timestamp.toString(),
+        'X-Webhook-ID': crypto.randomUUID(),
+      },
+    }, {
+      attempts: 5,
+      backoff: {
+        type: 'exponential',
+        delay: 5000, // 5s, 10s, 20s, 40s, 80s
+      },
+    });
+  }
+}
+```
+
+### Receiving Webhooks — Signature Verification
+```typescript
+@Post('webhooks/payments')
+async handlePaymentWebhook(
+  @Body() body: any,
+  @Headers('x-webhook-signature') signature: string,
+  @Headers('x-webhook-timestamp') timestamp: string,
+) {
+  // Prevent replay attacks — reject if timestamp > 5 minutes old
+  const age = Date.now() - parseInt(timestamp);
+  if (age > 5 * 60 * 1000) {
+    throw new BadRequestException('Webhook timestamp too old');
+  }
+
+  // Verify signature
+  const expectedSig = crypto
+    .createHmac('sha256', process.env.WEBHOOK_SECRET)
+    .update(JSON.stringify(body))
+    .digest('hex');
+
+  if (!crypto.timingSafeEqual(Buffer.from(signature.replace('sha256=', '')), Buffer.from(expectedSig))) {
+    throw new UnauthorizedException('Invalid webhook signature');
+  }
+
+  // Process idempotently using webhook ID
+  const webhookId = body.id;
+  if (await this.processedWebhooks.has(webhookId)) {
+    return { status: 'already_processed' };
+  }
+
+  await this.handlePaymentEvent(body);
+  await this.processedWebhooks.set(webhookId, true);
+
+  return { status: 'ok' };
+}
+```
+
+### Webhook Reliability Best Practices
+| Practice | Why |
+|----------|-----|
+| Sign payloads (HMAC-SHA256) | Prevent spoofing |
+| Include timestamp | Prevent replay attacks |
+| Unique webhook ID | Enable idempotent processing |
+| Exponential backoff retries | Handle temporary failures |
+| Dead letter queue | Don't lose failed deliveries |
+| Timeout (5-10s) | Don't hang on slow consumers |
+| Return 2xx quickly | Process async, acknowledge fast |
+| Allow re-delivery | Consumer should be idempotent |
+
+**Interview Tip:** "In my Banglalink notification system, we used webhook-like patterns for notifying downstream services. The key was HMAC signing + idempotency keys + exponential backoff with a dead letter queue for manual review."
+
+---
+
+## Q13: API Gateway Pattern
+
+**Q: What is the API Gateway pattern and when do you use it?**
+
+**A:**
+
+An API Gateway is a single entry point that sits in front of your microservices, handling cross-cutting concerns.
+
+### What an API Gateway Does
+```
+Client → API Gateway → Service A
+                     → Service B
+                     → Service C
+
+Gateway handles:
+- Routing (path-based, header-based)
+- Authentication / Authorization
+- Rate limiting
+- Request/Response transformation
+- Load balancing
+- Caching
+- Logging & monitoring
+- SSL termination
+- API versioning
+- Circuit breaking
+```
+
+### API Gateway vs Direct Service Communication
+| Aspect | Direct | API Gateway |
+|--------|--------|-------------|
+| Client complexity | High (knows all services) | Low (single endpoint) |
+| Cross-cutting concerns | Duplicated in each service | Centralized |
+| Performance | Fewer hops | +1 hop (gateway) |
+| Security | Each service handles auth | Centralized auth |
+| Deployment coupling | Low | Gateway is a dependency |
+
+### AWS API Gateway (REST vs HTTP APIs)
+| Feature | REST API | HTTP API |
+|---------|----------|----------|
+| Cost | ~$3.50/million requests | ~$1.00/million requests |
+| Latency | Higher | ~60% lower |
+| Features | Full (caching, WAF, API keys) | Basic (JWT auth, CORS) |
+| Use case | Public APIs needing full features | Internal/simple APIs |
+
+### BFF (Backend for Frontend) Pattern
+```
+Mobile App    → Mobile BFF Gateway    → Microservices
+Web App       → Web BFF Gateway       → Microservices
+Partner API   → Partner BFF Gateway   → Microservices
+```
+- Each client type gets a tailored gateway
+- Mobile BFF returns less data (bandwidth optimization — especially relevant for BD networks)
+- Web BFF can return richer responses
+
+### NestJS as API Gateway
+```typescript
+// Simple gateway that aggregates multiple services
+@Controller('dashboard')
+export class DashboardGatewayController {
+  constructor(
+    private readonly userService: UserServiceClient,
+    private readonly orderService: OrderServiceClient,
+    private readonly analyticsService: AnalyticsServiceClient,
+  ) {}
+
+  @Get(':userId')
+  async getDashboard(@Param('userId') userId: string) {
+    // Parallel calls to multiple services
+    const [user, recentOrders, stats] = await Promise.all([
+      this.userService.getUser(userId),
+      this.orderService.getRecentOrders(userId),
+      this.analyticsService.getUserStats(userId),
+    ]);
+
+    // Aggregate and transform for client
+    return {
+      user: { name: user.name, avatar: user.avatar },
+      orders: recentOrders.map(o => ({ id: o.id, total: o.total, status: o.status })),
+      stats: { totalSpent: stats.totalSpent, orderCount: stats.orderCount },
+    };
+  }
+}
+```
+
+### Gateway Rate Limiting Example
+```typescript
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+
+@Module({
+  imports: [
+    ThrottlerModule.forRoot([
+      { name: 'short', ttl: 1000, limit: 3 },   // 3 requests/second
+      { name: 'medium', ttl: 10000, limit: 20 }, // 20 requests/10 seconds
+      { name: 'long', ttl: 60000, limit: 100 },  // 100 requests/minute
+    ]),
+  ],
+})
+export class GatewayModule {}
+```
+
+**Interview Tip:** "For a BD startup, I'd start with AWS HTTP API (cheaper) as the gateway. As complexity grows, move to a NestJS-based custom gateway or Kong for fine-grained control."
+
+---
+
+## Q14: API Backward Compatibility & Versioning Strategy
+
+**Q: How do you maintain backward compatibility when evolving APIs?**
+
+**A:**
+
+### Breaking vs Non-Breaking Changes
+| Change Type | Breaking? | Example |
+|------------|-----------|---------|
+| Add optional field to response | No | Adding `avatar_url` to user response |
+| Add optional query parameter | No | Adding `?include_archived=true` |
+| Remove a field from response | YES | Removing `legacy_id` |
+| Rename a field | YES | `user_name` → `username` |
+| Change field type | YES | `id: number` → `id: string` |
+| Change HTTP method | YES | POST → PUT |
+| Change error format | YES | Different error response shape |
+| Add required field to request | YES | New required `phone` field |
+
+### Versioning Strategies
+```
+# URL Path (most common, clearest)
+GET /api/v1/users
+GET /api/v2/users
+
+# Header-based
+GET /api/users
+Accept-Version: v2
+
+# Query parameter
+GET /api/users?version=2
+```
+
+### NestJS API Versioning
+```typescript
+// main.ts
+app.enableVersioning({
+  type: VersioningType.URI, // /v1/users, /v2/users
+  defaultVersion: '1',
+});
+
+// Controller
+@Controller('users')
+export class UsersController {
+  @Get()
+  @Version('1')
+  findAllV1() {
+    return this.usersService.findAll(); // Original format
+  }
+
+  @Get()
+  @Version('2')
+  findAllV2() {
+    return this.usersService.findAllEnriched(); // New format with extra fields
+  }
+}
+```
+
+### Deprecation Strategy
+```typescript
+// Deprecation middleware
+@Injectable()
+export class DeprecationMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    if (req.path.startsWith('/api/v1')) {
+      res.setHeader('Deprecation', 'true');
+      res.setHeader('Sunset', 'Sat, 01 Jun 2026 00:00:00 GMT');
+      res.setHeader('Link', '</api/v2>; rel="successor-version"');
+    }
+    next();
+  }
+}
+```
+
+### Expand-Contract Pattern for API Evolution
+```
+Phase 1 (Expand): Add new field alongside old
+  Response: { user_name: "fazle", username: "fazle" }
+
+Phase 2 (Migrate): Update all clients to use new field
+  Monitor: Track usage of old field via analytics
+
+Phase 3 (Contract): Remove old field after no usage
+  Response: { username: "fazle" }
+```
+
+### Semantic Versioning for APIs
+- **Major (v1 → v2)**: Breaking changes — give clients 6-12 months to migrate
+- **Minor**: New features, backward compatible
+- **Patch**: Bug fixes only
+
+**Interview Tip:** "I always start with URL-based versioning for clarity. For non-breaking additions, I don't version — I just add optional fields. I use the expand-contract pattern to safely remove fields over time."
+
+---
+
+## Q15: API Documentation with OpenAPI/Swagger
+
+**Q: How do you approach API documentation?**
+
+**A:**
+
+### NestJS + Swagger Setup
+```typescript
+// main.ts
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
+const config = new DocumentBuilder()
+  .setTitle('Order Service API')
+  .setDescription('API for managing orders')
+  .setVersion('1.0')
+  .addBearerAuth()
+  .addTag('orders')
+  .build();
+
+const document = SwaggerModule.createDocument(app, config);
+SwaggerModule.setup('api/docs', app, document);
+```
+
+### DTO Documentation with Decorators
+```typescript
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class CreateOrderDto {
+  @ApiProperty({ description: 'Array of product IDs to order', example: ['prod_123', 'prod_456'] })
+  @IsArray()
+  productIds: string[];
+
+  @ApiProperty({ description: 'Shipping address', example: '123 Gulshan Ave, Dhaka' })
+  @IsString()
+  shippingAddress: string;
+
+  @ApiPropertyOptional({ description: 'Discount coupon code', example: 'SAVE20' })
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
+}
+```
+
+### Controller Documentation
+```typescript
+@ApiTags('orders')
+@ApiBearerAuth()
+@Controller('orders')
+export class OrdersController {
+  @Post()
+  @ApiOperation({ summary: 'Create a new order' })
+  @ApiResponse({ status: 201, description: 'Order created successfully', type: OrderResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  create(@Body() dto: CreateOrderDto): Promise<OrderResponseDto> {
+    return this.orderService.create(dto);
+  }
+}
+```
+
+### Best Practices
+- Generate docs from code (single source of truth)
+- Include request/response examples
+- Document error responses
+- Keep docs in sync via CI checks
+- Export OpenAPI spec for client SDK generation
+
+**Interview Tip:** "I treat API documentation as a contract. Using NestJS Swagger decorators ensures docs stay in sync with the code. For public APIs, I also generate client SDKs from the OpenAPI spec."

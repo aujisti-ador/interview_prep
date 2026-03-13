@@ -2350,3 +2350,2351 @@ describe('OrderEventConsumer', () => {
 8. How do you ensure ordering in distributed systems?
 9. What are the drawbacks of EDA?
 10. How do you debug issues in event-driven systems?
+
+---
+
+## Schema Registry and Event Serialization
+
+### Q12: Explain Schema Registry and why it matters in event-driven systems.
+
+**Answer:**
+
+A schema registry is a centralized service that stores and manages event schemas. It acts as the **contract between producers and consumers** — producers register the schema they write, consumers fetch the schema to deserialize correctly. Without it, you get runtime deserialization failures when schemas evolve.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Schema Registry Architecture                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Producer                     Schema Registry              Consumer          │
+│  ┌──────────┐                ┌───────────────┐           ┌──────────┐      │
+│  │          │── 1. Register ─→│               │←─ 3. Get ──│          │      │
+│  │  Order   │    Schema       │  Schema Store │   Schema   │ Inventory│      │
+│  │  Service │                 │               │            │ Service  │      │
+│  │          │── 2. Produce ──→│  - Version 1  │            │          │      │
+│  └──────────┘    (with        │  - Version 2  │            └──────────┘      │
+│                  schema ID)   │  - Version 3  │                              │
+│                               │               │                              │
+│         Message Envelope:     │  Compatibility │                              │
+│         ┌──────────────┐      │  Rules:        │                              │
+│         │ Schema ID: 3 │      │  - BACKWARD    │                              │
+│         │ Payload: ...  │      │  - FORWARD     │                              │
+│         └──────────────┘      │  - FULL        │                              │
+│                               └───────────────┘                              │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Avro vs Protobuf vs JSON Schema — Trade-offs:**
+
+| Feature | Avro | Protobuf | JSON Schema |
+|---------|------|----------|-------------|
+| Schema Evolution | Excellent (reader/writer schemas) | Good (field numbers) | Limited |
+| Binary Size | Smallest (no field names in payload) | Small (varint encoding) | Largest (text-based) |
+| Human Readable | No (binary) | No (binary) | Yes |
+| Code Generation | Optional | Required | Not needed |
+| Schema Registry Support | Native (Confluent) | Supported | Supported |
+| Best For | Kafka-heavy systems | gRPC + events | Simple systems, debugging |
+| Language Support | Excellent | Excellent | Universal |
+
+**Schema Evolution Compatibility Types:**
+
+- **Backward compatible**: New schema can read data written by old schema. You can *add* optional fields, *remove* fields with defaults. Safe to upgrade consumers first.
+- **Forward compatible**: Old schema can read data written by new schema. Safe to upgrade producers first.
+- **Full compatible**: Both backward AND forward compatible. Safest but most restrictive — only add/remove optional fields with defaults.
+
+**Breaking vs Non-Breaking Changes:**
+
+| Change | Breaking? | Notes |
+|--------|-----------|-------|
+| Add optional field with default | No | Safe in all modes |
+| Remove field with default | No | Safe in backward mode |
+| Rename a field | Yes | Old consumers can't find it |
+| Change field type | Yes | Deserialization fails |
+| Remove a required field | Yes | Old consumers expect it |
+| Add required field without default | Yes | Old data lacks it |
+
+```typescript
+// ========== Kafka Producer/Consumer with Avro Schema Registry ==========
+
+import { SchemaRegistry, SchemaType } from '@kafkajs/confluent-schema-registry';
+import { Kafka, Producer, Consumer, EachMessagePayload } from 'kafkajs';
+
+// --- Schema Registry Client ---
+@Injectable()
+export class SchemaRegistryService {
+  private registry: SchemaRegistry;
+
+  constructor(private readonly configService: ConfigService) {
+    this.registry = new SchemaRegistry({
+      host: this.configService.get('SCHEMA_REGISTRY_URL') || 'http://localhost:8081',
+      auth: {
+        username: this.configService.get('SCHEMA_REGISTRY_USER'),
+        password: this.configService.get('SCHEMA_REGISTRY_PASSWORD'),
+      },
+    });
+  }
+
+  // Register a new schema (or get existing)
+  async registerSchema(subject: string, schema: string): Promise<number> {
+    const { id } = await this.registry.register({
+      type: SchemaType.AVRO,
+      schema,
+    }, {
+      subject,
+    });
+    return id;
+  }
+
+  // Encode a message using the schema
+  async encode(schemaId: number, payload: any): Promise<Buffer> {
+    return this.registry.encode(schemaId, payload);
+  }
+
+  // Decode a message (schema ID is embedded in the binary)
+  async decode(buffer: Buffer): Promise<any> {
+    return this.registry.decode(buffer);
+  }
+
+  getRegistry(): SchemaRegistry {
+    return this.registry;
+  }
+}
+
+// --- Avro Schema Definitions ---
+const ORDER_CREATED_SCHEMA_V1 = JSON.stringify({
+  type: 'record',
+  name: 'OrderCreated',
+  namespace: 'com.example.events',
+  fields: [
+    { name: 'eventId', type: 'string' },
+    { name: 'orderId', type: 'string' },
+    { name: 'userId', type: 'string' },
+    { name: 'items', type: {
+      type: 'array',
+      items: {
+        type: 'record',
+        name: 'OrderItem',
+        fields: [
+          { name: 'productId', type: 'string' },
+          { name: 'quantity', type: 'int' },
+          { name: 'price', type: 'double' },
+        ],
+      },
+    }},
+    { name: 'totalAmount', type: 'double' },
+    { name: 'timestamp', type: 'long' },
+  ],
+});
+
+// V2: Added optional fields (backward compatible)
+const ORDER_CREATED_SCHEMA_V2 = JSON.stringify({
+  type: 'record',
+  name: 'OrderCreated',
+  namespace: 'com.example.events',
+  fields: [
+    { name: 'eventId', type: 'string' },
+    { name: 'orderId', type: 'string' },
+    { name: 'userId', type: 'string' },
+    { name: 'items', type: {
+      type: 'array',
+      items: {
+        type: 'record',
+        name: 'OrderItem',
+        fields: [
+          { name: 'productId', type: 'string' },
+          { name: 'quantity', type: 'int' },
+          { name: 'price', type: 'double' },
+        ],
+      },
+    }},
+    { name: 'totalAmount', type: 'double' },
+    { name: 'timestamp', type: 'long' },
+    // New optional fields (backward compatible — have defaults)
+    { name: 'currency', type: ['null', 'string'], default: null },
+    { name: 'metadata', type: ['null', { type: 'map', values: 'string' }], default: null },
+    { name: 'version', type: 'int', default: 2 },
+  ],
+});
+
+// --- Producer with Schema Validation ---
+@Injectable()
+export class OrderEventProducer implements OnModuleInit {
+  private producer: Producer;
+  private schemaId: number;
+
+  constructor(
+    private readonly kafka: Kafka,
+    private readonly schemaRegistryService: SchemaRegistryService,
+  ) {
+    this.producer = this.kafka.producer({
+      idempotent: true, // Exactly-once semantics
+    });
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.producer.connect();
+
+    // Register schema (idempotent — returns existing ID if schema hasn't changed)
+    this.schemaId = await this.schemaRegistryService.registerSchema(
+      'order-events-value', // Subject name convention: <topic>-value
+      ORDER_CREATED_SCHEMA_V2,
+    );
+  }
+
+  async publishOrderCreated(order: Order): Promise<void> {
+    const event = {
+      eventId: crypto.randomUUID(),
+      orderId: order.id,
+      userId: order.userId,
+      items: order.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      totalAmount: order.totalAmount,
+      timestamp: Date.now(),
+      currency: order.currency || null,
+      metadata: order.metadata || null,
+      version: 2,
+    };
+
+    // Encode with Avro schema — validates against the registered schema
+    // If validation fails, this throws BEFORE sending to Kafka
+    const encodedValue = await this.schemaRegistryService.encode(
+      this.schemaId,
+      event,
+    );
+
+    await this.producer.send({
+      topic: 'order-events',
+      messages: [
+        {
+          key: order.id, // Partition by order ID for ordering
+          value: encodedValue,
+          headers: {
+            'event-type': 'OrderCreated',
+            'schema-version': '2',
+            'correlation-id': order.correlationId,
+          },
+        },
+      ],
+    });
+  }
+}
+
+// --- Consumer with Schema Deserialization ---
+@Injectable()
+export class OrderEventConsumer implements OnModuleInit {
+  private consumer: Consumer;
+  private readonly logger = new Logger(OrderEventConsumer.name);
+
+  constructor(
+    private readonly kafka: Kafka,
+    private readonly schemaRegistryService: SchemaRegistryService,
+    private readonly inventoryService: InventoryService,
+  ) {
+    this.consumer = this.kafka.consumer({
+      groupId: 'inventory-service',
+    });
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.consumer.connect();
+    await this.consumer.subscribe({ topic: 'order-events', fromBeginning: false });
+
+    await this.consumer.run({
+      eachMessage: async (payload: EachMessagePayload) => {
+        await this.handleMessage(payload);
+      },
+    });
+  }
+
+  private async handleMessage(payload: EachMessagePayload): Promise<void> {
+    const { message } = payload;
+
+    try {
+      // Decode using schema registry — automatically uses the schema ID
+      // embedded in the binary. Works even if producer used V1 or V2.
+      const event = await this.schemaRegistryService.decode(message.value as Buffer);
+
+      const eventType = message.headers?.['event-type']?.toString();
+
+      switch (eventType) {
+        case 'OrderCreated':
+          await this.handleOrderCreated(event);
+          break;
+        default:
+          this.logger.warn(`Unknown event type: ${eventType}`);
+      }
+    } catch (error) {
+      this.logger.error('Failed to process message', error);
+      // Send to DLQ for investigation
+    }
+  }
+
+  private async handleOrderCreated(event: any): Promise<void> {
+    // Handle both V1 and V2 events gracefully
+    const currency = event.currency || 'USD'; // V1 won't have this field
+    const metadata = event.metadata || {};
+
+    await this.inventoryService.reserveForOrder(
+      event.orderId,
+      event.items,
+    );
+
+    this.logger.log(
+      `Processed OrderCreated: ${event.orderId} (${currency})`,
+    );
+  }
+}
+```
+
+> **Interview Tip:** Schema registry is often overlooked but it is critical in production event-driven systems. Without it, a producer can silently change the event shape and break all consumers. The key insight: "Schema registry shifts schema validation from runtime (consumer crash) to deploy time (producer rejects incompatible changes)." Mention that Confluent Schema Registry is the industry standard for Kafka, and that the subject naming convention is `<topic>-key` and `<topic>-value`.
+
+---
+
+## Kafka Advanced — Partition Rebalancing and Consumer Groups
+
+### Q13: Explain Kafka partition rebalancing, consumer groups, and consumer lag.
+
+**Answer:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Consumer Group Rebalancing                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Topic: order-events (6 partitions)                                         │
+│                                                                              │
+│  BEFORE (2 consumers):           AFTER (3 consumers — rebalance):           │
+│                                                                              │
+│  Consumer A: [P0, P1, P2]        Consumer A: [P0, P1]                       │
+│  Consumer B: [P3, P4, P5]        Consumer B: [P2, P3]                       │
+│                                   Consumer C: [P4, P5]  ← new              │
+│                                                                              │
+│  Rebalancing Triggers:                                                      │
+│  1. New consumer joins the group                                            │
+│  2. Consumer crashes or leaves                                              │
+│  3. New partitions added to topic                                           │
+│  4. Consumer session timeout expires                                        │
+│                                                                              │
+│  Eager Rebalancing (default):                                               │
+│  ┌───────────────────────────────────────────────────────────────┐          │
+│  │  ALL consumers STOP processing → revoke ALL partitions →      │          │
+│  │  reassign ALL partitions → resume processing                  │          │
+│  │  ⚠ STOP-THE-WORLD: complete processing pause                 │          │
+│  └───────────────────────────────────────────────────────────────┘          │
+│                                                                              │
+│  Cooperative Rebalancing:                                                   │
+│  ┌───────────────────────────────────────────────────────────────┐          │
+│  │  Only AFFECTED partitions are revoked and reassigned →        │          │
+│  │  other consumers keep processing unaffected partitions        │          │
+│  │  ✓ Minimal disruption, incremental migration                  │          │
+│  └───────────────────────────────────────────────────────────────┘          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Eager vs Cooperative Rebalancing:**
+
+| Aspect | Eager (Stop-the-World) | Cooperative (Incremental) |
+|--------|----------------------|--------------------------|
+| Disruption | All consumers pause | Only affected consumers pause |
+| Speed | Fast (single round) | Slower (2+ rounds) |
+| Complexity | Simple | More complex |
+| Default? | Yes (legacy) | No (opt-in) |
+| Best For | Small consumer groups | Large groups, latency-sensitive |
+
+**Partition Assignment Strategies:**
+
+- **Range**: Assigns contiguous partition ranges to consumers. Can cause imbalance if partition count isn't divisible by consumer count.
+- **RoundRobin**: Distributes partitions evenly across consumers in round-robin. Better balance.
+- **Sticky**: Like RoundRobin but tries to minimize partition movement during rebalancing. Reduces the number of partitions that change hands.
+- **CooperativeSticky**: Sticky + cooperative rebalancing. Best of both worlds.
+
+**Static Group Membership:**
+
+By assigning a `group.instance.id` to each consumer, Kafka treats it as a "static member." If the consumer disconnects and reconnects with the same instance ID, Kafka skips rebalancing entirely during the session timeout window. This dramatically reduces rebalancing frequency in containerized environments where pods restart often.
+
+**Consumer Lag:**
+
+Consumer lag is the difference between the latest offset in a partition and the consumer's committed offset. It tells you how far behind a consumer is.
+
+- **Healthy**: Lag near 0, consumer keeps up with producers
+- **Warning**: Lag growing, consumer is slower than production rate
+- **Critical**: Lag growing continuously, consumer will never catch up without intervention (add consumers, optimize processing, increase partitions)
+
+```typescript
+// ========== Consumer Group with Cooperative Rebalancing ==========
+
+import { Kafka, Consumer, ConsumerConfig, EachMessagePayload } from 'kafkajs';
+
+@Injectable()
+export class OptimizedKafkaConsumer implements OnModuleInit, OnModuleDestroy {
+  private consumer: Consumer;
+  private readonly logger = new Logger(OptimizedKafkaConsumer.name);
+  private isProcessing = true;
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly metricsService: ConsumerMetricsService,
+  ) {
+    const kafka = new Kafka({
+      clientId: this.configService.get('KAFKA_CLIENT_ID'),
+      brokers: this.configService.get<string[]>('KAFKA_BROKERS'),
+    });
+
+    const consumerConfig: ConsumerConfig = {
+      groupId: 'order-processing-group',
+
+      // --- Cooperative Rebalancing ---
+      // KafkaJS uses cooperative rebalancing by default (since v2.0+)
+      // For older versions or kafkajs, configure the partition assigner:
+      rebalanceTimeout: 60000, // 60 seconds for rebalance
+
+      // --- Static Group Membership ---
+      // Unique per instance — use pod name in Kubernetes
+      // Prevents rebalancing when a consumer restarts within session timeout
+      // groupInstanceId: process.env.POD_NAME || `instance-${process.pid}`,
+
+      // --- Session and Heartbeat ---
+      sessionTimeout: 30000,    // 30s — consumer considered dead after this
+      heartbeatInterval: 3000,  // 3s — send heartbeat to coordinator
+
+      // --- Offset management ---
+      maxWaitTimeInMs: 500,     // Max wait for new messages
+      maxBytesPerPartition: 1048576, // 1MB per partition per fetch
+    };
+
+    this.consumer = kafka.consumer(consumerConfig);
+  }
+
+  async onModuleInit(): Promise<void> {
+    await this.consumer.connect();
+
+    // Subscribe to topics
+    await this.consumer.subscribe({
+      topics: ['order-events', 'payment-events'],
+      fromBeginning: false,
+    });
+
+    // --- Handle Rebalance Events ---
+    this.consumer.on('consumer.rebalancing', () => {
+      this.logger.warn('Rebalancing started — pausing processing');
+      this.isProcessing = false;
+    });
+
+    this.consumer.on('consumer.group_join', ({ payload }) => {
+      this.logger.log(`Rebalancing complete. Assigned partitions: ${
+        JSON.stringify(payload.memberAssignment)
+      }`);
+      this.isProcessing = true;
+    });
+
+    // --- Start consuming ---
+    await this.consumer.run({
+      // Process messages one at a time per partition (ordered)
+      partitionsConsumedConcurrently: 3, // Process 3 partitions in parallel
+
+      eachMessage: async (payload: EachMessagePayload) => {
+        if (!this.isProcessing) {
+          // Skip during rebalancing — message will be re-delivered
+          return;
+        }
+
+        const startTime = Date.now();
+
+        try {
+          await this.handleMessage(payload);
+
+          // Track consumer lag metrics
+          this.metricsService.recordProcessingTime(
+            payload.topic,
+            payload.partition,
+            Date.now() - startTime,
+          );
+        } catch (error) {
+          this.logger.error(
+            `Error processing ${payload.topic}[${payload.partition}]@${payload.message.offset}`,
+            error,
+          );
+          // Don't commit offset — message will be retried
+          throw error;
+        }
+      },
+    });
+  }
+
+  private async handleMessage(payload: EachMessagePayload): Promise<void> {
+    const { topic, partition, message } = payload;
+
+    this.logger.debug(
+      `Processing ${topic}[${partition}]@${message.offset}`,
+    );
+
+    // Route to appropriate handler based on topic
+    switch (topic) {
+      case 'order-events':
+        await this.handleOrderEvent(message);
+        break;
+      case 'payment-events':
+        await this.handlePaymentEvent(message);
+        break;
+    }
+  }
+
+  // Graceful shutdown during rebalancing
+  async onModuleDestroy(): Promise<void> {
+    this.logger.log('Shutting down consumer gracefully...');
+    this.isProcessing = false;
+
+    // Disconnect triggers a clean leave from the consumer group
+    // This avoids waiting for session timeout and speeds up rebalancing
+    await this.consumer.disconnect();
+    this.logger.log('Consumer disconnected');
+  }
+
+  private async handleOrderEvent(message: any): Promise<void> {
+    // Process order event
+  }
+
+  private async handlePaymentEvent(message: any): Promise<void> {
+    // Process payment event
+  }
+}
+
+// --- Consumer Lag Monitoring ---
+@Injectable()
+export class ConsumerMetricsService {
+  private readonly logger = new Logger(ConsumerMetricsService.name);
+
+  constructor(
+    private readonly kafka: Kafka,
+    private readonly alertService: AlertService,
+  ) {}
+
+  // Check consumer lag periodically
+  @Cron('*/30 * * * * *') // Every 30 seconds
+  async checkConsumerLag(): Promise<void> {
+    const admin = this.kafka.admin();
+    await admin.connect();
+
+    try {
+      const topics = await admin.listTopics();
+      const groupId = 'order-processing-group';
+
+      // Get committed offsets for the consumer group
+      const offsets = await admin.fetchOffsets({ groupId, topics });
+
+      // Get latest offsets (end of each partition)
+      for (const topicOffset of offsets) {
+        const topicOffsets = await admin.fetchTopicOffsets(topicOffset.topic);
+
+        for (const partition of topicOffset.partitions) {
+          const latestOffset = topicOffsets.find(
+            (t) => t.partition === partition.partition,
+          );
+
+          if (latestOffset) {
+            const lag = parseInt(latestOffset.offset) - parseInt(partition.offset);
+
+            // Record metric
+            this.recordLag(topicOffset.topic, partition.partition, lag);
+
+            // Alert if lag exceeds threshold
+            if (lag > 10000) {
+              this.alertService.warn(
+                `High consumer lag: ${topicOffset.topic}[${partition.partition}] = ${lag}`,
+              );
+            }
+
+            if (lag > 100000) {
+              this.alertService.critical(
+                `Critical consumer lag: ${topicOffset.topic}[${partition.partition}] = ${lag}`,
+              );
+            }
+          }
+        }
+      }
+    } finally {
+      await admin.disconnect();
+    }
+  }
+
+  recordProcessingTime(topic: string, partition: number, durationMs: number): void {
+    // Push to Prometheus / StatsD / CloudWatch
+    this.logger.debug(
+      `Processed ${topic}[${partition}] in ${durationMs}ms`,
+    );
+  }
+
+  private recordLag(topic: string, partition: number, lag: number): void {
+    // Push to monitoring system
+    this.logger.debug(`Lag: ${topic}[${partition}] = ${lag}`);
+  }
+}
+```
+
+> **Interview Tip:** Rebalancing is one of the most common pain points in Kafka. Always mention cooperative rebalancing as the solution to stop-the-world pauses. If asked "how would you reduce rebalancing in Kubernetes?", the answer is static group membership — assign `group.instance.id` to the pod name so restarts within session timeout don't trigger rebalancing. For consumer lag, explain it as "the distance between where the producer is writing and where the consumer is reading" — if it grows, your consumer can't keep up.
+
+---
+
+## Event Versioning Strategies
+
+### Q14: How do you handle event versioning as your system evolves?
+
+**Answer:**
+
+Events are immutable facts that happened. Once published, they can't be changed. But your business evolves — new fields are needed, old fields become irrelevant, data types change. You need a strategy to handle this without breaking consumers.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Event Versioning Strategies                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Strategy 1: Version Field in Event                                         │
+│  ┌─────────────────────────────────────────────────┐                        │
+│  │ { "version": 2, "orderId": "...", ... }         │                        │
+│  │ Consumer checks version and routes to handler   │                        │
+│  └─────────────────────────────────────────────────┘                        │
+│  + Simple, all versions on same topic                                       │
+│  - Consumer must handle all versions forever                                │
+│                                                                              │
+│  Strategy 2: Separate Topics per Version                                    │
+│  ┌────────────────────┐  ┌────────────────────┐                            │
+│  │ order-events-v1    │  │ order-events-v2    │                            │
+│  └────────────────────┘  └────────────────────┘                            │
+│  + Clean separation, consumers subscribe to their version                   │
+│  - Topic proliferation, producers might dual-write                          │
+│                                                                              │
+│  Strategy 3: Upcasting (Transform on Read)                                  │
+│  ┌──────────┐    ┌───────────┐    ┌──────────┐                             │
+│  │ Old Event│───→│ Upcaster  │───→│ New Event│                             │
+│  │ (v1)     │    │ v1 → v2   │    │ (v2)     │                             │
+│  └──────────┘    └───────────┘    └──────────┘                             │
+│  + Consumers always work with latest version                                │
+│  - Adds processing overhead, chain of upcasters                             │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Upcasting Pattern:**
+
+Upcasting transforms old event versions to the latest version at read time. Consumers only need to handle the latest version. When an event store returns a V1 event, it passes through a chain of upcasters: V1 -> V2 -> V3 (current).
+
+**Backward and Forward Compatibility Rules:**
+
+- **Adding an optional field with a default value**: Backward AND forward compatible. Old consumers ignore it, old events get the default.
+- **Removing a field that has a default**: Backward compatible. Old events still have the field, new events don't — but the default fills in.
+- **Changing field type**: BREAKING. Must use a new field name or create a new event version.
+- **Renaming a field**: BREAKING. Old consumers look for the old name.
+
+**Handling Breaking Changes:**
+
+When you absolutely must make a breaking change:
+1. Start producing BOTH old and new versions (dual-write period)
+2. Migrate consumers one by one to the new version
+3. Once all consumers are migrated, stop producing the old version
+4. Keep the old schema in the registry for replaying historical events
+
+```typescript
+// ========== Event Upcaster for Version Migration ==========
+
+// --- Event Version Types ---
+interface OrderCreatedV1 {
+  version: 1;
+  orderId: string;
+  items: Array<{ productId: string; quantity: number }>;
+  total: number;
+  createdAt: string;
+}
+
+interface OrderCreatedV2 {
+  version: 2;
+  orderId: string;
+  userId: string; // Added in V2
+  items: Array<{ productId: string; quantity: number; unitPrice: number }>; // price added
+  total: number;
+  currency: string; // Added in V2
+  createdAt: string;
+}
+
+interface OrderCreatedV3 {
+  version: 3;
+  orderId: string;
+  userId: string;
+  items: Array<{
+    productId: string;
+    quantity: number;
+    unitPrice: number;
+    discount: number; // Added in V3
+  }>;
+  total: number;
+  currency: string;
+  shippingAddress: { // Added in V3
+    street: string;
+    city: string;
+    country: string;
+    zipCode: string;
+  } | null;
+  createdAt: string;
+  metadata: Record<string, string>; // Added in V3
+}
+
+// Current version that consumers work with
+type OrderCreatedEvent = OrderCreatedV3;
+
+// --- Upcaster Chain ---
+@Injectable()
+export class EventUpcasterService {
+  private readonly upcasters: Map<string, Map<number, (event: any) => any>> = new Map();
+
+  constructor() {
+    this.registerUpcasters();
+  }
+
+  private registerUpcasters(): void {
+    // OrderCreated upcasters
+    const orderCreatedUpcasters = new Map<number, (event: any) => any>();
+
+    // V1 → V2
+    orderCreatedUpcasters.set(1, (event: OrderCreatedV1): OrderCreatedV2 => ({
+      version: 2,
+      orderId: event.orderId,
+      userId: 'unknown', // V1 didn't track userId — use placeholder
+      items: event.items.map((item) => ({
+        ...item,
+        unitPrice: 0, // V1 didn't have per-item prices
+      })),
+      total: event.total,
+      currency: 'USD', // Default for V1 events
+      createdAt: event.createdAt,
+    }));
+
+    // V2 → V3
+    orderCreatedUpcasters.set(2, (event: OrderCreatedV2): OrderCreatedV3 => ({
+      version: 3,
+      orderId: event.orderId,
+      userId: event.userId,
+      items: event.items.map((item) => ({
+        ...item,
+        discount: 0, // V2 didn't have discounts
+      })),
+      total: event.total,
+      currency: event.currency,
+      shippingAddress: null, // V2 didn't have shipping address
+      createdAt: event.createdAt,
+      metadata: {}, // V2 didn't have metadata
+    }));
+
+    this.upcasters.set('OrderCreated', orderCreatedUpcasters);
+  }
+
+  // Upcast an event to the latest version
+  upcast(eventType: string, event: any): any {
+    const typeUpcasters = this.upcasters.get(eventType);
+    if (!typeUpcasters) return event;
+
+    let current = event;
+    const LATEST_VERSION = 3;
+
+    // Apply upcasters sequentially: V1 → V2 → V3
+    while (current.version < LATEST_VERSION) {
+      const upcaster = typeUpcasters.get(current.version);
+      if (!upcaster) {
+        throw new Error(
+          `No upcaster found for ${eventType} v${current.version}`,
+        );
+      }
+      current = upcaster(current);
+    }
+
+    return current;
+  }
+}
+
+// --- Consumer That Uses Upcasting ---
+@Injectable()
+export class OrderEventConsumerV3 {
+  constructor(
+    private readonly upcasterService: EventUpcasterService,
+    private readonly orderService: OrderService,
+  ) {}
+
+  async handleEvent(rawEvent: any): Promise<void> {
+    const eventType = rawEvent.eventType || rawEvent.type;
+
+    // Upcast to latest version regardless of what version was stored
+    const event: OrderCreatedEvent = this.upcasterService.upcast(
+      eventType,
+      rawEvent.payload,
+    );
+
+    // Consumer only handles V3 — no version switch statements needed
+    await this.orderService.processOrder({
+      orderId: event.orderId,
+      userId: event.userId,
+      items: event.items,
+      total: event.total,
+      currency: event.currency,
+      shippingAddress: event.shippingAddress,
+      metadata: event.metadata,
+    });
+  }
+}
+
+// --- Versioned Event Producer (Dual-Write During Migration) ---
+@Injectable()
+export class VersionedEventProducer {
+  private currentVersion = 3;
+
+  constructor(
+    private readonly kafkaClient: ClientKafka,
+    private readonly configService: ConfigService,
+  ) {}
+
+  async publish(event: OrderCreatedEvent): Promise<void> {
+    const envelope = {
+      eventId: crypto.randomUUID(),
+      eventType: 'OrderCreated',
+      version: this.currentVersion,
+      payload: event,
+      timestamp: new Date().toISOString(),
+      source: 'order-service',
+    };
+
+    // Primary topic (latest version)
+    await firstValueFrom(
+      this.kafkaClient.emit('order-events', {
+        key: event.orderId,
+        value: JSON.stringify(envelope),
+      }),
+    );
+
+    // During migration period: also publish to legacy topic
+    // Remove this once all consumers are migrated
+    const isMigrating = this.configService.get('DUAL_WRITE_ENABLED') === 'true';
+    if (isMigrating) {
+      const legacyEvent = this.downcastToV2(event);
+      await firstValueFrom(
+        this.kafkaClient.emit('order-events-v2', {
+          key: event.orderId,
+          value: JSON.stringify({ ...envelope, version: 2, payload: legacyEvent }),
+        }),
+      );
+    }
+  }
+
+  private downcastToV2(event: OrderCreatedV3): OrderCreatedV2 {
+    return {
+      version: 2,
+      orderId: event.orderId,
+      userId: event.userId,
+      items: event.items.map(({ discount, ...rest }) => rest),
+      total: event.total,
+      currency: event.currency,
+      createdAt: event.createdAt,
+    };
+  }
+}
+```
+
+> **Interview Tip:** When asked about event versioning, start with "events are immutable, so we can't change them after they're published." Then explain the three strategies. Upcasting is the most elegant for event-sourced systems because the event store can replay old events through the upcaster chain, and consumers only ever see the latest version. For Kafka-based systems, schema registry with Avro compatibility rules is the practical choice. Always mention the dual-write migration pattern for breaking changes.
+
+---
+
+## Testing Event-Driven Systems
+
+### Q15: How do you test event-driven systems?
+
+**Answer:**
+
+Testing event-driven systems is challenging because of asynchronous flows, eventual consistency, and distributed state. You need a layered testing strategy:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    Testing Pyramid for EDA                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│            /\                                                                │
+│           /  \    E2E Tests                                                  │
+│          / ── \   (Full pipeline with real Kafka)                            │
+│         /      \  Slow, expensive, catch integration issues                  │
+│        /────────\                                                            │
+│       /          \    Contract Tests                                         │
+│      /   ──────   \   (Producer/consumer schema agreement)                   │
+│     /              \   Medium speed, catch compatibility issues              │
+│    /────────────────\                                                        │
+│   /                  \    Integration Tests                                   │
+│  /     ──────────     \   (Testcontainers with embedded Kafka)               │
+│ /                      \   Moderate speed, test real Kafka behavior          │
+│/────────────────────────\                                                    │
+│                          \    Unit Tests                                      │
+│  ────────────────────────  \  (Isolated handler logic, mocked deps)          │
+│                              \ Fast, test business logic only               │
+│──────────────────────────────\                                               │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Testing Challenges in EDA:**
+
+1. **Eventual consistency**: You can't assert immediately — you need polling or waiting patterns
+2. **Ordering**: Messages may arrive in unexpected order
+3. **Idempotency**: You must test that processing the same message twice produces the same result
+4. **Saga compensation**: Test both the happy path and every possible failure/compensation path
+5. **Dead letter queue**: Verify that poison messages end up in the DLQ, not in an infinite retry loop
+
+```typescript
+// ========== Testing a Kafka Consumer with Testcontainers ==========
+
+// 1. Unit Testing Event Handlers (isolated, no Kafka)
+describe('OrderEventHandler', () => {
+  let handler: OrderEventHandler;
+  let inventoryService: jest.Mocked<InventoryService>;
+  let idempotencyService: jest.Mocked<IdempotentEventHandler>;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [
+        OrderEventHandler,
+        {
+          provide: InventoryService,
+          useValue: {
+            reserveForOrder: jest.fn().mockResolvedValue({ reserved: true }),
+            releaseReservation: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: IdempotentEventHandler,
+          useValue: {
+            handleIdempotently: jest.fn().mockImplementation(
+              (eventId, consumerId, handler) => handler(),
+            ),
+          },
+        },
+      ],
+    }).compile();
+
+    handler = module.get(OrderEventHandler);
+    inventoryService = module.get(InventoryService);
+    idempotencyService = module.get(IdempotentEventHandler);
+  });
+
+  it('should reserve inventory when order is created', async () => {
+    const event = {
+      eventId: 'evt-123',
+      orderId: 'order-456',
+      userId: 'user-789',
+      items: [
+        { productId: 'prod-1', quantity: 2, unitPrice: 29.99 },
+        { productId: 'prod-2', quantity: 1, unitPrice: 49.99 },
+      ],
+      total: 109.97,
+      currency: 'USD',
+    };
+
+    await handler.handleOrderCreated(event);
+
+    expect(inventoryService.reserveForOrder).toHaveBeenCalledWith(
+      'order-456',
+      expect.arrayContaining([
+        expect.objectContaining({ productId: 'prod-1', quantity: 2 }),
+        expect.objectContaining({ productId: 'prod-2', quantity: 1 }),
+      ]),
+    );
+  });
+
+  // Test idempotency — same event processed twice
+  it('should be idempotent — processing same event twice has same effect', async () => {
+    const event = {
+      eventId: 'evt-123',
+      orderId: 'order-456',
+      userId: 'user-789',
+      items: [{ productId: 'prod-1', quantity: 2, unitPrice: 29.99 }],
+      total: 59.98,
+      currency: 'USD',
+    };
+
+    // First call processes normally
+    await handler.handleOrderCreated(event);
+
+    // Second call — idempotency service returns cached result
+    idempotencyService.handleIdempotently.mockImplementation(
+      async (eventId, consumerId, fn) => {
+        // Simulate already-processed
+        return { reserved: true };
+      },
+    );
+
+    await handler.handleOrderCreated(event);
+
+    // Inventory reservation only called once
+    expect(inventoryService.reserveForOrder).toHaveBeenCalledTimes(1);
+  });
+
+  it('should handle missing optional fields gracefully', async () => {
+    // V1 event without currency and metadata
+    const legacyEvent = {
+      eventId: 'evt-old',
+      orderId: 'order-old',
+      items: [{ productId: 'prod-1', quantity: 1 }],
+      total: 29.99,
+      // No userId, no currency — V1 event
+    };
+
+    await handler.handleOrderCreated(legacyEvent);
+
+    expect(inventoryService.reserveForOrder).toHaveBeenCalled();
+  });
+});
+
+// 2. Integration Testing with Testcontainers (real Kafka)
+import { KafkaContainer, StartedKafkaContainer } from '@testcontainers/kafka';
+import { Kafka, Producer, Consumer } from 'kafkajs';
+
+describe('Order Event Pipeline (Integration)', () => {
+  let kafkaContainer: StartedKafkaContainer;
+  let kafka: Kafka;
+  let producer: Producer;
+  let consumer: Consumer;
+
+  // Start Kafka container before all tests
+  beforeAll(async () => {
+    kafkaContainer = await new KafkaContainer('confluentinc/cp-kafka:7.4.0')
+      .withExposedPorts(9093)
+      .start();
+
+    kafka = new Kafka({
+      brokers: [kafkaContainer.getBrokers()[0]],
+    });
+
+    producer = kafka.producer();
+    consumer = kafka.consumer({ groupId: 'test-group' });
+
+    await producer.connect();
+    await consumer.connect();
+
+    // Create topic
+    const admin = kafka.admin();
+    await admin.connect();
+    await admin.createTopics({
+      topics: [{ topic: 'order-events', numPartitions: 3 }],
+    });
+    await admin.disconnect();
+  }, 60000); // 60s timeout for container startup
+
+  afterAll(async () => {
+    await producer.disconnect();
+    await consumer.disconnect();
+    await kafkaContainer.stop();
+  });
+
+  it('should produce and consume an order event', async () => {
+    const receivedMessages: any[] = [];
+
+    await consumer.subscribe({ topic: 'order-events', fromBeginning: true });
+    await consumer.run({
+      eachMessage: async ({ message }) => {
+        receivedMessages.push(JSON.parse(message.value.toString()));
+      },
+    });
+
+    // Produce an event
+    const orderEvent = {
+      eventId: 'evt-integration-1',
+      eventType: 'OrderCreated',
+      orderId: 'order-int-1',
+      userId: 'user-1',
+      items: [{ productId: 'prod-1', quantity: 3, unitPrice: 19.99 }],
+      total: 59.97,
+      currency: 'USD',
+      timestamp: Date.now(),
+    };
+
+    await producer.send({
+      topic: 'order-events',
+      messages: [
+        { key: orderEvent.orderId, value: JSON.stringify(orderEvent) },
+      ],
+    });
+
+    // Wait for eventual consistency — poll until message arrives
+    await waitForCondition(
+      () => receivedMessages.length > 0,
+      5000, // timeout
+      100,  // poll interval
+    );
+
+    expect(receivedMessages).toHaveLength(1);
+    expect(receivedMessages[0].orderId).toBe('order-int-1');
+    expect(receivedMessages[0].eventType).toBe('OrderCreated');
+  });
+
+  it('should maintain message ordering within a partition', async () => {
+    const receivedMessages: any[] = [];
+
+    await consumer.subscribe({ topic: 'order-events', fromBeginning: true });
+    await consumer.run({
+      eachMessage: async ({ message }) => {
+        receivedMessages.push(JSON.parse(message.value.toString()));
+      },
+    });
+
+    // Send 3 messages with the same key (same partition)
+    const orderId = 'order-ordering-test';
+    const events = ['OrderCreated', 'OrderPaid', 'OrderShipped'];
+
+    for (const eventType of events) {
+      await producer.send({
+        topic: 'order-events',
+        messages: [
+          { key: orderId, value: JSON.stringify({ eventType, orderId, seq: events.indexOf(eventType) }) },
+        ],
+      });
+    }
+
+    await waitForCondition(
+      () => receivedMessages.filter((m) => m.orderId === orderId).length >= 3,
+      5000,
+      100,
+    );
+
+    const orderMessages = receivedMessages
+      .filter((m) => m.orderId === orderId)
+      .sort((a, b) => a.seq - b.seq);
+
+    // Messages should arrive in order (same key = same partition)
+    expect(orderMessages[0].eventType).toBe('OrderCreated');
+    expect(orderMessages[1].eventType).toBe('OrderPaid');
+    expect(orderMessages[2].eventType).toBe('OrderShipped');
+  });
+});
+
+// 3. Testing Eventual Consistency — Polling Helper
+async function waitForCondition(
+  condition: () => boolean | Promise<boolean>,
+  timeoutMs: number,
+  pollIntervalMs: number,
+): Promise<void> {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < timeoutMs) {
+    const result = await condition();
+    if (result) return;
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+
+  throw new Error(`Condition not met within ${timeoutMs}ms`);
+}
+
+// 4. Testing Saga Compensation
+describe('OrderSaga', () => {
+  let saga: OrderSaga;
+  let inventoryService: jest.Mocked<InventoryService>;
+  let paymentService: jest.Mocked<PaymentService>;
+  let shippingService: jest.Mocked<ShippingService>;
+
+  beforeEach(async () => {
+    const module = await Test.createTestingModule({
+      providers: [
+        OrderSaga,
+        { provide: InventoryService, useValue: createMock<InventoryService>() },
+        { provide: PaymentService, useValue: createMock<PaymentService>() },
+        { provide: ShippingService, useValue: createMock<ShippingService>() },
+      ],
+    }).compile();
+
+    saga = module.get(OrderSaga);
+    inventoryService = module.get(InventoryService);
+    paymentService = module.get(PaymentService);
+    shippingService = module.get(ShippingService);
+  });
+
+  it('should complete successfully when all steps pass', async () => {
+    inventoryService.reserve.mockResolvedValue({ reservationId: 'res-1' });
+    paymentService.charge.mockResolvedValue({ paymentId: 'pay-1' });
+    shippingService.createShipment.mockResolvedValue({ shipmentId: 'ship-1' });
+
+    await saga.execute(testOrder);
+
+    expect(inventoryService.reserve).toHaveBeenCalled();
+    expect(paymentService.charge).toHaveBeenCalled();
+    expect(shippingService.createShipment).toHaveBeenCalled();
+  });
+
+  it('should compensate when payment fails', async () => {
+    inventoryService.reserve.mockResolvedValue({ reservationId: 'res-1' });
+    paymentService.charge.mockRejectedValue(new Error('Insufficient funds'));
+
+    await expect(saga.execute(testOrder)).rejects.toThrow('Insufficient funds');
+
+    // Inventory should be released (compensated)
+    expect(inventoryService.releaseReservation).toHaveBeenCalledWith('res-1');
+    // Shipping should NOT have been called
+    expect(shippingService.createShipment).not.toHaveBeenCalled();
+  });
+
+  it('should compensate all completed steps when shipping fails', async () => {
+    inventoryService.reserve.mockResolvedValue({ reservationId: 'res-1' });
+    paymentService.charge.mockResolvedValue({ paymentId: 'pay-1' });
+    shippingService.createShipment.mockRejectedValue(new Error('Address invalid'));
+
+    await expect(saga.execute(testOrder)).rejects.toThrow('Address invalid');
+
+    // Both inventory and payment should be compensated (reverse order)
+    expect(paymentService.refund).toHaveBeenCalledWith('pay-1');
+    expect(inventoryService.releaseReservation).toHaveBeenCalledWith('res-1');
+  });
+});
+
+// 5. Contract Testing for Events (Consumer-Driven)
+describe('OrderCreated Event Contract', () => {
+  it('should match the agreed schema', () => {
+    const event = produceOrderCreatedEvent(testOrder);
+
+    // Validate required fields exist
+    expect(event).toHaveProperty('eventId');
+    expect(event).toHaveProperty('orderId');
+    expect(event).toHaveProperty('items');
+    expect(event).toHaveProperty('total');
+    expect(event).toHaveProperty('timestamp');
+
+    // Validate types
+    expect(typeof event.eventId).toBe('string');
+    expect(typeof event.orderId).toBe('string');
+    expect(Array.isArray(event.items)).toBe(true);
+    expect(typeof event.total).toBe('number');
+
+    // Validate items structure
+    for (const item of event.items) {
+      expect(item).toHaveProperty('productId');
+      expect(item).toHaveProperty('quantity');
+      expect(typeof item.quantity).toBe('number');
+      expect(item.quantity).toBeGreaterThan(0);
+    }
+  });
+
+  it('should be deserializable by inventory consumer', () => {
+    const event = produceOrderCreatedEvent(testOrder);
+
+    // Simulate what the inventory consumer does
+    const parsed = inventoryConsumerDeserialize(event);
+
+    expect(parsed.orderId).toBeDefined();
+    expect(parsed.items.length).toBeGreaterThan(0);
+  });
+});
+```
+
+> **Interview Tip:** Emphasize the testing pyramid — unit tests for business logic (fast, many), integration tests with testcontainers for real Kafka behavior (medium, some), and E2E tests for the full pipeline (slow, few). The most commonly missed testing area is saga compensation — always test every failure point in the saga, not just the happy path. Mention `waitForCondition` or polling patterns for testing eventual consistency — never use fixed `sleep()` in tests.
+
+---
+
+## Observability in Event-Driven Architecture
+
+### Q16: How do you implement observability across event-driven services?
+
+**Answer:**
+
+Observability in event-driven systems is harder than in synchronous architectures because a single business operation spans multiple services connected by asynchronous events. A request doesn't follow a single thread — it hops across services via message brokers.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│              Observability in Event-Driven Architecture                       │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  Three Pillars:                                                             │
+│                                                                              │
+│  1. DISTRIBUTED TRACING (OpenTelemetry)                                     │
+│     ┌───────┐  trace-id  ┌───────┐  trace-id  ┌───────┐                   │
+│     │ Order │ ─────────→ │ Kafka │ ─────────→ │ Inv.  │                   │
+│     │ Svc   │  in header │       │  propagated │ Svc   │                   │
+│     └───────┘            └───────┘             └───────┘                   │
+│     Trace ID follows the event across every service                        │
+│                                                                              │
+│  2. METRICS (Prometheus/Grafana)                                            │
+│     - Consumer lag per topic/partition                                       │
+│     - Message throughput (produced/consumed per second)                      │
+│     - Processing time per event type                                        │
+│     - Error rate per consumer group                                         │
+│     - DLQ depth                                                             │
+│                                                                              │
+│  3. LOGGING (Structured, with correlation IDs)                              │
+│     Every log line includes: traceId, correlationId, eventId, service       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+**The Core Problem: Correlation**
+
+In a synchronous REST call chain, a single request ID can be passed through HTTP headers. In EDA, the "request" becomes an event that triggers other events — you need:
+- **Trace ID**: Spans the entire business operation across all services (same as distributed tracing)
+- **Correlation ID**: Groups related events from the same business trigger (e.g., all events from one order)
+- **Causation ID**: The specific event that caused this event (direct parent in the event chain)
+
+**Tools:**
+- **Jaeger / Zipkin**: Distributed tracing visualization — see the full journey of a request across services
+- **Kafka UI / Conduktor**: Inspect topics, consumer groups, messages, and lag
+- **OpenTelemetry**: Vendor-neutral instrumentation for traces, metrics, and logs
+- **Grafana + Prometheus**: Dashboards for consumer lag, throughput, error rates
+
+```typescript
+// ========== Adding Trace Context to Kafka Messages ==========
+
+import { trace, context, SpanKind, propagation } from '@opentelemetry/api';
+import { Kafka, Producer, Consumer, EachMessagePayload } from 'kafkajs';
+
+// --- OpenTelemetry Setup (bootstrap) ---
+// Usually in a separate tracing.ts file, initialized before the app starts
+
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { KafkaJsInstrumentation } from 'opentelemetry-instrumentation-kafkajs';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const sdk = new NodeSDK({
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'order-service',
+    [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV,
+  }),
+  traceExporter: new OTLPTraceExporter({
+    url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://jaeger:4318/v1/traces',
+  }),
+  instrumentations: [
+    new KafkaJsInstrumentation(), // Auto-instruments KafkaJS
+  ],
+});
+
+sdk.start();
+
+// --- Traced Event Producer ---
+@Injectable()
+export class TracedEventProducer {
+  private producer: Producer;
+  private readonly tracer = trace.getTracer('order-service');
+
+  constructor(private readonly kafka: Kafka) {
+    this.producer = this.kafka.producer();
+  }
+
+  async publishWithTracing(
+    topic: string,
+    key: string,
+    event: any,
+    correlationId: string,
+  ): Promise<void> {
+    // Create a span for the produce operation
+    const span = this.tracer.startSpan(`kafka.produce ${topic}`, {
+      kind: SpanKind.PRODUCER,
+      attributes: {
+        'messaging.system': 'kafka',
+        'messaging.destination': topic,
+        'messaging.destination_kind': 'topic',
+        'messaging.message.key': key,
+        'app.event.type': event.eventType,
+        'app.correlation.id': correlationId,
+      },
+    });
+
+    try {
+      // Inject trace context into message headers
+      const headers: Record<string, string> = {
+        'event-type': event.eventType,
+        'correlation-id': correlationId,
+        'causation-id': event.causationId || event.eventId,
+        'produced-at': new Date().toISOString(),
+        'source-service': 'order-service',
+      };
+
+      // Propagate OpenTelemetry context via headers
+      propagation.inject(context.active(), headers);
+
+      await this.producer.send({
+        topic,
+        messages: [
+          {
+            key,
+            value: JSON.stringify(event),
+            headers,
+          },
+        ],
+      });
+
+      span.setStatus({ code: 0 }); // OK
+    } catch (error) {
+      span.setStatus({ code: 2, message: error.message }); // ERROR
+      span.recordException(error);
+      throw error;
+    } finally {
+      span.end();
+    }
+  }
+}
+
+// --- Traced Event Consumer ---
+@Injectable()
+export class TracedEventConsumer {
+  private consumer: Consumer;
+  private readonly tracer = trace.getTracer('inventory-service');
+  private readonly logger = new Logger(TracedEventConsumer.name);
+
+  constructor(
+    private readonly kafka: Kafka,
+    private readonly metricsService: EventMetricsService,
+  ) {
+    this.consumer = this.kafka.consumer({ groupId: 'inventory-service' });
+  }
+
+  async startConsuming(): Promise<void> {
+    await this.consumer.subscribe({ topic: 'order-events' });
+
+    await this.consumer.run({
+      eachMessage: async (payload: EachMessagePayload) => {
+        await this.processWithTracing(payload);
+      },
+    });
+  }
+
+  private async processWithTracing(payload: EachMessagePayload): Promise<void> {
+    const { topic, partition, message } = payload;
+    const headers = this.parseHeaders(message.headers);
+
+    // Extract trace context from message headers
+    const parentContext = propagation.extract(context.active(), headers);
+
+    // Create a consumer span linked to the producer span
+    const span = this.tracer.startSpan(
+      `kafka.consume ${topic}`,
+      {
+        kind: SpanKind.CONSUMER,
+        attributes: {
+          'messaging.system': 'kafka',
+          'messaging.source': topic,
+          'messaging.kafka.partition': partition,
+          'messaging.kafka.offset': message.offset,
+          'app.event.type': headers['event-type'],
+          'app.correlation.id': headers['correlation-id'],
+        },
+      },
+      parentContext, // Link to producer's trace
+    );
+
+    const startTime = Date.now();
+
+    try {
+      await context.with(trace.setSpan(parentContext, span), async () => {
+        // All downstream operations inherit this trace context
+        const event = JSON.parse(message.value.toString());
+
+        // Structured logging with trace context
+        this.logger.log({
+          message: `Processing event: ${headers['event-type']}`,
+          traceId: span.spanContext().traceId,
+          spanId: span.spanContext().spanId,
+          correlationId: headers['correlation-id'],
+          eventType: headers['event-type'],
+          topic,
+          partition,
+          offset: message.offset,
+        });
+
+        await this.handleEvent(event, headers);
+      });
+
+      span.setStatus({ code: 0 });
+
+      // Record success metric
+      this.metricsService.recordEventProcessed(
+        topic,
+        headers['event-type'],
+        'success',
+        Date.now() - startTime,
+      );
+    } catch (error) {
+      span.setStatus({ code: 2, message: error.message });
+      span.recordException(error);
+
+      this.metricsService.recordEventProcessed(
+        topic,
+        headers['event-type'],
+        'error',
+        Date.now() - startTime,
+      );
+
+      throw error;
+    } finally {
+      span.end();
+    }
+  }
+
+  private parseHeaders(headers: any): Record<string, string> {
+    const result: Record<string, string> = {};
+    if (headers) {
+      for (const [key, value] of Object.entries(headers)) {
+        result[key] = value?.toString() || '';
+      }
+    }
+    return result;
+  }
+
+  private async handleEvent(event: any, headers: Record<string, string>): Promise<void> {
+    // Process the event...
+  }
+}
+
+// --- Event Metrics Service (Prometheus-style) ---
+@Injectable()
+export class EventMetricsService {
+  // In production, use prom-client or OpenTelemetry metrics
+  private counters: Map<string, number> = new Map();
+  private histograms: Map<string, number[]> = new Map();
+
+  recordEventProcessed(
+    topic: string,
+    eventType: string,
+    status: 'success' | 'error',
+    durationMs: number,
+  ): void {
+    // Counter: events_processed_total{topic, event_type, status}
+    const counterKey = `events_processed:${topic}:${eventType}:${status}`;
+    this.counters.set(counterKey, (this.counters.get(counterKey) || 0) + 1);
+
+    // Histogram: event_processing_duration_ms{topic, event_type}
+    const histKey = `processing_duration:${topic}:${eventType}`;
+    const values = this.histograms.get(histKey) || [];
+    values.push(durationMs);
+    this.histograms.set(histKey, values);
+  }
+
+  recordConsumerLag(topic: string, partition: number, lag: number): void {
+    // Gauge: kafka_consumer_lag{topic, partition}
+    const key = `consumer_lag:${topic}:${partition}`;
+    this.counters.set(key, lag);
+  }
+
+  recordDlqDepth(topic: string, depth: number): void {
+    // Gauge: dlq_depth{topic}
+    this.counters.set(`dlq_depth:${topic}`, depth);
+  }
+
+  // End-to-end latency: time from event production to consumption
+  recordEndToEndLatency(
+    producedAt: string,
+    consumedAt: number,
+  ): void {
+    const e2eLatency = consumedAt - new Date(producedAt).getTime();
+    const values = this.histograms.get('e2e_latency') || [];
+    values.push(e2eLatency);
+    this.histograms.set('e2e_latency', values);
+  }
+}
+
+// --- DLQ Monitor and Replay ---
+@Injectable()
+export class DlqMonitorService {
+  private readonly logger = new Logger(DlqMonitorService.name);
+
+  constructor(
+    private readonly kafka: Kafka,
+    private readonly alertService: AlertService,
+    private readonly metricsService: EventMetricsService,
+  ) {}
+
+  // Monitor DLQ depth
+  @Cron('*/60 * * * * *') // Every minute
+  async checkDlqDepth(): Promise<void> {
+    const admin = this.kafka.admin();
+    await admin.connect();
+
+    try {
+      const dlqTopics = ['order-events.DLQ', 'payment-events.DLQ'];
+
+      for (const topic of dlqTopics) {
+        const offsets = await admin.fetchTopicOffsets(topic);
+        const totalMessages = offsets.reduce(
+          (sum, p) => sum + parseInt(p.offset),
+          0,
+        );
+
+        this.metricsService.recordDlqDepth(topic, totalMessages);
+
+        if (totalMessages > 100) {
+          this.alertService.warn(
+            `DLQ ${topic} has ${totalMessages} messages — investigate failures`,
+          );
+        }
+      }
+    } finally {
+      await admin.disconnect();
+    }
+  }
+
+  // Replay messages from DLQ back to the original topic
+  async replayDlqMessages(
+    dlqTopic: string,
+    targetTopic: string,
+    filter?: (message: any) => boolean,
+  ): Promise<{ replayed: number; skipped: number }> {
+    const consumer = this.kafka.consumer({ groupId: 'dlq-replay' });
+    const producer = this.kafka.producer();
+
+    await Promise.all([consumer.connect(), producer.connect()]);
+
+    let replayed = 0;
+    let skipped = 0;
+
+    try {
+      await consumer.subscribe({ topic: dlqTopic, fromBeginning: true });
+
+      await consumer.run({
+        eachMessage: async ({ message }) => {
+          const event = JSON.parse(message.value.toString());
+
+          if (filter && !filter(event)) {
+            skipped++;
+            return;
+          }
+
+          // Replay to original topic
+          await producer.send({
+            topic: targetTopic,
+            messages: [
+              {
+                key: message.key,
+                value: message.value,
+                headers: {
+                  ...message.headers,
+                  'replayed-from': dlqTopic,
+                  'replayed-at': new Date().toISOString(),
+                },
+              },
+            ],
+          });
+
+          replayed++;
+        },
+      });
+
+      this.logger.log(
+        `DLQ replay complete: ${replayed} replayed, ${skipped} skipped`,
+      );
+      return { replayed, skipped };
+
+    } finally {
+      await consumer.disconnect();
+      await producer.disconnect();
+    }
+  }
+}
+```
+
+> **Interview Tip:** Observability in EDA is a top interview topic for senior roles. The key points to hit: (1) Trace context must be explicitly propagated through message headers — it doesn't happen automatically like with HTTP. (2) Correlation IDs are essential for grouping all events from one business operation. (3) Consumer lag is your primary health indicator — if it grows, processing can't keep up. (4) DLQ monitoring prevents silent failures. When asked "how do you debug an issue in an event-driven system?", walk through: "I'd start with the correlation ID to find all related events in Jaeger, check consumer lag to see if the consumer is behind, look at the DLQ for failed messages, and check structured logs filtered by the trace ID."
+
+---
+
+## Q12: Schema Registry & Event Serialization
+
+**Q: How do you manage event schemas across microservices?**
+
+**A:**
+
+As event-driven systems grow, schema management becomes critical. Without it, a producer changing an event format can break every consumer.
+
+### The Problem
+```
+Order Service publishes: { orderId: "123", total: 50.00, currency: "BDT" }
+  ↓ (developer adds field and renames one)
+Order Service publishes: { order_id: "123", amount: 50.00, currency: "BDT", tax: 5.00 }
+  ↓
+Payment Service CRASHES: expects 'orderId' and 'total'
+```
+
+### Solution: Schema Registry
+```
+Producer → Schema Registry (validates schema) → Kafka → Consumer
+                ↕
+        Schema Store (Avro/Protobuf/JSON Schema)
+```
+
+### Confluent Schema Registry with Kafka
+```typescript
+import { SchemaRegistry, SchemaType } from '@kafkajs/confluent-schema-registry';
+
+const registry = new SchemaRegistry({ host: 'http://schema-registry:8081' });
+
+// Register a schema
+const schema = {
+  type: 'record',
+  name: 'OrderCreated',
+  namespace: 'com.example.events',
+  fields: [
+    { name: 'orderId', type: 'string' },
+    { name: 'userId', type: 'string' },
+    { name: 'total', type: 'double' },
+    { name: 'currency', type: 'string', default: 'BDT' },
+    { name: 'createdAt', type: 'long' },
+  ],
+};
+
+const { id: schemaId } = await registry.register({
+  type: SchemaType.AVRO,
+  schema: JSON.stringify(schema),
+});
+
+// Produce with schema validation
+async function publishOrderCreated(order: any) {
+  const encodedValue = await registry.encode(schemaId, {
+    orderId: order.id,
+    userId: order.userId,
+    total: order.total,
+    currency: order.currency || 'BDT',
+    createdAt: Date.now(),
+  });
+
+  await producer.send({
+    topic: 'order-events',
+    messages: [{ key: order.id, value: encodedValue }],
+  });
+}
+
+// Consume with automatic schema resolution
+async function consumeOrderEvents() {
+  await consumer.run({
+    eachMessage: async ({ message }) => {
+      const decodedValue = await registry.decode(message.value);
+      // decodedValue is typed according to the schema
+      console.log('Order:', decodedValue.orderId, decodedValue.total);
+    },
+  });
+}
+```
+
+### Schema Compatibility Modes
+| Mode | Allowed Changes | Use Case |
+|------|----------------|----------|
+| BACKWARD | Delete fields, add optional fields | Consumer upgraded first |
+| FORWARD | Add fields, delete optional fields | Producer upgraded first |
+| FULL | Add/delete optional fields only | Safest — both directions |
+| NONE | Any change allowed | Development only |
+
+### Schema Evolution Rules
+```
+✅ SAFE Changes (Backward Compatible):
+  - Add a new field WITH a default value
+  - Remove a field that has a default value
+  - Add a new optional field
+
+❌ BREAKING Changes:
+  - Remove a field WITHOUT a default value
+  - Rename a field (wire format changes)
+  - Change a field's type (int → string)
+  - Add a required field without default
+```
+
+### Avro vs Protobuf vs JSON Schema
+| Feature | Avro | Protobuf | JSON Schema |
+|---------|------|----------|-------------|
+| Size | Smallest (no field names) | Small (binary) | Largest (text) |
+| Schema required to read | Yes | Yes (generated code) | No |
+| Schema evolution | Excellent | Good | Basic |
+| Code generation | Optional | Required | Optional |
+| Kafka ecosystem | Best supported | Growing | Supported |
+| Learning curve | Medium | Medium | Low |
+
+### JSON Schema Alternative (Simpler)
+```typescript
+// For teams not ready for Avro/Protobuf
+import Ajv from 'ajv';
+const ajv = new Ajv();
+
+const orderCreatedSchema = {
+  type: 'object',
+  required: ['orderId', 'userId', 'total'],
+  properties: {
+    orderId: { type: 'string' },
+    userId: { type: 'string' },
+    total: { type: 'number' },
+    currency: { type: 'string', default: 'BDT' },
+    tax: { type: 'number' }, // New optional field — backward compatible
+  },
+  additionalProperties: false,
+};
+
+const validate = ajv.compile(orderCreatedSchema);
+
+// Validate before publishing
+function publishEvent(topic: string, event: any) {
+  if (!validate(event)) {
+    throw new Error(`Schema validation failed: ${JSON.stringify(validate.errors)}`);
+  }
+  return producer.send({ topic, messages: [{ value: JSON.stringify(event) }] });
+}
+```
+
+**Interview Tip:** "For a BD startup, I'd start with JSON Schema validation for simplicity. As the system grows to 5+ services, move to Confluent Schema Registry with Avro for stronger guarantees. The registry acts as the contract between teams."
+
+---
+
+## Q13: Kafka Partition Rebalancing & Consumer Groups
+
+**Q: How does Kafka partition rebalancing work, and how do you minimize its impact?**
+
+**A:**
+
+### What Triggers Rebalancing
+```
+Consumer Group "order-processors" has 3 consumers, 6 partitions:
+  Consumer A: [P0, P1]
+  Consumer B: [P2, P3]
+  Consumer C: [P4, P5]
+
+When Consumer C dies:
+  → REBALANCE triggered
+  Consumer A: [P0, P1, P4]  (took over P4)
+  Consumer B: [P2, P3, P5]  (took over P5)
+
+When Consumer D joins:
+  → REBALANCE triggered
+  Consumer A: [P0, P1]
+  Consumer B: [P2, P3]
+  Consumer D: [P4, P5]
+```
+
+### Rebalancing Triggers
+- Consumer joins/leaves the group
+- Consumer crashes (heartbeat timeout)
+- New partitions added to a topic
+- Consumer's subscription changes
+
+### The "Stop-the-World" Problem
+```
+During rebalance (Eager protocol):
+1. ALL consumers STOP processing ← This is the problem
+2. ALL partition assignments revoked
+3. Group coordinator reassigns ALL partitions
+4. Consumers resume
+
+Duration: seconds to minutes depending on group size
+Impact: Message processing halts entirely
+```
+
+### Solution: Cooperative Incremental Rebalancing
+```typescript
+const kafka = new Kafka({ brokers: ['kafka:9092'] });
+
+const consumer = kafka.consumer({
+  groupId: 'order-processors',
+  // Use CooperativeSticky for minimal disruption
+  rebalanceTimeout: 60000,
+  sessionTimeout: 30000,
+  heartbeatInterval: 3000,
+});
+
+// KafkaJS uses cooperative rebalancing by default
+// Only affected partitions are revoked, not all of them
+```
+
+### Cooperative vs Eager Rebalancing
+| Aspect | Eager (Default in older clients) | Cooperative (Modern) |
+|--------|--------------------------------|---------------------|
+| During rebalance | ALL consumers stop | Only affected consumers pause |
+| Partition movement | Revoke all, reassign all | Revoke only moving partitions |
+| Downtime | Seconds to minutes | Milliseconds to seconds |
+| Implementation | Simpler | More complex |
+| KafkaJS | Not default | Default behavior |
+
+### Static Group Membership (Avoid Unnecessary Rebalances)
+```typescript
+const consumer = kafka.consumer({
+  groupId: 'order-processors',
+  // Static membership: consumer gets fixed ID
+  // Short restarts don't trigger rebalance
+  groupInstanceId: `order-processor-${hostname()}`,
+  sessionTimeout: 300000, // 5 minutes — tolerates restarts
+});
+
+// Without static membership: restart = rebalance
+// With static membership: restart within sessionTimeout = no rebalance
+```
+
+### Graceful Shutdown (Prevent Unnecessary Rebalances)
+```typescript
+async function gracefulShutdown() {
+  console.log('Shutting down consumer gracefully...');
+
+  // 1. Stop fetching new messages
+  await consumer.stop();
+
+  // 2. Commit current offsets
+  // (KafkaJS does this automatically on stop)
+
+  // 3. Leave the group cleanly (triggers immediate rebalance instead of waiting for session timeout)
+  await consumer.disconnect();
+
+  process.exit(0);
+}
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
+```
+
+### Monitoring Consumer Group Health
+```typescript
+// Check consumer group lag
+const admin = kafka.admin();
+await admin.connect();
+
+const groupDescription = await admin.describeGroups(['order-processors']);
+const offsets = await admin.fetchOffsets({ groupId: 'order-processors', topics: ['orders'] });
+const topicOffsets = await admin.fetchTopicOffsets('orders');
+
+// Calculate lag per partition
+topicOffsets.forEach(partition => {
+  const consumerOffset = offsets.find(o =>
+    o.partitions.find(p => p.partition === partition.partition)
+  );
+  const lag = parseInt(partition.offset) - parseInt(consumerOffset?.partitions[0]?.offset || '0');
+  console.log(`Partition ${partition.partition}: lag = ${lag} messages`);
+});
+```
+
+**Interview Tip:** "At Banglalink, we used static group membership for our notification processors to avoid rebalances during rolling deployments. Combined with cooperative rebalancing, we reduced deployment-related message processing pauses from 30s to under 1s."
+
+---
+
+## Q14: Event Versioning & Evolution Strategies
+
+**Q: How do you handle event schema changes without breaking consumers?**
+
+**A:**
+
+### Strategy 1: Backward-Compatible Changes Only
+```typescript
+// Version 1
+interface OrderCreatedV1 {
+  orderId: string;
+  userId: string;
+  total: number;
+}
+
+// Version 2 — only ADD optional fields
+interface OrderCreatedV2 {
+  orderId: string;
+  userId: string;
+  total: number;
+  currency?: string;   // NEW — optional, default 'BDT'
+  discount?: number;   // NEW — optional, default 0
+}
+
+// Old consumers still work — they ignore new fields
+// New consumers can use new fields with fallbacks
+function handleOrderCreated(event: Record<string, any>) {
+  const currency = event.currency || 'BDT';     // Fallback for v1 events
+  const discount = event.discount || 0;          // Fallback for v1 events
+}
+```
+
+### Strategy 2: Explicit Versioning in Events
+```typescript
+// Include version in every event
+interface VersionedEvent {
+  eventType: string;
+  version: number;
+  timestamp: string;
+  correlationId: string;
+  data: Record<string, any>;
+}
+
+// Publish with version
+await publishEvent({
+  eventType: 'OrderCreated',
+  version: 2,
+  timestamp: new Date().toISOString(),
+  correlationId: uuid(),
+  data: { orderId: '123', userId: 'user-1', total: 50, currency: 'BDT' },
+});
+
+// Consumer handles multiple versions
+async function handleEvent(event: VersionedEvent) {
+  switch (event.eventType) {
+    case 'OrderCreated':
+      if (event.version === 1) {
+        return handleOrderCreatedV1(event.data);
+      } else if (event.version >= 2) {
+        return handleOrderCreatedV2(event.data);
+      }
+      break;
+  }
+}
+```
+
+### Strategy 3: Event Upcasting
+```typescript
+// Transform old events to new format at read time
+const upcasters = new Map<string, (event: any) => any>();
+
+upcasters.set('OrderCreated:1->2', (v1Event) => ({
+  ...v1Event,
+  currency: 'BDT',  // Default for old events
+  discount: 0,
+}));
+
+upcasters.set('OrderCreated:2->3', (v2Event) => ({
+  ...v2Event,
+  taxAmount: v2Event.total * 0.15, // Calculate tax for old events
+}));
+
+function upcastEvent(event: VersionedEvent, targetVersion: number): VersionedEvent {
+  let current = event;
+  while (current.version < targetVersion) {
+    const key = `${current.eventType}:${current.version}->${current.version + 1}`;
+    const upcaster = upcasters.get(key);
+    if (!upcaster) throw new Error(`No upcaster for ${key}`);
+    current = { ...current, data: upcaster(current.data), version: current.version + 1 };
+  }
+  return current;
+}
+```
+
+### Strategy 4: Separate Topics per Version (Last Resort)
+```
+Topic: order-events-v1  ← Old consumers read here
+Topic: order-events-v2  ← New consumers read here
+
+Bridge: Consumer reads v1 → upcasts → publishes to v2
+```
+- Use only for major breaking changes
+- Run bridge temporarily during migration
+
+### Event Versioning Decision Tree
+```
+Need to change an event schema?
+  │
+  ├─ Adding optional field → Just add it (backward compatible) ✅
+  │
+  ├─ Removing a field → Mark as deprecated, remove after all consumers updated
+  │
+  ├─ Renaming a field → Add new field + keep old field → deprecate old ← Expand-Contract
+  │
+  ├─ Changing field type → New version + upcaster
+  │
+  └─ Completely new structure → New event type (OrderCreatedV2 as separate event)
+```
+
+**Interview Tip:** "I follow the expand-contract pattern for most schema changes. Add new fields alongside old ones, migrate all consumers, then remove old fields. For event sourcing systems, I use upcasters so historical events can be replayed with the current schema."
+
+---
+
+## Q15: Dead Letter Queue (DLQ) Handling Patterns
+
+**Q: How do you handle failed messages in event-driven systems?**
+
+**A:**
+
+### What Goes Into a DLQ
+```
+Message fails processing → Retry (3-5 times with backoff) → Still fails → DLQ
+
+Common failure reasons:
+- Invalid message format (schema mismatch)
+- Business logic failure (e.g., user not found)
+- Transient errors that exceeded retry limit
+- Bugs in consumer code
+- Downstream service permanently down
+```
+
+### Kafka DLQ Implementation
+```typescript
+const DLQ_TOPIC = 'order-events.dlq';
+
+async function processWithDLQ(message: KafkaMessage) {
+  const maxRetries = 3;
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      await processOrder(JSON.parse(message.value.toString()));
+      return; // Success
+    } catch (error) {
+      attempt++;
+
+      if (isRetryable(error) && attempt < maxRetries) {
+        // Transient error — retry with backoff
+        await sleep(Math.pow(2, attempt) * 1000);
+        continue;
+      }
+
+      // Non-retryable or exhausted retries — send to DLQ
+      await producer.send({
+        topic: DLQ_TOPIC,
+        messages: [{
+          key: message.key,
+          value: message.value,
+          headers: {
+            ...message.headers,
+            'x-original-topic': 'order-events',
+            'x-failure-reason': error.message,
+            'x-failure-timestamp': Date.now().toString(),
+            'x-retry-count': attempt.toString(),
+            'x-original-partition': message.partition?.toString(),
+            'x-original-offset': message.offset,
+          },
+        }],
+      });
+
+      logger.error('Message sent to DLQ', {
+        topic: 'order-events',
+        offset: message.offset,
+        error: error.message,
+      });
+      return;
+    }
+  }
+}
+
+function isRetryable(error: Error): boolean {
+  // Network errors, timeouts → retryable
+  // Validation errors, business logic → not retryable
+  return error instanceof TimeoutError ||
+         error instanceof ConnectionError ||
+         error.message.includes('ECONNREFUSED');
+}
+```
+
+### DLQ Monitoring & Alerting
+```typescript
+// Monitor DLQ topic for messages
+const dlqConsumer = kafka.consumer({ groupId: 'dlq-monitor' });
+await dlqConsumer.subscribe({ topic: DLQ_TOPIC });
+
+await dlqConsumer.run({
+  eachMessage: async ({ message }) => {
+    const failureReason = message.headers['x-failure-reason']?.toString();
+    const originalTopic = message.headers['x-original-topic']?.toString();
+
+    // Alert on DLQ messages
+    await alertService.send({
+      channel: '#backend-alerts',
+      message: `⚠️ DLQ message from ${originalTopic}: ${failureReason}`,
+      severity: 'warning',
+    });
+
+    // Track metrics
+    dlqMessageCounter.inc({
+      original_topic: originalTopic,
+      failure_reason: categorizeError(failureReason),
+    });
+  },
+});
+```
+
+### DLQ Replay/Reprocessing
+```typescript
+// CLI tool or admin endpoint to replay DLQ messages
+async function replayDLQ(options: {
+  fromTimestamp?: number;
+  limit?: number;
+  originalTopic: string;
+}) {
+  const dlqConsumer = kafka.consumer({ groupId: `dlq-replay-${Date.now()}` });
+  await dlqConsumer.subscribe({ topic: DLQ_TOPIC, fromBeginning: true });
+
+  let replayed = 0;
+
+  await dlqConsumer.run({
+    eachMessage: async ({ message }) => {
+      const originalTopic = message.headers['x-original-topic']?.toString();
+      if (originalTopic !== options.originalTopic) return;
+
+      const timestamp = parseInt(message.headers['x-failure-timestamp']?.toString() || '0');
+      if (options.fromTimestamp && timestamp < options.fromTimestamp) return;
+
+      // Republish to original topic
+      await producer.send({
+        topic: originalTopic,
+        messages: [{
+          key: message.key,
+          value: message.value,
+          headers: {
+            ...message.headers,
+            'x-replayed-from-dlq': 'true',
+            'x-replayed-at': Date.now().toString(),
+          },
+        }],
+      });
+
+      replayed++;
+      if (options.limit && replayed >= options.limit) {
+        await dlqConsumer.disconnect();
+      }
+    },
+  });
+
+  return { replayed };
+}
+```
+
+### DLQ Best Practices
+| Practice | Why |
+|----------|-----|
+| Include original metadata in headers | Know where the message came from |
+| Categorize failure reasons | Distinguish transient vs permanent failures |
+| Set up alerts on DLQ message count | Don't let failures go unnoticed |
+| Build replay tooling | Fix the bug, then replay the messages |
+| Set DLQ retention longer than main topic | Don't lose failed messages before reviewing |
+| Review DLQ regularly (daily/weekly) | Part of operational hygiene |
+
+**Interview Tip:** "A DLQ without monitoring and replay tooling is just a message graveyard. I always build three things together: the DLQ routing, an alerting pipeline, and a replay mechanism. At Banglalink, we had a daily DLQ review as part of our ops process."
+
+---
+
+## Q16: Testing Event-Driven Systems
+
+**Q: How do you test event-driven architectures?**
+
+**A:**
+
+### Unit Testing: Event Handlers in Isolation
+```typescript
+describe('OrderCreatedHandler', () => {
+  let handler: OrderCreatedHandler;
+  let mockPaymentService: jest.Mocked<PaymentService>;
+  let mockInventoryService: jest.Mocked<InventoryService>;
+
+  beforeEach(() => {
+    mockPaymentService = { initiatePayment: jest.fn() } as any;
+    mockInventoryService = { reserveItems: jest.fn() } as any;
+    handler = new OrderCreatedHandler(mockPaymentService, mockInventoryService);
+  });
+
+  it('should initiate payment and reserve inventory', async () => {
+    const event = {
+      orderId: 'order-123',
+      userId: 'user-1',
+      items: [{ productId: 'p1', qty: 2 }],
+      total: 100,
+    };
+
+    await handler.handle(event);
+
+    expect(mockPaymentService.initiatePayment).toHaveBeenCalledWith({
+      orderId: 'order-123',
+      amount: 100,
+    });
+    expect(mockInventoryService.reserveItems).toHaveBeenCalledWith(event.items);
+  });
+
+  it('should handle payment failure gracefully', async () => {
+    mockPaymentService.initiatePayment.mockRejectedValue(new Error('Payment failed'));
+
+    const event = { orderId: 'order-123', userId: 'user-1', items: [], total: 100 };
+
+    await expect(handler.handle(event)).rejects.toThrow('Payment failed');
+    expect(mockInventoryService.reserveItems).not.toHaveBeenCalled();
+  });
+});
+```
+
+### Integration Testing: With Real Broker
+```typescript
+import { KafkaContainer, StartedKafkaContainer } from '@testcontainers/kafka';
+
+describe('Order Event Integration', () => {
+  let kafkaContainer: StartedKafkaContainer;
+  let producer: Producer;
+  let consumer: Consumer;
+
+  beforeAll(async () => {
+    // Start real Kafka in Docker for tests
+    kafkaContainer = await new KafkaContainer().start();
+
+    const kafka = new Kafka({
+      brokers: [kafkaContainer.getBrokers()],
+    });
+
+    producer = kafka.producer();
+    consumer = kafka.consumer({ groupId: 'test-group' });
+    await producer.connect();
+    await consumer.connect();
+  }, 60000);
+
+  afterAll(async () => {
+    await producer.disconnect();
+    await consumer.disconnect();
+    await kafkaContainer.stop();
+  });
+
+  it('should process OrderCreated event end-to-end', async () => {
+    const receivedMessages: any[] = [];
+
+    await consumer.subscribe({ topic: 'order-events', fromBeginning: true });
+    await consumer.run({
+      eachMessage: async ({ message }) => {
+        receivedMessages.push(JSON.parse(message.value.toString()));
+      },
+    });
+
+    // Publish event
+    await producer.send({
+      topic: 'order-events',
+      messages: [{ value: JSON.stringify({ orderId: '123', total: 50 }) }],
+    });
+
+    // Wait for processing
+    await waitFor(() => expect(receivedMessages).toHaveLength(1));
+    expect(receivedMessages[0].orderId).toBe('123');
+  });
+});
+```
+
+### Testing Eventual Consistency
+```typescript
+// Helper: poll until condition is met or timeout
+async function waitForCondition(
+  checkFn: () => Promise<boolean>,
+  timeoutMs = 10000,
+  intervalMs = 200,
+): Promise<void> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    if (await checkFn()) return;
+    await new Promise(r => setTimeout(r, intervalMs));
+  }
+  throw new Error('Condition not met within timeout');
+}
+
+// Usage in test
+it('should update read model after event processing', async () => {
+  // Publish OrderCreated event
+  await publishEvent('OrderCreated', { orderId: '123', userId: 'user-1', total: 50 });
+
+  // Wait for read model to be updated (eventual consistency)
+  await waitForCondition(async () => {
+    const order = await orderReadRepository.findById('123');
+    return order !== null && order.status === 'CREATED';
+  }, 5000);
+
+  const order = await orderReadRepository.findById('123');
+  expect(order.total).toBe(50);
+});
+```
+
+### Testing Idempotency
+```typescript
+it('should process the same event only once', async () => {
+  const event = { eventId: 'evt-1', orderId: '123', total: 50 };
+
+  // Process same event twice
+  await handler.handle(event);
+  await handler.handle(event); // Duplicate
+
+  // Should only create one order
+  const orders = await orderRepository.findByOrderId('123');
+  expect(orders).toHaveLength(1);
+});
+```
+
+**Interview Tip:** "I use testcontainers for integration tests with real Kafka/RabbitMQ instances. For unit tests, I mock the broker and test handler logic in isolation. The key challenge in testing EDA is handling eventual consistency — I use polling helpers with reasonable timeouts."

@@ -967,6 +967,489 @@ setTimeout 100
 
 ---
 
+## Q16: Graceful Shutdown & Health Checks
+
+**Q: How do you implement graceful shutdown in a Node.js production server?**
+
+**A:**
+
+### Why It Matters
+When deploying (Kubernetes rolling update, AWS ECS task replacement), the old instance receives SIGTERM. Without graceful shutdown:
+- In-flight requests get terminated mid-response
+- Database connections left dangling
+- Kafka consumers don't commit offsets → messages reprocessed
+- WebSocket clients abruptly disconnected
+
+### Implementation
+```typescript
+import { NestFactory } from '@nestjs/core';
+import { Logger } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Shutdown');
+
+  // Enable shutdown hooks (NestJS)
+  app.enableShutdownHooks();
+
+  // Custom graceful shutdown
+  let isShuttingDown = false;
+
+  const gracefulShutdown = async (signal: string) => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    logger.warn(`Received ${signal}. Starting graceful shutdown...`);
+
+    // 1. Stop accepting new connections
+    // NestJS does this when close() is called
+
+    // 2. Set health check to unhealthy (load balancer stops sending traffic)
+    app.get(HealthService).setUnhealthy();
+
+    // 3. Wait for in-flight requests to complete (with timeout)
+    const shutdownTimeout = setTimeout(() => {
+      logger.error('Graceful shutdown timed out. Forcing exit.');
+      process.exit(1);
+    }, 30000); // 30 second max
+
+    try {
+      await app.close(); // Triggers OnModuleDestroy lifecycle hooks
+      clearTimeout(shutdownTimeout);
+      logger.log('Graceful shutdown complete.');
+      process.exit(0);
+    } catch (error) {
+      logger.error('Error during shutdown', error);
+      process.exit(1);
+    }
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+  await app.listen(3000);
+}
+```
+
+### NestJS Lifecycle Hooks for Cleanup
+```typescript
+@Injectable()
+export class KafkaConsumerService implements OnModuleDestroy {
+  async onModuleDestroy() {
+    // Commit offsets and disconnect
+    await this.consumer.commitOffsets();
+    await this.consumer.disconnect();
+    console.log('Kafka consumer disconnected cleanly');
+  }
+}
+
+@Injectable()
+export class DatabaseService implements OnModuleDestroy {
+  async onModuleDestroy() {
+    await this.pool.end(); // Close all database connections
+    console.log('Database pool closed');
+  }
+}
+```
+
+### Health Check Endpoints
+```typescript
+// Kubernetes expects these endpoints
+@Controller('health')
+export class HealthController {
+  constructor(private health: HealthService) {}
+
+  @Get('live')
+  // Liveness: Is the process alive? (If no → K8s restarts the pod)
+  liveness() {
+    return { status: 'ok' };
+  }
+
+  @Get('ready')
+  // Readiness: Can the process handle traffic? (If no → K8s stops sending traffic)
+  async readiness() {
+    if (this.health.isShuttingDown) {
+      throw new ServiceUnavailableException('Shutting down');
+    }
+
+    // Check dependencies
+    const dbHealthy = await this.health.checkDatabase();
+    const redisHealthy = await this.health.checkRedis();
+
+    if (!dbHealthy || !redisHealthy) {
+      throw new ServiceUnavailableException('Dependencies unhealthy');
+    }
+
+    return { status: 'ok', db: dbHealthy, redis: redisHealthy };
+  }
+}
+```
+
+### Shutdown Sequence
+```
+SIGTERM received
+  ↓
+1. Mark health check as unhealthy → Load balancer drains traffic (K8s: 5-10s)
+  ↓
+2. Stop accepting new connections
+  ↓
+3. Wait for in-flight requests to complete (max 30s)
+  ↓
+4. Close database pools, Redis connections, Kafka consumers
+  ↓
+5. Exit process
+```
+
+**Interview Tip:** "In Kubernetes, there's a race condition between the SIGTERM and the load balancer removing the pod. I add a 5-second delay before starting shutdown so the load balancer has time to stop routing traffic. This prevents failed requests during deployments."
+
+---
+
+## Q17: Node.js Security Best Practices
+
+**Q: What are the top security concerns for a Node.js backend?**
+
+**A:**
+
+### 1. Prototype Pollution
+```typescript
+// ❌ VULNERABLE: merging user input into objects
+function merge(target: any, source: any) {
+  for (const key in source) {
+    target[key] = source[key];
+  }
+  return target;
+}
+
+// Attack payload:
+// { "__proto__": { "isAdmin": true } }
+// Now ALL objects have isAdmin = true!
+
+// ✅ SAFE: Block __proto__ and constructor
+function safeMerge(target: any, source: any) {
+  for (const key of Object.keys(source)) {
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      continue; // Skip dangerous keys
+    }
+    target[key] = source[key];
+  }
+  return target;
+}
+
+// ✅ BETTER: Use Object.create(null) for lookup objects
+const lookup = Object.create(null); // No prototype chain
+```
+
+### 2. Command Injection
+```typescript
+// ❌ VULNERABLE: user input in shell command
+import { exec } from 'child_process';
+exec(`ls -la ${userInput}`); // userInput: "; rm -rf /"
+
+// ✅ SAFE: Use execFile (no shell interpretation)
+import { execFile } from 'child_process';
+execFile('ls', ['-la', userInput]); // Arguments are escaped
+
+// ✅ SAFE: Validate and sanitize
+const safeFilename = userInput.replace(/[^a-zA-Z0-9._-]/g, '');
+```
+
+### 3. Path Traversal
+```typescript
+import * as path from 'path';
+
+// ❌ VULNERABLE
+app.get('/files/:name', (req, res) => {
+  res.sendFile(`/uploads/${req.params.name}`);
+  // Attack: /files/../../etc/passwd
+});
+
+// ✅ SAFE: Resolve and check the path
+app.get('/files/:name', (req, res) => {
+  const safePath = path.resolve('/uploads', req.params.name);
+  if (!safePath.startsWith('/uploads/')) {
+    return res.status(403).send('Forbidden');
+  }
+  res.sendFile(safePath);
+});
+```
+
+### 4. ReDoS (Regular Expression Denial of Service)
+```typescript
+// ❌ VULNERABLE: Catastrophic backtracking
+const emailRegex = /^([a-zA-Z0-9]+\.)+[a-zA-Z]{2,}$/;
+// Input: "aaaaaaaaaaaaaaaaaaaaaaaa!" → hangs for minutes
+
+// ✅ SAFE: Use safe-regex or re2 library
+import RE2 from 're2'; // Google's regex engine — no backtracking
+const safeRegex = new RE2('^[a-zA-Z0-9.]+@[a-zA-Z0-9.]+\\.[a-zA-Z]{2,}$');
+
+// ✅ SAFE: Use validator libraries instead of custom regex
+import { isEmail } from 'class-validator';
+```
+
+### 5. Dependency Security
+```bash
+# Regular auditing
+npm audit                           # Built-in vulnerability scanner
+npx snyk test                       # Snyk vulnerability database
+npx better-npm-audit audit          # Better formatting
+
+# Lock dependencies
+npm ci                              # Install from lock file (CI/CD)
+# Never npm install in production — it can change versions
+```
+
+### 6. Environment & Secrets
+```typescript
+// ❌ NEVER: Hardcode secrets
+const apiKey = 'sk_live_abc123';
+
+// ✅ CORRECT: Environment variables + validation
+import { z } from 'zod';
+
+const envSchema = z.object({
+  DATABASE_URL: z.string().url(),
+  JWT_SECRET: z.string().min(32),
+  API_KEY: z.string(),
+  NODE_ENV: z.enum(['development', 'production', 'test']),
+});
+
+const env = envSchema.parse(process.env);
+// Crashes at startup if env vars are missing/invalid — fail fast!
+```
+
+### Security Checklist
+| Threat | Mitigation |
+|--------|-----------|
+| Prototype pollution | Block `__proto__`, use `Object.create(null)` |
+| Command injection | Use `execFile` not `exec`, validate input |
+| Path traversal | `path.resolve` + prefix check |
+| ReDoS | `re2` library, avoid complex regex |
+| Dependency vulns | `npm audit`, Snyk, Dependabot |
+| Secrets exposure | Env vars + validation, never commit `.env` |
+| SSRF | Validate/whitelist URLs, block internal IPs |
+| Header injection | Use helmet middleware |
+| Rate limiting | `@nestjs/throttler` or Redis-based |
+
+**Interview Tip:** "Prototype pollution is the most Node.js-specific vulnerability that interviewers ask about. It's unique to JavaScript's prototype chain. I always validate and sanitize user input before merging into objects, and use `Object.create(null)` for lookup tables."
+
+---
+
+## Q18: Node.js Performance Profiling & Optimization
+
+**Q: How do you identify and fix performance bottlenecks in a Node.js application?**
+
+**A:**
+
+### 1. Identify the Bottleneck Type
+```
+CPU-bound: Event loop blocked (heavy computation, JSON parsing large payloads)
+  → Symptom: High event loop lag, slow responses across ALL endpoints
+
+I/O-bound: Waiting on external resources (DB, Redis, API calls)
+  → Symptom: Specific endpoints slow, event loop lag normal
+
+Memory-bound: Memory leaks, large object allocations
+  → Symptom: Growing RSS, frequent GC pauses, eventual OOM crash
+```
+
+### 2. Measuring Event Loop Lag
+```typescript
+// Built-in: monitorEventLoopDelay (Node.js 12+)
+import { monitorEventLoopDelay } from 'perf_hooks';
+
+const histogram = monitorEventLoopDelay({ resolution: 20 });
+histogram.enable();
+
+setInterval(() => {
+  console.log({
+    min: histogram.min / 1e6,     // Convert ns → ms
+    max: histogram.max / 1e6,
+    mean: histogram.mean / 1e6,
+    p99: histogram.percentile(99) / 1e6,
+  });
+  histogram.reset();
+}, 5000);
+
+// Healthy: mean < 10ms, p99 < 50ms
+// Problem: mean > 100ms → event loop is blocked
+```
+
+### 3. CPU Profiling with clinic.js
+```bash
+# Install
+npm install -g clinic
+
+# Flame graph (identify slow functions)
+clinic flame -- node dist/main.js
+# → Opens browser with interactive flame chart
+
+# Doctor (general health check)
+clinic doctor -- node dist/main.js
+# → Identifies event loop blocks, I/O issues, GC problems
+
+# Bubbleprof (async flow visualization)
+clinic bubbleprof -- node dist/main.js
+# → Shows where async operations spend time
+```
+
+### 4. Memory Profiling
+```typescript
+// Check memory usage
+const usage = process.memoryUsage();
+console.log({
+  rss: `${(usage.rss / 1024 / 1024).toFixed(1)}MB`,         // Total memory
+  heapTotal: `${(usage.heapTotal / 1024 / 1024).toFixed(1)}MB`, // V8 heap allocated
+  heapUsed: `${(usage.heapUsed / 1024 / 1024).toFixed(1)}MB`,  // V8 heap used
+  external: `${(usage.external / 1024 / 1024).toFixed(1)}MB`,   // C++ objects (Buffers)
+});
+
+// Heap snapshot for leak detection
+// In production: use --inspect flag
+// node --inspect dist/main.js
+// Chrome DevTools → Memory → Take Heap Snapshot
+// Compare snapshots: growing objects = likely leak
+```
+
+### 5. Common Optimizations
+```typescript
+// ❌ SLOW: Synchronous JSON parsing of large payloads
+const data = JSON.parse(hugeString); // Blocks event loop
+
+// ✅ FAST: Stream parsing for large JSON
+import { parser } from 'stream-json';
+import { streamArray } from 'stream-json/streamers/StreamArray';
+
+fs.createReadStream('huge.json')
+  .pipe(parser())
+  .pipe(streamArray())
+  .on('data', ({ value }) => processItem(value));
+
+// ❌ SLOW: String concatenation in loops
+let result = '';
+for (const item of items) { result += item.toString(); }
+
+// ✅ FAST: Array join
+const result = items.map(i => i.toString()).join('');
+
+// ❌ SLOW: Creating new objects in hot paths
+function processRequest(req) {
+  const config = { ...defaultConfig, ...req.config }; // New object every request
+}
+
+// ✅ FAST: Reuse objects where possible
+const frozenDefault = Object.freeze(defaultConfig);
+```
+
+### 6. Database Query Optimization
+```typescript
+// ❌ SLOW: N+1 query problem
+const users = await userRepo.find();
+for (const user of users) {
+  user.orders = await orderRepo.find({ userId: user.id }); // N queries!
+}
+
+// ✅ FAST: Eager loading / join
+const users = await userRepo.find({ relations: ['orders'] }); // 1 query with JOIN
+
+// ✅ FAST: Batch loading with DataLoader
+const orderLoader = new DataLoader(async (userIds: string[]) => {
+  const orders = await orderRepo.find({ where: { userId: In(userIds) } });
+  return userIds.map(id => orders.filter(o => o.userId === id));
+});
+```
+
+### Performance Monitoring Metrics
+| Metric | Healthy | Warning | Critical |
+|--------|---------|---------|----------|
+| Event loop lag (p99) | < 50ms | 50-200ms | > 200ms |
+| Heap used | < 70% of total | 70-85% | > 85% |
+| GC pause time | < 50ms | 50-200ms | > 200ms |
+| Response time (p95) | < 200ms | 200-1000ms | > 1s |
+| Error rate | < 0.1% | 0.1-1% | > 1% |
+
+**Interview Tip:** "When a production Node.js app is slow, I first check event loop lag (CPU issue?) and memory usage (leak?). For CPU, clinic.js flame graphs pinpoint the exact function. For memory, I take heap snapshots 30 minutes apart and compare — growing objects reveal the leak."
+
+---
+
+## Q19: Signal Handling & Process Management
+
+**Q: How does Node.js handle OS signals, and why does it matter for production?**
+
+**A:**
+
+### Common Signals
+| Signal | Source | Default Behavior | Can Be Caught? |
+|--------|--------|-----------------|----------------|
+| SIGTERM | `kill`, Kubernetes, Docker stop | Terminate | Yes |
+| SIGINT | Ctrl+C | Terminate | Yes |
+| SIGKILL | `kill -9`, OOM killer | Force kill | No |
+| SIGHUP | Terminal closed | Terminate | Yes |
+| SIGUSR1 | Custom | Debug mode (Node.js) | Yes |
+| SIGUSR2 | Custom (nodemon restart) | None | Yes |
+
+### Handling Signals
+```typescript
+// SIGTERM: Clean shutdown (Kubernetes sends this 30s before SIGKILL)
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received');
+  await shutdown();  // Close DB, drain requests
+  process.exit(0);
+});
+
+// SIGINT: Ctrl+C in terminal
+process.on('SIGINT', async () => {
+  console.log('SIGINT received');
+  await shutdown();
+  process.exit(0);
+});
+
+// Unhandled errors — log and exit (don't try to recover)
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+  process.exit(1); // Exit — state may be corrupted
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled rejection:', reason);
+  // In Node.js 15+, this causes exit by default
+  // In older versions, add explicit exit
+  process.exit(1);
+});
+```
+
+### Kubernetes Shutdown Sequence
+```
+1. K8s sends SIGTERM to pod
+2. Pod has terminationGracePeriodSeconds (default 30s) to shut down
+3. If still running after grace period → SIGKILL (forced kill)
+
+Your code must:
+- Catch SIGTERM
+- Stop accepting new requests
+- Finish in-flight requests
+- Close connections
+- Exit within 30 seconds
+```
+
+### PM2 / Docker / Kubernetes Compatibility
+```typescript
+// PM2: Use graceful shutdown
+process.on('SIGINT', () => {
+  // PM2 sends SIGINT for graceful restart
+  db.close();
+  process.exit(0);
+});
+
+// Docker: Make sure Node.js receives signals
+// Dockerfile: use exec form (not shell form)
+// ✅ CMD ["node", "dist/main.js"]     — node is PID 1, receives SIGTERM
+// ❌ CMD node dist/main.js            — shell is PID 1, node never gets SIGTERM
+```
+
+**Interview Tip:** "The most common production issue I've seen is Node.js not receiving SIGTERM in Docker because the Dockerfile uses shell form CMD. Always use exec form: `CMD [\"node\", \"dist/main.js\"]` so the Node.js process is PID 1 and directly receives the signal."
+
+---
+
 ## Quick Reference
 
 | Topic | Key Point |

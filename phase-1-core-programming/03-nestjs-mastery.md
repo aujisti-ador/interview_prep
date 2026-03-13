@@ -2635,6 +2635,558 @@ async function bootstrap() {
 
 ---
 
+## Q15: Caching Strategies with Redis in NestJS
+
+**Q: How do you implement caching in a NestJS application?**
+
+**A:**
+
+### NestJS Cache Manager
+```typescript
+// Install: npm install @nestjs/cache-manager cache-manager cache-manager-redis-yet
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
+
+@Module({
+  imports: [
+    CacheModule.registerAsync({
+      isGlobal: true,
+      useFactory: async () => ({
+        store: await redisStore({
+          socket: { host: 'localhost', port: 6379 },
+          ttl: 60000, // 60 seconds default TTL
+        }),
+      }),
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+### Controller-Level Caching (Simple)
+```typescript
+import { CacheInterceptor, CacheTTL, CacheKey } from '@nestjs/cache-manager';
+
+@Controller('products')
+@UseInterceptors(CacheInterceptor) // Auto-cache all GET endpoints
+export class ProductsController {
+  @Get()
+  @CacheTTL(30000) // 30 seconds
+  findAll() {
+    return this.productService.findAll(); // Cached automatically
+  }
+
+  @Get(':id')
+  @CacheKey('product') // Custom cache key prefix
+  @CacheTTL(60000) // 60 seconds
+  findOne(@Param('id') id: string) {
+    return this.productService.findOne(id);
+  }
+}
+```
+
+### Service-Level Caching (More Control)
+```typescript
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+
+@Injectable()
+export class ProductService {
+  constructor(
+    @Inject(CACHE_MANAGER) private cache: Cache,
+    private productRepo: ProductRepository,
+  ) {}
+
+  async findById(id: string): Promise<Product> {
+    const cacheKey = `product:${id}`;
+
+    // Check cache first
+    const cached = await this.cache.get<Product>(cacheKey);
+    if (cached) return cached;
+
+    // Cache miss → fetch from DB
+    const product = await this.productRepo.findOne(id);
+    if (product) {
+      await this.cache.set(cacheKey, product, 60000); // Cache for 60s
+    }
+    return product;
+  }
+
+  async update(id: string, dto: UpdateProductDto): Promise<Product> {
+    const product = await this.productRepo.update(id, dto);
+
+    // Invalidate cache on write
+    await this.cache.del(`product:${id}`);
+    await this.cache.del('products:list'); // Invalidate list cache too
+
+    return product;
+  }
+}
+```
+
+### Cache Invalidation Patterns
+```
+1. TTL-based: Set expiry, accept stale data within TTL
+   → Best for: Product catalogs, configuration data
+
+2. Write-through: Update cache on every write
+   → Best for: User profiles, frequently read data
+
+3. Write-behind: Queue cache updates, write to DB async
+   → Best for: Analytics counters, non-critical data
+
+4. Cache-aside (Lazy loading): Read → miss → fetch → cache
+   → Best for: Most use cases (shown above)
+
+5. Event-based invalidation: Listen for change events
+   → Best for: Microservices (Service A publishes "ProductUpdated", Service B invalidates its cache)
+```
+
+### Multi-Tier Caching
+```typescript
+// In-memory (fastest) → Redis (shared) → Database (slowest)
+@Injectable()
+export class MultiTierCacheService {
+  private localCache = new Map<string, { data: any; expiry: number }>();
+
+  constructor(@Inject(CACHE_MANAGER) private redis: Cache) {}
+
+  async get<T>(key: string): Promise<T | null> {
+    // Tier 1: In-memory (same process)
+    const local = this.localCache.get(key);
+    if (local && local.expiry > Date.now()) return local.data;
+
+    // Tier 2: Redis (shared across instances)
+    const cached = await this.redis.get<T>(key);
+    if (cached) {
+      this.localCache.set(key, { data: cached, expiry: Date.now() + 5000 }); // 5s local
+      return cached;
+    }
+
+    return null; // Cache miss → caller fetches from DB
+  }
+}
+```
+
+**Interview Tip:** "I use cache-aside as the default pattern. For invalidation, I prefer event-based invalidation in microservices — when the product service updates a product, it emits 'ProductUpdated', and any service caching that product invalidates its cache. At Banglalink, we used Redis with TTL-based caching for frequently accessed subscriber data."
+
+---
+
+## Q16: Configuration & Environment Validation
+
+**Q: How do you manage configuration in NestJS production apps?**
+
+**A:**
+
+### Config Module with Validation
+```typescript
+// Install: npm install @nestjs/config joi
+
+// config/configuration.ts
+export default () => ({
+  port: parseInt(process.env.PORT, 10) || 3000,
+  database: {
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT, 10) || 5432,
+    name: process.env.DB_NAME,
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+  },
+  redis: {
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+  },
+});
+
+// config/validation.ts
+import * as Joi from 'joi';
+
+export const validationSchema = Joi.object({
+  NODE_ENV: Joi.string().valid('development', 'production', 'test').required(),
+  PORT: Joi.number().default(3000),
+  DB_HOST: Joi.string().required(),
+  DB_PORT: Joi.number().default(5432),
+  DB_NAME: Joi.string().required(),
+  DB_USERNAME: Joi.string().required(),
+  DB_PASSWORD: Joi.string().required(),
+  JWT_SECRET: Joi.string().min(32).required(), // Minimum 32 chars
+  REDIS_HOST: Joi.string().default('localhost'),
+});
+
+// app.module.ts
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+      validationSchema,
+      validationOptions: { abortEarly: true }, // Fail fast on first error
+    }),
+  ],
+})
+export class AppModule {}
+
+// If JWT_SECRET is missing → app crashes at startup with clear error message
+// This is intentional: fail fast, don't run with missing config
+```
+
+### Typed Config Service
+```typescript
+@Injectable()
+export class DatabaseConfig {
+  constructor(private configService: ConfigService) {}
+
+  get host(): string {
+    return this.configService.get<string>('database.host');
+  }
+
+  get port(): number {
+    return this.configService.get<number>('database.port');
+  }
+
+  get connectionString(): string {
+    const { host, port } = this;
+    const name = this.configService.get('database.name');
+    const user = this.configService.get('database.username');
+    const pass = this.configService.get('database.password');
+    return `postgresql://${user}:${pass}@${host}:${port}/${name}`;
+  }
+}
+```
+
+**Interview Tip:** "I always validate environment variables at startup with Joi or Zod. It's better to crash immediately with a clear 'JWT_SECRET is required' error than to discover it's missing when the first user tries to log in."
+
+---
+
+## Q17: Circular Dependencies in NestJS
+
+**Q: How do you handle circular dependencies in NestJS?**
+
+**A:**
+
+### The Problem
+```typescript
+// ServiceA depends on ServiceB
+@Injectable()
+export class ServiceA {
+  constructor(private serviceB: ServiceB) {} // ServiceB not yet defined
+}
+
+// ServiceB depends on ServiceA
+@Injectable()
+export class ServiceB {
+  constructor(private serviceA: ServiceA) {} // Circular!
+}
+// NestJS throws: "A circular dependency has been detected"
+```
+
+### Solution 1: forwardRef()
+```typescript
+@Injectable()
+export class ServiceA {
+  constructor(
+    @Inject(forwardRef(() => ServiceB))
+    private serviceB: ServiceB,
+  ) {}
+}
+
+@Injectable()
+export class ServiceB {
+  constructor(
+    @Inject(forwardRef(() => ServiceA))
+    private serviceA: ServiceA,
+  ) {}
+}
+
+// For modules too:
+@Module({
+  imports: [forwardRef(() => ModuleB)],
+})
+export class ModuleA {}
+```
+
+### Solution 2: Refactor to Remove Circular Dependency (Better)
+```typescript
+// Extract shared logic into a third service
+@Injectable()
+export class SharedService {
+  // Methods that both ServiceA and ServiceB need
+}
+
+@Injectable()
+export class ServiceA {
+  constructor(private shared: SharedService) {}
+}
+
+@Injectable()
+export class ServiceB {
+  constructor(private shared: SharedService) {}
+}
+// No circular dependency!
+```
+
+### Solution 3: Event-Based Decoupling (Best for Complex Cases)
+```typescript
+// Instead of direct dependency, communicate via events
+@Injectable()
+export class OrderService {
+  constructor(private eventEmitter: EventEmitter2) {}
+
+  async createOrder(dto: CreateOrderDto) {
+    const order = await this.orderRepo.save(dto);
+    // Don't call PaymentService directly — emit event
+    this.eventEmitter.emit('order.created', order);
+    return order;
+  }
+}
+
+@Injectable()
+export class PaymentService {
+  @OnEvent('order.created')
+  handleOrderCreated(order: Order) {
+    // Process payment without depending on OrderService
+    this.processPayment(order);
+  }
+}
+```
+
+**Interview Tip:** "forwardRef is a quick fix, but it's a code smell. If I see circular dependencies, I refactor: either extract shared logic into a new service, or use events to decouple the modules. Circular dependencies usually mean the module boundaries are wrong."
+
+---
+
+## Q18: NestJS Database Transactions
+
+**Q: How do you handle database transactions across multiple operations in NestJS?**
+
+**A:**
+
+### TypeORM Transactions
+```typescript
+@Injectable()
+export class OrderService {
+  constructor(
+    private dataSource: DataSource,
+    private orderRepo: Repository<Order>,
+  ) {}
+
+  async createOrder(dto: CreateOrderDto): Promise<Order> {
+    // Use QueryRunner for manual transaction control
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. Create order
+      const order = queryRunner.manager.create(Order, {
+        userId: dto.userId,
+        total: dto.total,
+      });
+      await queryRunner.manager.save(order);
+
+      // 2. Create order items
+      const items = dto.items.map(item =>
+        queryRunner.manager.create(OrderItem, { ...item, orderId: order.id })
+      );
+      await queryRunner.manager.save(items);
+
+      // 3. Deduct inventory
+      for (const item of dto.items) {
+        const result = await queryRunner.manager
+          .createQueryBuilder()
+          .update(Product)
+          .set({ stock: () => `stock - ${item.quantity}` })
+          .where('id = :id AND stock >= :qty', { id: item.productId, qty: item.quantity })
+          .execute();
+
+        if (result.affected === 0) {
+          throw new BadRequestException(`Product ${item.productId} out of stock`);
+        }
+      }
+
+      await queryRunner.commitTransaction();
+      return order;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+}
+```
+
+### Prisma Transactions
+```typescript
+@Injectable()
+export class OrderService {
+  constructor(private prisma: PrismaService) {}
+
+  async transferFunds(fromId: string, toId: string, amount: number) {
+    return this.prisma.$transaction(async (tx) => {
+      // All operations use `tx` instead of `this.prisma`
+      const sender = await tx.account.update({
+        where: { id: fromId },
+        data: { balance: { decrement: amount } },
+      });
+
+      if (sender.balance < 0) {
+        throw new BadRequestException('Insufficient funds');
+        // Transaction automatically rolls back on throw
+      }
+
+      await tx.account.update({
+        where: { id: toId },
+        data: { balance: { increment: amount } },
+      });
+
+      // Create audit log within same transaction
+      await tx.transactionLog.create({
+        data: { fromId, toId, amount, type: 'TRANSFER' },
+      });
+    });
+  }
+}
+```
+
+### Transaction Isolation Levels
+```typescript
+// Prisma
+await prisma.$transaction(callback, {
+  isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+});
+
+// TypeORM
+await queryRunner.startTransaction('SERIALIZABLE');
+```
+
+| Level | Dirty Read | Non-Repeatable Read | Phantom Read | Use Case |
+|-------|-----------|-------------------|--------------|----------|
+| READ UNCOMMITTED | Yes | Yes | Yes | Never use |
+| READ COMMITTED | No | Yes | Yes | Default (PostgreSQL) |
+| REPEATABLE READ | No | No | Yes | Default (MySQL) |
+| SERIALIZABLE | No | No | No | Financial transactions |
+
+**Interview Tip:** "For financial operations like the Daraz voucher system, I use SERIALIZABLE isolation to prevent race conditions. For most CRUD operations, READ COMMITTED is sufficient. The key is knowing the trade-off: higher isolation = more locks = lower throughput."
+
+---
+
+## Q19: NestJS Task Scheduling & Queue Processing
+
+**Q: How do you handle background tasks and scheduled jobs in NestJS?**
+
+**A:**
+
+### Cron Jobs with @nestjs/schedule
+```typescript
+import { Cron, CronExpression, SchedulerRegistry } from '@nestjs/schedule';
+
+@Injectable()
+export class TaskService {
+  constructor(private schedulerRegistry: SchedulerRegistry) {}
+
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async cleanupExpiredTokens() {
+    const deleted = await this.tokenRepo.deleteExpired();
+    this.logger.log(`Cleaned up ${deleted} expired tokens`);
+  }
+
+  @Cron('0 */5 * * * *') // Every 5 minutes
+  async syncInventory() {
+    await this.inventoryService.syncWithWarehouse();
+  }
+
+  // Dynamic cron job (can be created/deleted at runtime)
+  addDynamicJob(name: string, cronExpression: string, callback: () => void) {
+    const job = new CronJob(cronExpression, callback);
+    this.schedulerRegistry.addCronJob(name, job);
+    job.start();
+  }
+}
+```
+
+### Queue Processing with Bull
+```typescript
+import { BullModule, Process, Processor, InjectQueue } from '@nestjs/bull';
+
+// Module setup
+@Module({
+  imports: [
+    BullModule.forRoot({ redis: { host: 'localhost', port: 6379 } }),
+    BullModule.registerQueue({ name: 'email' }),
+  ],
+})
+
+// Producer: Add jobs to queue
+@Injectable()
+export class NotificationService {
+  constructor(@InjectQueue('email') private emailQueue: Queue) {}
+
+  async sendWelcomeEmail(userId: string) {
+    await this.emailQueue.add('welcome', { userId }, {
+      attempts: 3,
+      backoff: { type: 'exponential', delay: 5000 },
+      removeOnComplete: 100,  // Keep last 100 completed jobs
+      removeOnFail: 200,      // Keep last 200 failed jobs
+    });
+  }
+
+  async sendBulkEmails(userIds: string[]) {
+    const jobs = userIds.map(userId => ({
+      name: 'marketing',
+      data: { userId },
+      opts: { delay: Math.random() * 60000 }, // Spread over 1 minute
+    }));
+    await this.emailQueue.addBulk(jobs);
+  }
+}
+
+// Consumer: Process jobs
+@Processor('email')
+export class EmailProcessor {
+  @Process('welcome')
+  async handleWelcome(job: Job<{ userId: string }>) {
+    const user = await this.userService.findById(job.data.userId);
+    await this.emailService.send({
+      to: user.email,
+      template: 'welcome',
+      data: { name: user.name },
+    });
+  }
+
+  @Process('marketing')
+  async handleMarketing(job: Job) {
+    // Process marketing email
+  }
+
+  @OnQueueFailed()
+  onFailed(job: Job, error: Error) {
+    this.logger.error(`Job ${job.id} failed: ${error.message}`);
+    // Alert if final attempt
+    if (job.attemptsMade >= job.opts.attempts) {
+      this.alertService.notify(`Email job permanently failed: ${job.id}`);
+    }
+  }
+}
+```
+
+### Cron vs Queue Decision
+| Use Case | Cron | Queue |
+|----------|------|-------|
+| Run at specific times | ✅ | ❌ |
+| Background job triggered by event | ❌ | ✅ |
+| Needs retry on failure | ❌ | ✅ |
+| Distributed across workers | ❌ | ✅ |
+| Rate limiting / concurrency control | ❌ | ✅ |
+| Cleanup/maintenance tasks | ✅ | ❌ |
+
+**Interview Tip:** "At Banglalink, we used Bull queues for sending notifications to 41M users — we could control concurrency (max 1000 parallel), retry failures, and distribute across multiple worker pods. Cron jobs handled cleanup tasks like purging expired tokens nightly."
+
+---
+
 ## Quick Reference Table
 
 | Component | Purpose | Execution Order |
