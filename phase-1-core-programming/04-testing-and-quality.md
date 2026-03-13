@@ -133,6 +133,46 @@ When asked this in an interview, structure your answer around these layers:
 
 > **Common Follow-up:** "How do you handle testing in a microservices architecture?" Answer: contract testing (Pact), shared test fixtures for common data models, and independent test databases per service.
 
+### Chaos Engineering Basics (Lead/Architecture Level)
+
+**Q: What is Chaos Engineering and how would you implement it for resilience testing?**
+
+**A:**
+Chaos Engineering is the discipline of experimenting on a system in production (or a production-like staging environment) in order to build confidence in the system's capability to withstand turbulent conditions in unexpected failures.
+
+As a Lead Engineer, integrating Chaos Engineering proves your architecture is resilient.
+
+**Key Concepts:**
+1. **Define the Steady State:** What does "healthy" look like? (e.g., 99% HTTP 200 responses, < 200ms latency).
+2. **Formulate a Hypothesis:** "If the primary database goes down, the system will automatically failover to the replica within 10 seconds without dropping more than 50 requests."
+3. **Inject Faults:** Introduce real-world failures.
+   - Kill node processes randomly (Chaos Monkey).
+   - Inject network latency between microservices (e.g., add 500ms delay to Redis calls).
+   - Simulate database connection limits or CPU exhaustion.
+4. **Observe & Automate:** Did the system recover as expected? Automate these tests in CI/CD pipelines.
+
+**Practical Implementation in Node.js/NestJS:**
+- **Failure Injection Middleware:** You can create chaos middleware that randomly drops requests or adds latency based on a configuration flag.
+```typescript
+@Injectable()
+export class ChaosMiddleware implements NestMiddleware {
+  use(req: Request, res: Response, next: NextFunction) {
+    if (process.env.ENABLE_CHAOS !== 'true') return next();
+    
+    const random = Math.random();
+    if (random < 0.05) { // 5% chance to drop request
+      return res.status(503).json({ error: 'Chaos: Service Unavailable' });
+    }
+    if (random < 0.15) { // 10% chance to add 2s latency
+      return setTimeout(() => next(), 2000);
+    }
+    
+    next();
+  }
+}
+```
+- **Tools:** Use tools like Gremlin, AWS Fault Injection Simulator (FIS), or Toxiproxy to simulate network partitions at the infrastructure level.
+
 ---
 
 ## Q2: Unit Testing with Jest

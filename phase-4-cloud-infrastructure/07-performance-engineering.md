@@ -1035,9 +1035,22 @@ MGET with 100 keys:
   1 round trip = 0.5ms + processing time ≈ 1.5ms
 ```
 
+### Q: Explain Cache Avalanche and Cache Penetration. How do you mitigate them?
+
+**A:**
+These are advanced caching problems that can bring down a system under high load:
+
+**1. Cache Avalanche:**
+Occurs when a large number of cache keys expire at the exact same time. The database is suddenly crushed by thousands of concurrent requests trying to rebuild the cache.
+*Mitigation:* Add "jitter" (randomness) to your TTLs. Instead of exactly 60 minutes, use `60 minutes + random(0 to 5) minutes`.
+
+**2. Cache Penetration:**
+Occurs when users repeatedly request data that does *not* exist in the database (e.g., a malicious bot querying random fake user IDs). The cache always misses, and the malicious queries penetrate straight to the database, potentially crushing it.
+*Mitigation:* Cache the MISS. If a user queries ID `999` and it's not in the DB, cache `key:999` with value `NULL` for a short time (e.g., 5 mins). A more advanced mitigation is using a **Bloom Filter** before hitting the cache.
+
 ### Q: How do you prevent cache stampede (thundering herd)?
 
-**A:** A cache stampede happens when a popular cache key expires and **hundreds of concurrent requests** all try to rebuild the cache simultaneously, overwhelming the database.
+**A:**
 
 ```typescript
 // src/cache/stampede-prevention.service.ts

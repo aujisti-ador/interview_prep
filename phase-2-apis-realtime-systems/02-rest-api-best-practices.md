@@ -1314,6 +1314,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 }
 
+// 6b. OpenID Connect (OIDC) vs OAuth2
+// Q: What is the difference between OAuth2 and OIDC?
+// A: OAuth2 is for *Authorization* (delegated access, granting access to APIs).
+//    OIDC is an identity layer built *on top* of OAuth2 for *Authentication* (verifying who the user is).
+//    - OAuth2 gives you an Access Token (opaque string, meant for APIs).
+//    - OIDC gives you an ID Token (always a JWT, contains user info like email, name, sub).
+//    - In NestJS/Passport, if you request the 'openid', 'profile', and 'email' scopes, you are using OIDC.
+
 // 7. OAuth2 Controller
 @Controller('auth')
 export class AuthController {

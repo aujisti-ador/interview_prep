@@ -25,12 +25,14 @@
   - Event loop, closures, prototypes, async/await, promises, error handling
   - Modules (ESM vs CommonJS), hoisting, this keyword
 - [ ] Node.js Fundamentals
-  - Streams, buffers, child processes, clustering
-  - Performance: Memory leaks, garbage collection basics
+  - Event Loop phases deep dive (Timers, Poll, Check, Close callbacks)
+  - Streams, buffers, child processes, worker threads, clustering
+  - Performance: Memory leaks profiling, V8 Garbage Collection (Generational GC), generating heap snapshots
 - [ ] NestJS Mastery
   - Modules, controllers, services, providers, decorators
-  - Guards, interceptors, pipes, exception filters
+  - Guards, interceptors, pipes, exception filters, custom execution context
   - Dependency injection, custom providers
+  - NestJS Microservices (TCP, Redis, NATS, Kafka custom transporters)
   - Cron jobs & task scheduling (@nestjs/schedule, dynamic cron)
   - Queue processing with Bull/BullMQ (Redis-backed job queues, retries, concurrency)
   - Caching strategies with Redis (cache-aside, invalidation, multi-tier)
@@ -39,6 +41,7 @@
   - Unit testing: Jest, test doubles (mocks, stubs, spies)
   - Integration testing: Supertest for APIs, test containers
   - E2E testing: basics of Playwright/Cypress for full-stack awareness
+  - Chaos Engineering basics (for Lead-level system resilience understanding)
   - TDD workflow: Red → Green → Refactor
   - Code coverage goals, testing pyramid
 - [ ] Design Patterns in Practice
@@ -58,9 +61,15 @@
   - Authentication (Cognito), authorization, caching
   - Federation vs standalone
 - [ ] REST API Best Practices
-  - HTTP methods, status codes, versioning, pagination
-  - Rate limiting, throttling, idempotency
-  - Security: JWT, OAuth2, OWASP Top 10
+  - HTTP methods, status codes, versioning, pagination (Cursor-based vs Offset-based)
+  - Webhook design: HMAC signatures, retry mechanisms, exponential backoff
+  - Rate limiting, throttling, idempotency (crucial for payment APIs)
+  - Security: JWT, OAuth2 flows (Auth Code vs Implicit), OIDC, OWASP Top 10
+- [ ] **[AI & LLM Integrations](phase-2-apis-realtime-systems/06-ai-llm-integrations.md) (2026 Core Skill)**
+  - Integrating OpenAI/Anthropic/Local LLM APIs responsibly
+  - Streaming LLM responses (Server-Sent Events / SSE)
+  - Vector Databases (Pinecone, pgvector) basics
+  - Basic RAG (Retrieval-Augmented Generation) backend architecture
 - [ ] gRPC & Protocol Buffers (increasingly asked in international interviews)
   - Protobuf schema definition, code generation
   - Unary, server streaming, client streaming, bidirectional streaming
@@ -85,10 +94,14 @@
 
 ## Phase 3: Databases & Data Management (Week 3–4)
 
+- [ ] [Database Architecture Fundamentals](phase-3-databases-data/08-database-architecture-fundamentals.md)
+  - CAP Theorem & PACELC Theorem Deep Dive (Crucial for System Design)
+  - Sharding algorithms (Consistent Hashing), Partitioning vs Sharding
+  - Read Replica replication lag handling, Multi-master replication trade-offs
 - [ ] Relational Databases (MySQL / PostgreSQL)
-  - Indexing strategies, composite indexes, EXPLAIN
+  - Indexing strategies, composite indexes, B-trees vs Hash indexes, EXPLAIN ANALYZE
   - Joins (types), normalization vs denormalization
-  - Transactions (ACID), isolation levels, deadlocks
+  - Transactions (ACID), isolation levels, deadlocks, MVCC (Multi-Version Concurrency Control)
 - [ ] NoSQL (MongoDB / DynamoDB)
   - Schema design patterns, aggregation pipeline
   - Partition keys, sort keys (DynamoDB)
@@ -153,7 +166,10 @@
   - Profiling Node.js apps: clinic.js, 0x flame graphs
   - Benchmarking APIs: latency percentiles (p50, p95, p99)
   - Capacity planning and autoscaling strategies
+  - Advanced Caching: Preventing cache avalanche, cache penetration, and the thundering herd problem
 - [ ] Security & Compliance (Critical for international clients)
+  - Web Application Firewall (WAF) & DDoS mitigation strategies
+  - Identity & Access Management: RBAC vs ABAC (Role vs Attribute Based Access Control)
   - GDPR compliance: data residency, right to erasure, consent management
   - SOC 2 basics: what it means for engineering teams
   - HIPAA awareness (if targeting US healthcare clients)
@@ -231,11 +247,12 @@
   - Deploying containerized apps in cost-constrained BD environments
 - [ ] Technical Leadership & Documentation (Lead-level expectation)
   - Writing RFCs (Request for Comments) / ADRs (Architecture Decision Records)
-  - Technical roadmap planning and estimation
+  - Technical roadmap planning, agile estimation (story points vs time), handling scope creep
   - Build vs Buy decision frameworks
   - Code review best practices: What to look for, how to give constructive feedback
-  - Git workflows: Gitflow, trunk-based development, feature flags
+  - Git workflows: Gitflow, trunk-based development, feature flags (e.g., LaunchDarkly pattern)
   - Managing technical debt: Tracking, prioritizing, communicating to stakeholders
+  - Root Cause Analysis (RCA) & Blameless Post-mortem formats (5 Whys) for production incidents
 
 ## Phase 6: Behavioral, Leadership & Market Fit (Week 6–8)
 

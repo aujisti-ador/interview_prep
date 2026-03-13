@@ -279,12 +279,45 @@ function readFile(fd, size) {
   return buf;
 }
 
-// DANGER: Never return allocUnsafe buffer without filling it
+// Danger: Never return allocUnsafe buffer without filling it
 function badExample(size) {
   const buf = Buffer.allocUnsafe(size);
   // Forgetting to fill it - may leak sensitive data!
   return buf;
 }
+```
+
+### Q6b: Explain the Event Loop phases in deep dive. What happens in each phase?
+
+**Answer:**
+The Node.js Event Loop is what allows Node.js to perform non-blocking I/O operations despite being single-threaded. It offloads operations to the system kernel whenever possible.
+
+There are 6 major phases, executed in this strict order:
+
+1. **Timers:** Executes callbacks scheduled by `setTimeout()` and `setInterval()`.
+2. **Pending Callbacks:** Executes I/O callbacks deferred to the next loop iteration (e.g., TCP errors).
+3. **Idle, Prepare:** Only used internally by Node.js.
+4. **Poll Phase:** The most important phase.
+   - Retrieves new I/O events.
+   - Executes I/O related callbacks (almost all, with the exception of close callbacks, timers, and `setImmediate()`).
+   - If the poll queue is empty, it will wait here for new I/O events, *unless* a `setImmediate()` script is scheduled.
+5. **Check Phase:** Executes callbacks scheduled by `setImmediate()`.
+6. **Close Callbacks:** Executes close callbacks, e.g., `socket.on('close', ...)`.
+
+**Microtasks (process.nextTick & Promises):**
+Microtasks do *not* belong to any specific phase. They are executed *immediately after* the currently executing operation completes, and *before* the event loop continues to the next phase. `process.nextTick()` has higher priority than Promise microtasks.
+
+```javascript
+setTimeout(() => console.log('1. Timer phase (setTimeout)'), 0);
+setImmediate(() => console.log('2. Check phase (setImmediate)'));
+process.nextTick(() => console.log('3. Microtask (process.nextTick)'));
+Promise.resolve().then(() => console.log('4. Microtask (Promise)'));
+
+// Output order:
+// 3. Microtask (process.nextTick)  <- execution runs before Event Loop phases
+// 4. Microtask (Promise)           <- execution runs before Event Loop phases
+// 1. Timer phase (setTimeout)      <- event loop starts, timer phase
+// 2. Check phase (setImmediate)    <- reaches check phase
 ```
 
 ---
@@ -773,6 +806,31 @@ function getCached(key) {
   return null;
 }
 ```
+
+### Q12b: How do you generate and analyze V8 Heap Snapshots for profiling?
+
+**Answer:**
+
+A heap snapshot represents the state of memory at a specific point in time. It shows what objects are taking up memory and what is holding references to them (preventing Garbage Collection).
+
+1. **Triggering a Snapshot:**
+   - Command line: `node --heap-prof app.js` (generates an `.heapprofile` file).
+   - Programmatically: `const v8 = require('v8'); v8.writeHeapSnapshot();`
+   - Using `clinic.js`: `npx clinic heapprofiler -- node app.js`
+
+2. **Analyzing the Snapshot in Chrome DevTools:**
+   - Open Chrome and navigate to `chrome://inspect`.
+   - Click "Open dedicated DevTools for Node".
+   - Go to the "Memory" tab and load the `.heapprofile` or `.heapsnapshot` file.
+
+3. **Key Views in DevTools:**
+   - **Summary View:** Shows total objects by constructor name. Sort by "Retained Size" to find the biggest memory hogs.
+   - **Comparison View:** Take *two* snapshots (e.g., before and after a load test) and compare them. Tells you exactly what objects leaked during the test.
+   - **Containment View:** Explores the heap from the root object down to see reference chains.
+
+**Shallow Size vs. Retained Size:**
+- **Shallow Size:** Memory held by the object itself (usually small, just primitive values).
+- **Retained Size:** Memory that would be freed if this object was garbage collected (Shallow Size + all child objects it exclusively references). **Always sort by Retained Size to find leaks.**
 
 ---
 

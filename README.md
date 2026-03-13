@@ -49,6 +49,7 @@
 | 3 | [Real-Time Systems & Agora.io](phase-2-apis-realtime-systems/03-realtime-systems-agora.md) | WebSockets, SSE, long polling, Socket.io rooms/namespaces, Agora tokens/channels, RTMP, live streaming architecture, horizontal scaling (Redis adapter), connection recovery, memory management | 15 |
 | 4 | [Event-Driven Architecture](phase-2-apis-realtime-systems/04-event-driven-architecture.md) | Events vs commands, Kafka/RabbitMQ/Redis, event sourcing, CQRS, saga pattern, outbox pattern, idempotency, schema registry (Avro/Protobuf), partition rebalancing, event versioning, DLQ handling, testing EDA | 16 |
 | 5 | [gRPC & Protocol Buffers](phase-2-apis-realtime-systems/05-grpc-protocol-buffers.md) | Protobuf schema, 4 RPC patterns, NestJS gRPC, error handling, auth (mTLS/JWT), performance, gRPC-Web, microservices communication, gRPC vs REST decision framework | 11 |
+| 6 | [AI & LLM Integrations](phase-2-apis-realtime-systems/06-ai-llm-integrations.md) | Integrating OpenAI/Anthropic APIs, Streaming responses (SSE), Vector Databases (Pinecone, pgvector), Basic RAG architecture | 3 |
 
 ---
 
@@ -63,6 +64,7 @@
 | 5 | [NoSQL — MongoDB & DynamoDB](phase-3-databases-data/05-nosql-mongodb-dynamodb.md) | CAP theorem, MongoDB schema patterns, indexing (9 types), aggregation pipeline, Mongoose/NestJS, sharding, DynamoDB single-table design, GSI/LSI, Streams, Global Tables, SDK v3 | 14 |
 | 6 | [Database Migrations & Schema Evolution](phase-3-databases-data/06-database-migrations-schema-evolution.md) | Prisma/TypeORM/Knex migrations, zero-downtime (expand-contract), safe vs dangerous operations, backfill strategies, schema versioning, CI pipeline | 11 |
 | 7 | [ORMs & Query Builders](phase-3-databases-data/07-orms-query-builders.md) | Prisma vs TypeORM vs Knex, N+1 problem, query optimization, cursor pagination, soft delete, multi-tenancy, testing strategies | 10 |
+| 8 | [Database Architecture Fundamentals](phase-3-databases-data/08-database-architecture-fundamentals.md) | CAP Theorem, PACELC Theorem, Sharding vs Partitioning, Read Replica lag mitigation, MVCC Concurrency Control | 6 |
 
 ---
 

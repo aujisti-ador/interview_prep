@@ -128,6 +128,42 @@ export class UserController {
 }
 ```
 
+### Q2b: What is `ExecutionContext` and how is it used in custom Guards/Interceptors?
+
+**Answer:**
+`ExecutionContext` inherits from `ArgumentsHost` and provides additional details about the current execution process. It's the standard way NestJS provides context to Guards, Interceptors, and Exception Filters, regardless of the transport layer (HTTP, Microservices, WebSockets).
+
+```typescript
+@Injectable()
+export class RolesGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    // 1. Determine what type of context we are in
+    const type = context.getType(); // 'http' | 'rpc' | 'ws'
+    
+    // 2. Extract standard request/response objects (if HTTP)
+    if (type === 'http') {
+      const request = context.switchToHttp().getRequest<Request>();
+      const user = request.user;
+      return user.roles.includes('admin');
+    }
+    
+    // 3. Extract RPC data (if Microservices)
+    if (type === 'rpc') {
+      const rpcContext = context.switchToRpc().getContext();
+      const data = context.switchToRpc().getData();
+      // Validate roles based on RPC metadata
+      return true;
+    }
+
+    // 4. Retrieve metadata about the running handler
+    const handlerName = context.getHandler().name;
+    const className = context.getClass().name;
+    
+    return false;
+  }
+}
+```
+
 ---
 
 ## Modules

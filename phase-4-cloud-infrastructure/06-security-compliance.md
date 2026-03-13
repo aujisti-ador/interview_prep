@@ -396,7 +396,13 @@ async createUser(@Body() dto: CreateUserDto) { ... }
 
 #### ABAC with CASL
 
-ABAC is needed when RBAC is too coarse-grained — e.g., "a user can edit only their own posts" or "a manager can view only their department's reports."
+**Q: When should you transition from RBAC (Role-Based Access Control) to ABAC (Attribute-Based Access Control)?**
+
+**A:**
+- **RBAC:** Grants access based on user roles (Admin, Manager, User). It is static. E.g., "Only Admins can delete posts." It breaks down when rules become contextual.
+- **ABAC:** Grants access based on attributes (user attributes, resource attributes, environmental context). It is dynamic. E.g., "A user can edit a post *only if* they are the author of that post, *and* it is within business hours."
+
+ABAC is needed when RBAC is too coarse-grained. In NestJS, we often use `CASL` to implement ABAC.
 
 ```typescript
 // casl-ability.factory.ts
@@ -1849,35 +1855,22 @@ const dbSg = {
 | **Secrets Manager** | AES-256 via KMS | Automatic |
 | **DynamoDB** | AES-256 | AWS owned or customer managed |
 
-#### WAF (Web Application Firewall)
+#### WAF (Web Application Firewall) & DDoS Mitigation
 
-```
-AWS WAF Rules (attached to ALB/CloudFront):
+**Q: How do you protect a public-facing API from malicious bots, SQL injection, and DDoS attacks?**
 
-1. Rate limiting:         100 requests per 5 minutes per IP
-2. SQL injection:         AWS managed rule set
-3. XSS protection:        AWS managed rule set
-4. Known bad inputs:       AWS managed rule set
-5. Geographic blocking:    Block traffic from high-risk countries (if applicable)
-6. IP reputation:          AWS managed IP reputation list
-7. Bot control:           Challenge suspected bots
-8. Custom rules:          Block specific attack patterns observed in logs
-```
+**A:**
+We utilize a defense-in-depth strategy using AWS WAF and AWS Shield, sitting in front of our API Gateway or Application Load Balancer (ALB).
 
-#### DDoS Protection
+1. **AWS WAF (Web Application Firewall):** Let's us define rules to block malicious HTTP requests before they even reach our Node.js servers.
+   - **Rate limiting:** Block IPs exceeding 100 requests / 5 mins.
+   - **SQLi / XSS:** AWS Managed Rules automatically detect and drop payloads containing SQL injection or Cross-Site Scripting attempts.
+   - **Bot Control:** Challenges suspicious traffic (CAPTCHA).
+   - **Geo-Blocking:** Drop traffic from high-risk countries where we have no customers.
 
-```
-AWS Shield Standard (Free):
-- Automatic protection against common L3/L4 DDoS attacks
-- Included with CloudFront, ALB, Route 53
-
-AWS Shield Advanced ($3,000/month):
-- L7 DDoS protection
-- Real-time attack visibility
-- DDoS Response Team (DRT) support
-- Cost protection (refund for scaling during attack)
-- Recommended for: financial services, high-profile targets
-```
+2. **AWS Shield (DDoS Protection):**
+   - **Shield Standard:** Free, protects against common Layer 3/4 network attacks (SYN floods).
+   - **Shield Advanced:** Paid service that provides Layer 7 application DDoS protection, anomaly detection, and gives access to the AWS DDoS Response Team (DRT).
 
 #### IAM Best Practices
 
