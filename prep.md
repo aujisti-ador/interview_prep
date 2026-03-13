@@ -78,10 +78,10 @@
   - Patterns: Publish-Subscribe, Event Sourcing, Outbox Pattern, Saga (choreography vs orchestration)
   - EDA vs Request-Response: Temporal decoupling, pull vs push models
   - Tie to your experience: Notification Service (Banglalink), real-time sync in live streaming
-- [ ] Mini Project Ideas to Build/Review
-  - Real-time notification system (NestJS + Kafka/WebSocket)
-  - GraphQL subscription-based chat or live counter
-  - Simple event-driven order processing (e.g., publish "OrderPlaced" → trigger payment/shipping)
+- [ ] Mini Project Ideas to Build/Review → See [Hands-On Projects](hands-on-projects/)
+  - [Real-time Notification System](hands-on-projects/01-realtime-notification-system.md)
+  - [Event-Driven Order Processing](hands-on-projects/02-event-driven-order-processing.md)
+  - [GraphQL Subscription Chat](hands-on-projects/03-graphql-subscription-chat.md)
 
 ## Phase 3: Databases & Data Management (Week 3–4)
 
@@ -165,9 +165,11 @@
   - CI/CD pipelines (GitHub Actions, Jenkins basics)
   - Infrastructure as Code (Terraform basics for AWS)
   - Monitoring: Prometheus + Grafana integration
-- [ ] Mini Projects for Containerization
-  - Dockerize a NestJS app and deploy to AWS ECS
-  - Set up a simple K8s cluster (Minikube) with NGINX ingress
+- [ ] Mini Projects for Containerization → See [Hands-On Projects](hands-on-projects/)
+  - [Serverless GraphQL API on AWS](hands-on-projects/04-serverless-graphql-api-aws.md)
+  - [Dockerize NestJS + Deploy to ECS](hands-on-projects/05-dockerize-nestjs-deploy-ecs.md)
+  - [K8s Cluster with Minikube + NGINX Ingress](hands-on-projects/06-kubernetes-minikube-nginx-ingress.md)
+  - [Production Monitoring & Alerting](hands-on-projects/07-monitoring-alerting-setup.md)
 
 ## Phase 5: System Design & Architecture (Week 5–7)
 
