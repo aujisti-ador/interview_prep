@@ -189,6 +189,9 @@
 
 ## Phase 5: System Design & Architecture (Week 5–7)
 
+> **Guides:** [Roadmap](phase-5-system-design/00-roadmap.md) · [Fundamentals](phase-5-system-design/01-system-design-fundamentals.md) · [Architecture Patterns](phase-5-system-design/02-architecture-patterns.md) · [Distributed Systems](phase-5-system-design/03-distributed-systems.md) · [DDD & Data Architecture](phase-5-system-design/04-ddd-and-data-architecture.md) · [Reliability, Security & Cost](phase-5-system-design/05-reliability-security-cost.md) · [HLD Problems](phase-5-system-design/06-hld-practice-problems.md) · [LLD Problems](phase-5-system-design/07-lld-practice-problems.md) · [Architect-Level Practice](phase-5-system-design/08-architect-level-practice.md)
+
+- [ ] [System design fundamentals](phase-5-system-design/01-system-design-fundamentals.md) — the 7-step framework, capacity estimation, latency numbers, building blocks
 - [ ] Common BD-relevant Designs to Practice (verbal + diagram)
   - Scalable Notification Service (41M+ users like BL-Power)
   - Real-time Live Streaming Backend (Agora + AWS)
@@ -196,7 +199,8 @@
   - Identity & Access Management (IAM-like)
   - High-traffic Order Processing Microservice
   - Mobile Financial Service backend (bKash/Nagad-like — relevant for BD fintech)
-- [ ] International-standard System Design Problems (commonly asked by remote companies)
+  - → Worked designs: [notification system](phase-5-system-design/06-hld-practice-problems.md#3-notification-system-41m-users--bd-context), [live streaming](phase-5-system-design/06-hld-practice-problems.md#14-live-streaming-agora--rtmp), [voucher system](phase-5-system-design/06-hld-practice-problems.md#15-voucher--coupon-system-daraz-context), [MFS](phase-5-system-design/06-hld-practice-problems.md#7-mobile-financial-service-bkashnagad-like)
+- [ ] International-standard System Design Problems (commonly asked by remote companies) — [all 15 worked here](phase-5-system-design/06-hld-practice-problems.md)
   - URL shortener (classic warm-up)
   - Rate limiter (distributed)
   - Chat system (WhatsApp/Slack-like)
@@ -207,7 +211,11 @@
   - Search autocomplete / typeahead
   - Video streaming platform (Netflix-like CDN + transcoding)
   - Multi-tenant SaaS platform design
-- [ ] **Microservices Architecture Deep Dive**
+- [ ] [Low-Level Design (LLD)](phase-5-system-design/07-lld-practice-problems.md) — parking lot, elevator, vending machine, LRU cache, pub/sub, Splitwise, scheduler; Node.js concurrency for LLD
+- [ ] [Distributed systems theory](phase-5-system-design/03-distributed-systems.md) — CAP/PACELC, consistency models, Raft, fencing tokens, clocks, CRDTs, sharding
+- [ ] [DDD & data architecture](phase-5-system-design/04-ddd-and-data-architecture.md) — bounded contexts, aggregates, CDC, stream processing, data mesh
+- [ ] [Reliability, security & cost architecture](phase-5-system-design/05-reliability-security-cost.md) — SLOs & error budgets, DR, chaos, zero trust, OAuth2/PKCE, FinOps
+- [ ] **[Microservices Architecture Deep Dive](phase-5-system-design/02-architecture-patterns.md)**
   - Core principles: Bounded contexts, single responsibility, independent deployability
   - Communication patterns: Synchronous (REST/gRPC) vs Asynchronous (events/messages)
   - Key Design Patterns (must-know for interviews):
@@ -245,7 +253,7 @@
   - Refactoring legacy code with team
   - Technical debt prioritization
   - Deploying containerized apps in cost-constrained BD environments
-- [ ] Technical Leadership & Documentation (Lead-level expectation)
+- [ ] [Technical Leadership & Documentation](phase-5-system-design/08-architect-level-practice.md) (Lead-level expectation)
   - Writing RFCs (Request for Comments) / ADRs (Architecture Decision Records)
   - Technical roadmap planning, agile estimation (story points vs time), handling scope creep
   - Build vs Buy decision frameworks

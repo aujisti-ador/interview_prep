@@ -3,7 +3,7 @@
 > Comprehensive interview prep for **Senior/Lead Backend roles** targeting Bangladesh and international remote markets.
 > Stack: Node.js, NestJS, TypeScript, AWS Serverless, PostgreSQL, Redis, Kafka, RabbitMQ, Docker, Kubernetes.
 
-**Total Content:** 25 guides + 7 project walkthroughs | 80,000+ lines | 200+ Q&A sections with code examples
+**Total Content:** 33 guides + 7 project walkthroughs | 84,000+ lines | 280+ Q&A sections, 34 worked system design problems
 
 ---
 
@@ -14,9 +14,9 @@
 - [Phase 2: APIs & Real-Time Systems](#phase-2-apis--real-time-systems-week-23)
 - [Phase 3: Databases & Data Management](#phase-3-databases--data-management-week-34)
 - [Phase 4: Cloud & Infrastructure](#phase-4-cloud--infrastructure-week-45)
+- [Phase 5: System Design & Architecture](#phase-5-system-design--architecture-week-57)
+- [Phase 6: Behavioral, Leadership & Market Fit](#phase-6-behavioral-leadership--market-fit-week-68)
 - [Hands-On Projects](#hands-on-projects-practice-throughout)
-- [Phase 5: System Design & Architecture](#phase-5-system-design--architecture-week-57) *(coming soon)*
-- [Phase 6: Behavioral, Leadership & Market Fit](#phase-6-behavioral-leadership--market-fit-week-68) *(coming soon)*
 
 ---
 
@@ -83,6 +83,35 @@
 
 ---
 
+## Phase 5: System Design & Architecture (Week 5–7)
+
+| # | Guide | Topics | Problems |
+|---|-------|--------|----------|
+| 0 | [Roadmap](phase-5-system-design/00-roadmap.md) | Full learning plan — fundamentals → HLD → LLD → architecture → governance, with book/resource list | — |
+| 1 | [System Design Fundamentals](phase-5-system-design/01-system-design-fundamentals.md) | The 7-step framework, requirements, back-of-envelope estimation, API design, data modelling, networking (TCP/UDP, HTTP/1–3, TLS), REST vs GraphQL vs gRPC vs WebSocket vs SSE, DNS/CDN, load balancing, consistent hashing, caching patterns & failure modes, datastore selection, blob storage, search, queues, trade-off framing | 15 Q&A |
+| 2 | [Architecture Patterns](phase-5-system-design/02-architecture-patterns.md) | Monolith vs microservices vs SOA, modular monolith, service decomposition, hexagonal/clean architecture, EDA, choreography vs orchestration, CQRS, event sourcing, saga, outbox, API gateway & BFF, service discovery & mesh, resilience patterns, strangler fig, serverless, cell-based | 17 Q&A |
+| 3 | [Distributed Systems](phase-5-system-design/03-distributed-systems.md) | Fallacies, CAP & PACELC, consistency models, isolation levels, replication, quorums, Raft, split brain & fencing tokens, Lamport/vector/hybrid clocks, CRDTs, sharding & resharding, distributed locks, rate limiting algorithms, 2PC vs saga, gossip/SWIM, failure modes at scale | 17 Q&A |
+| 4 | [DDD & Data Architecture](phase-5-system-design/04-ddd-and-data-architecture.md) | Strategic vs tactical DDD, bounded contexts, context mapping & ACL, ubiquitous language, entities/value objects/aggregates, domain vs integration events, repositories, event storming, OLTP vs OLAP, lakehouse, CDC/Debezium, stream processing & watermarks, Lambda vs Kappa, data mesh, polyglot persistence, governance & GDPR erasure | 17 Q&A |
+| 5 | [Reliability, Security & Cost](phase-5-system-design/05-reliability-security-cost.md) | SLIs/SLOs/error budgets, burn-rate alerting, RPO/RTO & DR, multi-region, graceful degradation, chaos engineering, capacity planning, deployment safety, incident management, zero trust, OAuth2/OIDC & PKCE, mTLS/SPIFFE, secrets, STRIDE, envelope encryption, multi-tenancy, FinOps, latency budgets, build vs buy | 19 Q&A |
+| 6 | [HLD Practice Problems](phase-5-system-design/06-hld-practice-problems.md) | URL shortener, rate limiter, notification system (41M users), chat, news feed, payments, **MFS (bKash/Nagad)**, video streaming, file storage, autocomplete, web crawler, ride-hailing (Pathao), ticket booking, **live streaming (Agora)**, **voucher system (Daraz)** | 15 designs |
+| 7 | [LLD Practice Problems](phase-5-system-design/07-lld-practice-problems.md) | LLD method, Node.js concurrency (async mutex, per-key locking, races across `await`), parking lot, elevator, vending machine, LRU cache, rate limiter, pub/sub, Splitwise, logging framework, task scheduler, file system + 7 rapid-fire designs | 19 designs |
+| 8 | [Architect-Level Practice](phase-5-system-design/08-architect-level-practice.md) | ADRs, RFCs, Conway's Law & Team Topologies, tech radar, technical debt, golden paths, code review, RCA/postmortems, compliance architecture — plus multi-tenant SaaS, global e-commerce, real-time bidding, monolith migration, IoT, healthcare, developer platform, multi-cloud | 18 topics |
+
+---
+
+## Phase 6: Behavioral, Leadership & Market Fit (Week 6–8)
+
+| # | Focus | Notes |
+|---|-------|-------|
+| 1 | Behavioral stories | STAR stories for leadership, incident response, mentoring, trade-offs |
+| 2 | BD market fit | Cost optimization, local compliance, telecom/fintech constraints, Bangladeshi salary context |
+| 3 | International remote readiness | Remote interview formats, async communication, timezone collaboration, contract negotiation |
+| 4 | Mock interview practice | Technical + behavioral mocks, system design drills, English communication |
+
+> Phase 6 prepares you for leadership-level interviews by combining technical depth with communication, decision-making, and market awareness.
+
+---
+
 ## Hands-On Projects (Practice Throughout)
 
 Descriptive project walkthroughs with architecture diagrams, pseudo configs, data flows, and interview talking points. No runnable source code — designed for whiteboard-style understanding.
@@ -98,26 +127,6 @@ Descriptive project walkthroughs with architecture diagrams, pseudo configs, dat
 | 7 | [Production Monitoring & Alerting](hands-on-projects/07-monitoring-alerting-setup.md) | Prometheus + Grafana + Loki + AlertManager | Observability, SLIs/SLOs, on-call | 5–6h |
 
 Each project includes: architecture diagrams, step-by-step flows, database schemas, scaling strategies, failure handling, BD context, and interview talking points.
-
----
-
-## Phase 5: System Design & Architecture (Week 5–7)
-
-*Coming soon — will cover:*
-- Microservices architecture deep dive
-- 10+ international system design problems (URL shortener, chat, payment system, etc.)
-- BD-relevant designs (notification service, MFS, e-commerce)
-- Technical leadership (RFCs, ADRs, technical debt management)
-
----
-
-## Phase 6: Behavioral, Leadership & Market Fit (Week 6–8)
-
-*Coming soon — will cover:*
-- STAR stories from real experience
-- BD market preparation (bKash/Nagad integration, BTRC, salary benchmarks)
-- International remote readiness (interview formats, async communication, salary negotiation)
-- Mock interview strategies
 
 ---
 
