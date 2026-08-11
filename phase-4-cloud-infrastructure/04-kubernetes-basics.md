@@ -1,5 +1,7 @@
 # Kubernetes (K8s) — Interview Preparation Guide
 
+> **📝 Screening drill:** probes, requests vs limits, QoS classes and zero-downtime deploys are the most-tested K8s MCQs — see [Phase 0 — DevOps MCQ Bank §2](../phase-0-online-assessments/06-devops-cloud-mcq-bank.md#2-kubernetes).
+
 > **Target Role:** Senior / Lead Backend Engineer
 > **Format:** Q&A with practical YAML examples and kubectl commands
 > **Last Updated:** 2026-03-13

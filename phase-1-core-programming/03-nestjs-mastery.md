@@ -1,5 +1,7 @@
 # NestJS Mastery - Interview Q&A
 
+> **📝 Screening drill:** NestJS pipeline order, provider scopes, DI tokens and `ValidationPipe` options appear as MCQs — see [Phase 0 — MCQ Bank: Node.js & Backend](../phase-0-online-assessments/02-mcq-bank-nodejs-backend.md#7-nestjs).
+
 ## Table of Contents
 1. [Core Concepts](#core-concepts)
 2. [Modules](#modules)

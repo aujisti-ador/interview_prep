@@ -132,6 +132,7 @@ A comprehensive, topic-wise learning plan covering Low-Level Design, High-Level 
 - DNS, TLS/SSL, OAuth2/OIDC
 - Blue-green / canary deployments
 - GitOps (ArgoCD, Flux)
+- Production operations — scaling (HPA/KEDA, connection pooling), backup & DR (RPO/RTO, restore drills, failover), monitoring (golden signals, alerting, on-call), capacity planning & cost control → [DevOps Operations](../phase-4-cloud-infrastructure/09-devops-operations.md)
 
 ---
 

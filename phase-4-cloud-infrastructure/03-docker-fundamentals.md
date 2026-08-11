@@ -1,5 +1,7 @@
 # Docker Fundamentals - Interview Q&A
 
+> **📝 Screening drill:** layer caching, `CMD` vs `ENTRYPOINT`, exit code 137 and multi-stage builds are all standard MCQs — see [Phase 0 — DevOps MCQ Bank §1](../phase-0-online-assessments/06-devops-cloud-mcq-bank.md#1-docker).
+
 ## Table of Contents
 1. [What is Docker & Containerization](#what-is-docker--containerization)
 2. [Docker Images & Dockerfile](#docker-images--dockerfile)

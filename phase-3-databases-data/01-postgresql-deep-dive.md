@@ -1,5 +1,7 @@
 # PostgreSQL Deep Dive — Interview Preparation Guide
 
+> **📝 Screening drill:** SQL is the highest points-per-minute section on any mixed assessment. Work the 52 query challenges and 18 rapid-fire MCQs in [Phase 0 — SQL Challenge Bank](../phase-0-online-assessments/04-sql-challenge-bank.md) before your next test.
+
 > **Target Role:** Senior / Lead Backend Engineer
 > **Format:** Q&A with practical SQL, TypeScript, and NestJS code examples
 > **Goal:** Confidently answer any PostgreSQL question in a senior backend interview

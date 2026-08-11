@@ -1,5 +1,7 @@
 # REST API Best Practices - Interview Q&A
 
+> **📝 Screening drill:** status codes, idempotency, pagination and CORS are standard MCQ fodder ([Phase 0 — §5](../phase-0-online-assessments/02-mcq-bank-nodejs-backend.md#5-http--rest-api-design)), and HackerRank's **REST API question type** is drilled in [Phase 0 — REST API & Debugging](../phase-0-online-assessments/05-rest-api-and-debugging-challenges.md).
+
 ## Table of Contents
 1. [HTTP Methods & Semantics](#http-methods--semantics)
 2. [Status Codes](#status-codes)

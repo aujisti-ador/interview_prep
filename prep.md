@@ -19,6 +19,21 @@
 - **Mock Practice**: Record answers (behavioral + technical). Use STAR method.
 - **English Communication**: Practice explaining technical decisions fluently in English — this is the #1 gatekeeper for international remote roles. Use Pramp/Interviewing.io for live practice.
 
+## Phase 0: Online Assessments — The Screening Gate (Week 0 / Ongoing)
+
+> Run this in parallel with everything else. Most applications are rejected by an automated test on HackerRank, Codility, CodeSignal, TestGorilla, Talview or Mercer Mettl **before a human reads your CV**. Full material: [phase-0-online-assessments/](phase-0-online-assessments/README.md)
+
+- [ ] Read the [Platform Playbook](phase-0-online-assessments/00-platform-playbook.md) — question types, scoring models, proctoring rules, Node stdin harness
+- [ ] Take [Mock A](phase-0-online-assessments/08-timed-mock-assessments.md) cold and fill in the diagnostic scorecard
+- [ ] MCQ banks: [JavaScript/TypeScript](phase-0-online-assessments/01-mcq-bank-javascript-typescript.md) (75) · [Node/Backend](phase-0-online-assessments/02-mcq-bank-nodejs-backend.md) (84) · [DevOps/Cloud/Git](phase-0-online-assessments/06-devops-cloud-mcq-bank.md) (90)
+- [ ] Coding: [Patterns Part 1](phase-0-online-assessments/03-coding-challenges-dsa-javascript.md) + [Part 2](phase-0-online-assessments/03b-coding-challenges-advanced-patterns.md) (117 problems)
+- [ ] Coding: [Node/async & simulation tasks](phase-0-online-assessments/03c-nodejs-async-and-simulation-tasks.md) — async pool, retry+jitter, LRU, EventEmitter, CodeSignal growing-spec task
+- [ ] SQL: [52 query challenges + 18 MCQs](phase-0-online-assessments/04-sql-challenge-bank.md) — window functions, cohorts, EXPLAIN
+- [ ] [REST API question type, 16 find-the-bug snippets, code-review round](phase-0-online-assessments/05-rest-api-and-debugging-challenges.md)
+- [ ] [One-way video, aptitude & psychometric](phase-0-online-assessments/07-video-interview-and-psychometric.md) — record the five STAR stories, drill numerical/logical reasoning
+- [ ] Earn the free HackerRank certifications: **Node.js (Intermediate)**, **SQL (Advanced)**, **Problem Solving (Intermediate)** — recruiters filter by these badges
+- [ ] Re-take Mock A after two weeks and compare scores
+
 ## Phase 1: Core Programming & Languages (Week 1–2)
 
 - [ ] JavaScript / TypeScript Deep Dive

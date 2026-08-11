@@ -1,5 +1,7 @@
 # Node.js Fundamentals - Interview Q&A
 
+> **📝 Screening drill:** the 45-second MCQ version of this material is in [Phase 0 — MCQ Bank: Node.js & Backend](../phase-0-online-assessments/02-mcq-bank-nodejs-backend.md), and the implementation tasks (async pool, retry with jitter, LRU, EventEmitter) are in [03c — Node/Async Tasks](../phase-0-online-assessments/03c-nodejs-async-and-simulation-tasks.md).
+
 ## Table of Contents
 1. [Streams](#streams)
 2. [Buffers](#buffers)

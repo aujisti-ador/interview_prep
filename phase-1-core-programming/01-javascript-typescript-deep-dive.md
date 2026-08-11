@@ -1,5 +1,7 @@
 # JavaScript / TypeScript Deep Dive - Interview Q&A
 
+> **📝 Screening drill:** before the deep dive, test yourself against the 75 rapid-fire questions in [Phase 0 — MCQ Bank: JavaScript & TypeScript](../phase-0-online-assessments/01-mcq-bank-javascript-typescript.md). That's the exact format HackerRank, TestGorilla, iMocha and Mettl use to filter candidates.
+
 ## Table of Contents
 1. [Event Loop](#event-loop)
 2. [Closures](#closures)
