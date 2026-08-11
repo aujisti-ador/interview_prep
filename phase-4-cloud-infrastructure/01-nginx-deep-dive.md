@@ -1,5 +1,48 @@
 # NGINX Deep Dive - Interview Q&A
 
+## In 60 seconds
+
+1. **NGINX sits in front of your app and takes the abuse.** It terminates TLS, serves static
+   files, balances load, and shields your Node process from slow clients.
+2. **Reverse proxy = it faces the internet and forwards to your app.** (A *forward* proxy is
+   the opposite: it faces your users and forwards out to the internet.)
+3. **Layer 4 vs Layer 7:** L4 forwards raw TCP without reading it (fast, blind). L7 reads the
+   HTTP request and can route by path or header (slower, smart). NGINX does both.
+4. **This is disproportionately valuable for your market.** It is cheap to learn, concrete, and
+   BD infrastructure rounds ask about it far more than international ones do.
+5. **WebSockets need three specific lines** (`Upgrade`, `Connection`, HTTP/1.1). Forgetting them
+   is a very common production bug — and a common interview question.
+6. **`proxy_buffering` will silently break streaming.** NGINX holds the whole response before
+   sending it, so SSE and streamed LLM responses arrive all at once at the end.
+
+**The interview trap to expect:** "your WebSocket connection works locally but drops after 60
+seconds in production." The answer is NGINX's `proxy_read_timeout` plus missing upgrade
+headers.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Reverse proxy** | Sits in front of your servers, receives requests, forwards them on |
+| **Upstream** | The pool of backend servers NGINX forwards to |
+| **Load balancing** | Spreading requests across several backends |
+| **Round robin** | Take turns. The default balancing method |
+| **Least connections** | Send to whichever backend is least busy |
+| **IP hash** | Same client always goes to the same backend — a way to get sticky sessions |
+| **Layer 4 / Layer 7** | Routing by TCP address · routing by HTTP content |
+| **TLS termination** | NGINX decrypts HTTPS so your app can speak plain HTTP internally |
+| **`proxy_pass`** | The directive that forwards a request to a backend |
+| **`proxy_buffering`** | NGINX holding the full response before forwarding. Must be off for streaming |
+| **Keepalive** | Reusing a connection for several requests instead of reconnecting |
+| **Rate limiting (`limit_req`)** | Capping requests per client at the proxy, before they reach your app |
+| **Worker process** | NGINX's unit of concurrency, usually one per CPU core |
+| **`server` block** | A virtual host — one site's configuration |
+| **`location` block** | Rules for a specific URL path |
+| **Ingress** | The Kubernetes object that usually *is* an NGINX under the hood |
+| **Slowloris** | An attack holding connections open. NGINX absorbs it; a bare Node server does not |
+
+---
+
 ## Table of Contents
 1. [What is NGINX & How It Works](#what-is-nginx--how-it-works)
 2. [NGINX as Reverse Proxy](#nginx-as-reverse-proxy)

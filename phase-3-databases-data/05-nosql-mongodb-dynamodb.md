@@ -4,6 +4,55 @@
 > **Format:** Q&A with practical TypeScript, Node.js, and NestJS code examples
 > **Goal:** Confidently answer any NoSQL, MongoDB, or DynamoDB question in a senior backend interview
 
+## In 60 seconds
+
+1. **The rule that reverses everything you know from SQL: in NoSQL you design the schema around
+   your queries, not around the data.** In Postgres you normalise and then query however you
+   like. Here, you must know your access patterns *first*.
+2. **Embed or reference?** Embed data that is always read together and does not grow without
+   limit. Reference when it grows unboundedly (a user's orders) or is shared by many documents.
+3. **MongoDB's 16 MB document limit is a real design constraint.** "Embed the comments in the
+   post" works until a post gets 50,000 comments.
+4. **DynamoDB single-table design looks bizarre and is correct.** All entity types live in one
+   table with generic `PK`/`SK` columns, because DynamoDB cannot join. You are pre-computing
+   the joins by how you shape the keys.
+5. **In DynamoDB, if a query does not match a key or an index, it becomes a full table Scan** —
+   slow and expensive. Scans in production are almost always a design mistake.
+6. **Hot partitions are the classic DynamoDB failure.** A partition key with poor spread (like
+   `status = "active"`) sends all traffic to one physical partition and it throttles.
+
+**The interview trap to expect:** "model a chat application in DynamoDB." They are testing
+whether you list access patterns first (`get last 50 messages in a room`, `get all rooms for a
+user`) and design keys backwards from them — or whether you draw an SQL schema with a different
+syntax.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Document** | One record, roughly a JSON object. MongoDB's row |
+| **Collection** | A group of documents. MongoDB's table |
+| **Embedding** | Nesting related data inside a document |
+| **Referencing** | Storing an id and looking the other record up separately |
+| **Access pattern** | A specific question your app asks the database. Design starts here |
+| **Aggregation pipeline** | MongoDB's multi-stage query — filter, group, reshape |
+| **Sharding** | Splitting data across servers by a shard key |
+| **Shard key** | The field deciding which server a document lives on. Very hard to change later |
+| **Replica set** | MongoDB's replication group: one primary, several secondaries |
+| **Partition key (PK)** | DynamoDB: decides which physical partition an item lives on |
+| **Sort key (SK)** | DynamoDB: orders items inside a partition, and enables range queries |
+| **Single-table design** | Putting every entity type in one DynamoDB table with generic keys |
+| **GSI** | Global Secondary Index — a different PK/SK to support another access pattern |
+| **LSI** | Local Secondary Index — same PK, different SK. Must be created with the table |
+| **Query vs Scan** | `Query` uses the key and is fast · `Scan` reads everything and is not |
+| **Hot partition** | One partition getting a disproportionate share of traffic, so it throttles |
+| **RCU / WCU** | Read and Write Capacity Units — how DynamoDB measures and bills throughput |
+| **Eventually consistent read** | Cheaper and faster, but may return slightly stale data |
+| **DynamoDB Streams** | A change feed of every write, useful for triggering downstream work |
+| **BASE** | The NoSQL counterpart to ACID: Basically Available, Soft state, Eventual consistency |
+
+---
+
 ## Table of Contents
 1. [NoSQL Fundamentals & When to Use](#q1-nosql-fundamentals--when-to-use)
 2. [MongoDB Architecture & Internals](#q2-mongodb-architecture--internals)

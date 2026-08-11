@@ -16,6 +16,52 @@
 
 ---
 
+## In 60 seconds — how to use this bank
+
+1. **This is the bank most backend candidates neglect, which is exactly why it is worth
+   drilling.** Infrastructure questions are finite and factual — unlike design questions, there
+   is a right answer to memorise.
+2. **Docker questions cluster on three things:** layer caching (why `COPY package.json` comes
+   first), multi-stage builds, and the difference between `CMD` and `ENTRYPOINT`.
+3. **Kubernetes questions are mostly probes and resources.** Liveness restarts you; readiness
+   removes you from traffic. Requests are guaranteed; limits kill you (`OOMKilled`).
+4. **Git questions are almost always about recovery:** `revert` vs `reset`, what `rebase` does
+   to history, and how to recover a commit with `reflog`.
+5. **AWS questions favour a few comparisons:** Security Group (stateful, instance-level) vs NACL
+   (stateless, subnet-level); SQS vs SNS; and how Lambda is billed.
+6. **Linux triage questions are practical:** which command shows what is using a port, what
+   `df` vs `du` tell you, and how to find the process eating memory.
+
+**Answer every question.** No negative marking means an educated guess is always better than a
+blank — and on this bank, elimination usually narrows four options to two.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Layer** | One cached step of a Docker image |
+| **Multi-stage build** | Build in one stage, copy only the output into a small final image |
+| **`CMD` vs `ENTRYPOINT`** | Default arguments · the command that always runs |
+| **Exit code** | Why a container stopped. `137` = killed (usually OOM), `0` = clean |
+| **Liveness probe** | Fails → the container is **restarted** |
+| **Readiness probe** | Fails → the Pod is **removed from the Service** |
+| **Request / Limit** | Guaranteed resources · the hard ceiling |
+| **`OOMKilled`** | Killed for exceeding its memory limit |
+| **QoS class** | Guaranteed / Burstable / BestEffort — decides who gets evicted first |
+| **`git revert`** | A new commit undoing an old one. Safe on shared branches |
+| **`git reset`** | Moves the branch pointer. Rewrites history — dangerous if pushed |
+| **`git rebase`** | Replays your commits on top of another branch. Cleaner history, rewritten hashes |
+| **`git reflog`** | The log of where HEAD has been. How you recover "lost" commits |
+| **Security Group** | Stateful firewall on an instance. Return traffic is automatic |
+| **NACL** | Stateless firewall on a subnet. You must allow return traffic explicitly |
+| **SQS vs SNS** | A queue one consumer reads · a broadcast to many subscribers |
+| **DORA metrics** | Deploy frequency, lead time, change failure rate, time to restore |
+| **TLS handshake** | The negotiation establishing an encrypted connection |
+| **mTLS** | Both sides present certificates |
+| **`df` vs `du`** | Disk free by filesystem · disk used by directory |
+
+---
+
 ## 1. Docker
 
 **D1.** Difference between an image and a container?

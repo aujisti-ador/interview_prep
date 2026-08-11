@@ -3,6 +3,51 @@
 > For Senior/Lead Backend Engineers | TypeScript, NestJS, Node.js Focus
 > Covers Gang of Four patterns, SOLID principles, architectural patterns, and anti-patterns with real-world examples.
 
+## In 60 seconds
+
+1. **A pattern is a named solution to a problem that keeps coming back.** The name is the
+   point — it lets two engineers agree on a design in one word.
+2. **The interview question is never "what is the Factory pattern?"** It is "here is a messy
+   situation, what would you do?" You are being tested on *recognising the problem*, not
+   reciting definitions.
+3. **The five patterns worth knowing cold for backend work:** Repository (hide the database),
+   Strategy (swap an algorithm), Adapter (wrap a third party), Circuit Breaker (stop calling a
+   dead service), and Observer (react to events).
+4. **SOLID in one line each:** one job per class · extend without editing · a subclass must not
+   surprise you · small interfaces beat big ones · depend on an interface, not a concrete class.
+5. **Over-using patterns is a bigger red flag than not knowing them.** Three interfaces and a
+   factory for a single implementation reads as someone who has read about patterns rather than
+   needed them.
+6. **Clean/Hexagonal architecture is one idea:** your business rules must not import your
+   database or your web framework. Everything else follows from that.
+
+**The interview trap to expect:** they describe a class doing five things and ask you to
+improve it. Naming Single Responsibility is the easy half — showing *how you would split it*,
+and what you would deliberately leave alone, is the real answer.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **SOLID** | Five design principles, one per letter (see point 4 above) |
+| **Coupling** | How much one piece depends on another. Less is better |
+| **Cohesion** | How well the things inside one class belong together. More is better |
+| **Strategy** | Swap the algorithm at runtime — e.g. different pricing rules per country |
+| **Observer** | Something happens; anyone who registered interest gets told |
+| **Factory** | A function whose job is deciding *which* object to build |
+| **Singleton** | Exactly one instance for the whole app. Nest providers are this by default |
+| **Decorator (pattern)** | Wrap an object to add behaviour without changing it |
+| **Adapter** | A translator between your code and someone else's interface |
+| **Repository** | A class that hides *how* data is stored, so the rest of the code just asks for it |
+| **Unit of Work** | Group several changes so they all commit or all roll back together |
+| **Circuit Breaker** | After N failures, stop calling a service for a while instead of retrying forever |
+| **DTO** | A plain object describing data crossing a boundary — request bodies, API responses |
+| **CQRS** | Use different models for reading and for writing. Useful when the two have very different shapes |
+| **Hexagonal / Ports & Adapters** | Business logic in the middle; databases and APIs plug in at the edges |
+| **Anti-pattern** | A common "solution" that reliably makes things worse |
+
+---
+
 ## Table of Contents
 1. [Q1: SOLID Principles](#q1-solid-principles-with-real-nodejsnestjs-examples)
 2. [Q2: Strategy Pattern](#q2-strategy-pattern)

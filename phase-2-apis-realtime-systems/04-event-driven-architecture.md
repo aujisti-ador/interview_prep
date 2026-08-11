@@ -1,5 +1,52 @@
 # Event-Driven Architecture (EDA) - Interview Q&A
 
+## In 60 seconds
+
+1. **An event says "this happened" (past tense). A command says "do this."** Events have many
+   possible listeners and no expected reply. That distinction drives the whole design.
+2. **Almost every broker gives you "at-least-once" delivery**, which means **duplicates will
+   happen**. Your consumers must therefore be idempotent. This is not optional and it is the
+   most commonly tested idea in this guide.
+3. **The dual-write problem:** you save to the database *and* publish an event. If the second
+   fails, your system is now inconsistent. **The Outbox pattern** is the fix — write the event
+   into the same database transaction, and a separate process publishes it.
+4. **Kafka vs RabbitMQ in one line:** Kafka is a log you can replay and re-read; RabbitMQ is a
+   queue that deletes messages once handled. Pick replay vs routing flexibility.
+5. **A Saga manages a transaction across services** — since you cannot have one database
+   transaction spanning them. Each step has a compensating step that undoes it.
+6. **A message that always fails must go somewhere.** That is the dead-letter queue. Without
+   one, a single bad message blocks the whole partition forever.
+
+**The interview trap to expect:** "you save an order and publish an OrderCreated event. The
+publish fails. What happens?" They are looking for the Outbox pattern. Saying "I'd use a
+transaction" is wrong — your database and your broker cannot share one.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Event** | A record that something already happened. Past tense: `OrderPlaced` |
+| **Command** | An instruction to do something. Imperative: `PlaceOrder` |
+| **Broker** | The middleman holding messages — Kafka, RabbitMQ, SQS |
+| **Producer / Consumer** | The thing that sends · the thing that reads |
+| **Topic** | A named stream of messages (Kafka's word) |
+| **Partition** | A slice of a topic. Ordering is guaranteed *within* a partition only |
+| **Consumer group** | A set of consumers sharing the work of one topic |
+| **Offset** | Your bookmark — how far through the log you have read |
+| **At-least-once** | Messages will arrive, possibly more than once. The normal default |
+| **Exactly-once** | Very hard, usually faked with at-least-once + idempotent consumers |
+| **Idempotent consumer** | Processing the same message twice causes no extra effect |
+| **Outbox pattern** | Save the event in the same DB transaction as the data; publish it separately |
+| **Saga** | A multi-step business transaction across services, with compensating undo steps |
+| **Compensating transaction** | The undo step — you cannot roll back, so you do the opposite |
+| **CQRS** | Separate models for writing and for reading |
+| **Event sourcing** | Store the sequence of events as the source of truth; rebuild state by replaying |
+| **DLQ** | Dead-letter queue — where poison messages go so they stop blocking everyone |
+| **Schema registry** | A central place defining event formats, so producers cannot break consumers |
+| **Rebalancing** | Kafka reassigning partitions when a consumer joins or leaves |
+
+---
+
 ## Table of Contents
 1. [EDA Fundamentals](#eda-fundamentals)
 2. [Events vs Commands](#events-vs-commands)

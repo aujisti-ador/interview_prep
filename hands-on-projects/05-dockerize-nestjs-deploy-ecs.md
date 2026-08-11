@@ -6,6 +6,51 @@
 
 ---
 
+## In 60 seconds
+
+1. **This is the most immediately useful project in the list**, because "can you take a NestJS
+   app to production on AWS?" is a question you will actually be asked, and here you will have
+   done it end to end.
+2. **The multi-stage Dockerfile is the part to get right.** Build with the full toolchain in
+   stage one, copy only the compiled output and production dependencies into a slim runtime
+   stage. Expect roughly 1.2 GB → 150 MB.
+3. **Layer ordering decides your build time.** `COPY package*.json` and `npm ci` **before**
+   `COPY . .`, or every code change reinstalls every dependency. This is the classic mistake.
+4. **Zero-downtime needs three things working together:** a health-check endpoint the load
+   balancer polls, ECS waiting for it before shifting traffic, and your app handling `SIGTERM`
+   to finish in-flight requests.
+5. **Never bake secrets into the image.** A secret in a layer is in the image history forever,
+   even if a later layer deletes it. Use Secrets Manager or SSM Parameter Store.
+6. **Run as a non-root user.** One line in the Dockerfile, and its absence is the first thing a
+   security-minded reviewer notices.
+
+**What to be able to explain afterwards:** what happens during a deploy, second by second — old
+tasks draining, new tasks starting, health checks passing, traffic shifting — and how you would
+roll back.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Multi-stage build** | Build in one stage, ship only the artefacts from a slimmer stage |
+| **Layer caching** | Reusing unchanged Docker steps. Broken by bad instruction ordering |
+| **`.dockerignore`** | Keeps `node_modules` and `.git` out of the build context |
+| **ECR** | AWS's private Docker image registry |
+| **ECS** | AWS's container orchestrator |
+| **Fargate** | ECS without managing servers. You just declare CPU and memory |
+| **Task definition** | The blueprint: which image, how much CPU/memory, which env vars |
+| **Service** | Keeps N tasks running and registers them with the load balancer |
+| **ALB** | Application Load Balancer — routes HTTP traffic to healthy tasks |
+| **Target group** | The set of tasks the ALB sends traffic to |
+| **Health check** | The endpoint the ALB polls to decide if a task can serve traffic |
+| **Draining** | Letting an old task finish its requests before stopping it |
+| **`SIGTERM`** | The "please stop" signal before the kill. Your app must handle it |
+| **RDS / ElastiCache** | AWS's managed PostgreSQL · managed Redis |
+| **Secrets Manager / SSM** | Where credentials live, injected at runtime |
+| **OIDC (in GitHub Actions)** | Deploying without storing long-lived AWS keys in GitHub |
+
+---
+
 ## What You'll Learn
 
 - Multi-stage Docker builds for Node.js

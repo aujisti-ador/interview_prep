@@ -6,6 +6,54 @@
 
 ---
 
+## In 60 seconds
+
+1. **Almost every injection bug has the same shape and the same fix:** untrusted input reaching
+   an interpreter. Parameterised queries, not string concatenation. Ever.
+2. **Authentication vs authorisation.** *AuthN* = who are you. *AuthZ* = what may you do. Most
+   real breaches are authorisation bugs, not authentication ones.
+3. **The most common API vulnerability has a boring name: IDOR** — you check the user is logged
+   in, but not that *this* order belongs to *them*. `GET /orders/1234` returning someone else's
+   order.
+4. **Hash passwords with bcrypt or argon2, never SHA-256.** Fast hashes are a weakness here:
+   the whole point is to be slow enough that brute-forcing is impractical.
+5. **A JWT cannot be cancelled.** Once signed, it is valid until it expires. Instant logout
+   needs short expiry plus refresh tokens, or a denylist.
+6. **Secrets in environment variables are fine; secrets in git are not** — and once committed,
+   they are in the history forever. Rotate, do not just delete.
+
+**The interview trap to expect:** "how do you store passwords?" is the warm-up. The real
+question that follows is "how do you handle a user who wants to be forgotten under GDPR when
+their data is in backups and a Kafka log?" — and that is where senior answers separate.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **OWASP Top 10** | The industry list of the ten most critical web security risks |
+| **SQL injection** | User input treated as SQL commands. Fixed by parameterised queries |
+| **XSS** | Injecting scripts that run in another user's browser |
+| **CSRF** | Tricking a logged-in user's browser into making a request they did not intend |
+| **IDOR** | Accessing someone else's record by changing an id in the URL |
+| **AuthN / AuthZ** | Who you are · what you may do |
+| **RBAC / ABAC** | Permissions by role · permissions by attributes and context |
+| **Principle of least privilege** | Give the minimum access needed, nothing more |
+| **bcrypt / argon2** | Deliberately slow password hashes. Use these |
+| **Salt** | Random data added per password so identical passwords hash differently |
+| **JWT** | A signed token carrying claims. Readable by anyone; forgeable by nobody |
+| **Refresh token** | Long-lived, used only to obtain new short-lived access tokens |
+| **OAuth2 / OIDC** | Delegated authorisation · an identity layer on top of it |
+| **mTLS** | Both sides present certificates. Common between internal services |
+| **Secrets manager** | A service storing credentials with access control and rotation |
+| **Supply chain attack** | Compromising you through a dependency you trust |
+| **SBOM** | A list of everything in your build, so you know what to patch |
+| **GDPR** | EU privacy law. Consent, data minimisation, and the right to erasure |
+| **SOC 2** | An audited report proving your security controls actually operate |
+| **PII** | Personally Identifiable Information — data identifying a real person |
+| **Data residency** | Legal rules about which country data may be stored in |
+
+---
+
 ## Q1: Application Security Fundamentals
 
 ### Interview Question

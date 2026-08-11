@@ -10,6 +10,54 @@ This file covers the **"run it in production"** half of DevOps — the questions
 
 ---
 
+## In 60 seconds
+
+1. **Autoscaling on CPU is the default and often the wrong metric.** A Node app waiting on the
+   database has low CPU and a huge queue. Scale on the thing that actually represents load —
+   requests in flight, queue depth, or event-loop lag.
+2. **Scaling up is fast; scaling down must be slow.** Aggressive scale-down causes thrashing:
+   remove instances, load rises, add them back, repeat. Use a cooldown.
+3. **A backup you have never restored is not a backup.** The only proof is a practised restore,
+   timed, into a real environment. Say this in an interview and you sound like someone who has
+   been burned.
+4. **RPO and RTO are the two numbers that define your disaster plan.** *RPO* = how much data you
+   can afford to lose (drives backup frequency). *RTO* = how long you can afford to be down
+   (drives your failover design). They are business decisions, not technical ones.
+5. **On-call quality is an engineering output.** Every page should be actionable and have a
+   runbook. A page that says "CPU high" at 3am with no runbook is a design failure.
+6. **Capacity planning is arithmetic, not intuition.** Peak RPS × cost per request × headroom
+   factor. Being able to do this out loud is a lead-level signal.
+
+**The interview trap to expect:** "your database is at 80% CPU and traffic doubles next month —
+what do you do?" They want ordered thinking: measure what the queries actually are → fix the
+worst ones → add read replicas → cache → *then* consider sharding. Jumping straight to "shard
+it" is the wrong answer.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Horizontal scaling** | More instances |
+| **Vertical scaling** | A bigger instance |
+| **HPA** | Kubernetes Horizontal Pod Autoscaler — adds Pods when a metric rises |
+| **KEDA** | Autoscaling driven by external signals, e.g. Kafka consumer lag |
+| **Cooldown** | A wait before scaling again, to stop thrashing |
+| **Thrashing** | Scaling up and down repeatedly without settling |
+| **Connection pooling** | Reusing database connections. Essential when instance count varies |
+| **RPO** | Recovery Point Objective — acceptable data loss, in time |
+| **RTO** | Recovery Time Objective — acceptable downtime |
+| **PITR** | Point-In-Time Recovery — restore to any moment, not just the last snapshot |
+| **Failover** | Switching to a standby when the primary dies |
+| **Restore drill** | Actually practising a restore. The only real proof |
+| **Runbook** | Step-by-step instructions for handling one specific alert |
+| **Escalation policy** | Who gets paged next if the first person does not respond |
+| **Toil** | Manual repetitive work that should be automated. Track it and reduce it |
+| **Capacity headroom** | Spare capacity kept for spikes — commonly 30–40% |
+| **Right-sizing** | Matching instance size to real usage. Usually the biggest cost saving |
+| **FinOps** | Treating cloud cost as an engineering metric with an owner |
+
+---
+
 ## Table of Contents
 
 1. [Scaling Fundamentals & Autoscaling in Production](#q1-scaling-fundamentals--autoscaling-in-production)

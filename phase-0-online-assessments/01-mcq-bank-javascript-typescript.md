@@ -16,6 +16,49 @@
 
 ---
 
+## In 60 seconds — how to use this bank
+
+1. **These are 45-second questions, not 5-minute ones.** If you are reasoning carefully, you are
+   already too slow. The goal is recognition, not derivation.
+2. **The largest category is "what does this print?"** and almost all of those come down to one
+   rule: **microtasks (promises) run before macrotasks (timers)**, and synchronous code runs
+   before both.
+3. **The second largest is coercion.** `==` converts types before comparing, `===` does not.
+   Most trick questions live in that gap.
+4. **`var` vs `let` in a loop** is close to guaranteed to appear. `var` has one shared binding;
+   `let` creates a new one each iteration.
+5. **For TypeScript, the recurring themes are:** `any` vs `unknown`, what `never` means, the
+   utility types (`Partial`, `Pick`, `Omit`, `Record`), and `satisfies`.
+6. **Answer every question.** No negative marking means a guess has positive expected value.
+
+**How to drill this properly:** cover the answer, commit to one out loud, *then* read. Passively
+reading questions and agreeing with the explanations feels productive and teaches you almost
+nothing.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Microtask** | Promise callbacks. Run before any timer, after the current code finishes |
+| **Macrotask** | `setTimeout`, `setInterval`, I/O callbacks |
+| **Coercion** | Automatic type conversion, e.g. `"5" == 5` being true |
+| **Hoisting** | Declarations moved to the top of scope before execution |
+| **TDZ** | Temporal Dead Zone — a `let`/`const` exists but cannot be accessed yet |
+| **Closure** | A function keeping access to the variables it was created beside |
+| **Prototype chain** | Where JS looks when a property is missing on an object |
+| **`this` binding** | Decided by how a function is *called*, except in arrow functions |
+| **Pure function** | Same input → same output, no side effects |
+| **Shallow vs deep copy** | Copies the top level only · copies everything nested |
+| **`any` vs `unknown`** | Disables checking · requires you to narrow before use. Prefer `unknown` |
+| **`never`** | A value that cannot exist — the return type of a function that always throws |
+| **Utility types** | Built-in type transformers: `Partial`, `Pick`, `Omit`, `Record` |
+| **Generic** | A type with a placeholder, filled in at use — `Array<T>` |
+| **Type narrowing** | Convincing the compiler a value is a more specific type |
+| **`satisfies`** | Check a value matches a type without widening its inferred type |
+| **Structural typing** | TypeScript compares shapes, not names |
+
+---
+
 ## 1. Output Prediction — Event Loop & Async
 
 **Q1.** What is printed?

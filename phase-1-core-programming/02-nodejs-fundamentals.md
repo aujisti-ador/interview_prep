@@ -2,6 +2,46 @@
 
 > **📝 Screening drill:** the 45-second MCQ version of this material is in [Phase 0 — MCQ Bank: Node.js & Backend](../phase-0-online-assessments/02-mcq-bank-nodejs-backend.md), and the implementation tasks (async pool, retry with jitter, LRU, EventEmitter) are in [03c — Node/Async Tasks](../phase-0-online-assessments/03c-nodejs-async-and-simulation-tasks.md).
 
+## In 60 seconds
+
+1. **Node is single-threaded for your code.** If you do heavy CPU work, the entire server stops
+   answering anyone. This is the root of most Node performance questions.
+2. **Streams let you process a 2 GB file using 50 MB of memory** — you read it in small pieces
+   instead of all at once.
+3. **Backpressure is the reader saying "slow down".** If you ignore it, memory fills up and the
+   process dies. Interviewers love this one.
+4. **Cluster vs Worker Threads solve different problems.** Cluster = more copies of your app, to
+   use all CPU cores for *requests*. Worker Threads = move one heavy *calculation* off the main
+   thread.
+5. **`setImmediate` vs `setTimeout(fn, 0)`** — the order depends on where you call them from.
+   The guide explains the phases that decide it.
+6. **Graceful shutdown matters in production.** When Kubernetes says stop, you must finish
+   in-flight requests before exiting, or users see errors during every deploy.
+
+**The interview trap to expect:** "your API gets slow under load — how do you find out why?"
+The answer involves the event loop, not the database. See Performance & Memory.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **libuv** | The C library underneath Node that actually does the file and network work |
+| **Thread pool** | A small set of background threads (4 by default) that libuv uses for file I/O, DNS and crypto |
+| **Event loop blocking** | Your code hogging the single thread, so nothing else can be served |
+| **Stream** | Data delivered in pieces over time, instead of all at once |
+| **Backpressure** | The signal from a slow writer telling a fast reader to pause |
+| **highWaterMark** | The buffer-size limit that triggers backpressure |
+| **Buffer** | A chunk of raw binary data — Node's way of holding bytes |
+| **Cluster** | Running several copies of your app, one per CPU core, sharing one port |
+| **Worker Thread** | A real separate thread for CPU-heavy work, with its own memory |
+| **Child process** | A whole separate program you started from Node |
+| **Graceful shutdown** | Stop accepting new requests, finish the current ones, then exit |
+| **SIGTERM** | The "please stop" signal an orchestrator sends before force-killing you |
+| **Memory leak** | Memory your program holds forever because something still references it |
+| **Flame graph** | A picture of where your CPU time went — wide bars are the slow parts |
+
+---
+
 ## Table of Contents
 1. [Streams](#streams)
 2. [Buffers](#buffers)

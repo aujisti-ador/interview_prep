@@ -14,6 +14,44 @@
 
 ---
 
+## In 60 seconds — how to use these mocks
+
+1. **Take them cold, under a real timer, before you feel ready.** That is the entire point. A
+   mock taken when you are prepared measures nothing; a mock taken cold tells you where to
+   spend the next two weeks.
+2. **No hints, no lookups, no pausing.** If you would not be allowed it in the real test, do not
+   allow it here. A comfortable mock produces a comfortable illusion.
+3. **Fill in the diagnostic scorecard immediately afterwards**, while you still remember where
+   you got stuck. "I lost 20 minutes on the DP problem and never opened the SQL section" is the
+   information you came for.
+4. **The result you want is a weakest bucket, not a score.** Most people are uneven — strong on
+   coding, weak on SQL; or strong technically and out of time. The uneven part is what to train.
+5. **Re-take the same mock two weeks later.** Comparing two scores on the same test is far more
+   informative than one score on a harder one.
+6. **Time management is usually the real finding.** Most candidates who fail these had the
+   knowledge and spent it badly — 40 minutes on one problem, nothing left for three easy ones.
+
+**Do Mock A today, on day one of your plan, before studying anything.** A baseline taken after
+two weeks of study cannot tell you what the two weeks were worth.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Cold mock** | Taken with no preparation or warm-up, to get a true baseline |
+| **Diagnostic scorecard** | The per-section breakdown showing where points were lost |
+| **Weakest bucket** | The section costing you the most. Where to train next |
+| **Time allocation** | Deciding in advance how long each section gets |
+| **Triage** | Scanning all questions first, then choosing an order |
+| **Partial credit** | Score per passing test case rather than all-or-nothing |
+| **TLE** | Time Limit Exceeded — correct but too slow |
+| **Bundle test** | Several short tests combined into one score (TestGorilla's format) |
+| **Enterprise screen** | A longer, mixed assessment: coding plus MCQs plus SQL |
+| **Percentile ranking** | Your position relative to other candidates |
+| **Cutoff score** | The threshold below which you are auto-rejected. Rarely published |
+
+---
+
 ## Mock A — HackerRank Enterprise Screen (90 min)
 
 **Format:** 10 MCQ (20 pts) + 2 coding (50 pts) + 1 SQL (30 pts). Navigation between questions allowed. Partial test-case credit on coding.

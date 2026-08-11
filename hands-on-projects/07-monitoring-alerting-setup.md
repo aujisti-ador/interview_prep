@@ -6,6 +6,53 @@
 
 ---
 
+## In 60 seconds
+
+1. **This is the cheapest project on the list and it buys the most credibility.** Five hours,
+   and afterwards you can talk about SLOs and error budgets from experience rather than from
+   reading — which is the fastest way to sound like a lead.
+2. **Instrument the four golden signals first:** latency, traffic, errors, saturation. Almost
+   every dashboard worth having is built from those four.
+3. **For a Node app, add one more that most people miss: event-loop lag.** It is the metric that
+   actually tells you your service is in trouble, and mentioning it signals real Node
+   experience.
+4. **Alert on symptoms, not causes.** "Checkout error rate above 1% for 5 minutes" is a good
+   alert. "CPU above 80%" is not — high CPU may be perfectly healthy.
+5. **Write a runbook for every alert you create.** If a page has no runbook, it is not ready to
+   wake anyone up. Make this a rule and say so in interviews.
+6. **Beware metric cardinality.** Adding a label with many distinct values — a user id, a
+   request id — multiplies your storage cost enormously. This is a real, expensive production
+   mistake.
+
+**What to be able to explain afterwards:** pick an SLO for your own service, state the error
+budget it implies in minutes per month, and describe what you would stop doing when the budget
+is spent.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Prometheus** | Pulls metrics from your app on a schedule and stores them |
+| **Grafana** | Draws dashboards from those metrics |
+| **Loki** | Stores logs, queryable alongside the metrics |
+| **AlertManager** | Decides who gets paged, groups alerts, and silences noise |
+| **Exporter** | A small service exposing metrics for something that cannot do it itself |
+| **Scrape** | Prometheus fetching `/metrics` from your app |
+| **Counter / Gauge / Histogram** | Only goes up · goes up and down · buckets for percentiles |
+| **Cardinality** | Distinct label combinations. High cardinality explodes storage cost |
+| **Golden signals** | Latency, traffic, errors, saturation |
+| **Event-loop lag** | How long Node's single thread is blocked. **The key Node metric** |
+| **p95 / p99** | The slowest 5% · slowest 1% of requests |
+| **SLI / SLO** | The measurement · the target |
+| **Error budget** | The failure your SLO permits, in minutes per month |
+| **Burn rate** | How fast you are consuming the error budget |
+| **Alert fatigue** | Too many alerts, so people stop reading them |
+| **Runbook** | Written steps for handling one specific alert at 3am |
+| **PromQL** | Prometheus's query language |
+| **Structured logging** | Logs as JSON with fields, so they can be searched |
+
+---
+
 ## What You'll Learn
 
 - Prometheus for metrics collection (pull-based model)

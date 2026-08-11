@@ -8,6 +8,56 @@ Each problem follows the same structure: **Requirements → Estimation → API �
 
 ---
 
+## In 60 seconds — how to use this guide
+
+1. **Do not read these as answers. Attempt them first, on a timer, out loud.** Reading a worked
+   solution feels like learning and is not. The value is entirely in the attempt.
+2. **45 minutes, a blank Excalidraw canvas, and your voice.** Record yourself. Then compare
+   against the write-up and score honestly against the rubric.
+3. **Follow the same seven steps every single time**, from
+   [01-system-design-fundamentals](01-system-design-fundamentals.md):
+   requirements → estimates → API → data model → high-level design → bottleneck → trade-offs.
+   The consistency is the skill.
+4. **Most of these problems reduce to a small set of recurring ideas.** Once you see them, new
+   problems stop being new:
+   - **Fan-out** — one write, many readers (feeds, notifications, chat)
+   - **Idempotency** — safe retries (payments, webhooks, job runners)
+   - **Sharding by a key** — spreading load without losing ordering where it matters
+   - **Read vs write optimisation** — precompute at write time, or compute at read time
+   - **Hot spots** — one celebrity, one popular key, breaking your even distribution
+5. **The bottleneck question is where the interview really happens.** Get to "what breaks
+   first?" quickly — that is the conversation they want.
+6. **Say the trade-off out loud, every time.** "I'm choosing X over Y, which costs us Z." That
+   sentence is what is actually being scored.
+
+**The most common failure in this round is not a wrong design — it is never finishing.**
+Candidates spend 30 minutes on the data model and never reach scaling. Watch the clock and move
+on deliberately.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Fan-out on write** | Do the work when data is created — push to every follower's feed. Fast reads, expensive writes |
+| **Fan-out on read** | Do the work when data is requested — assemble the feed on demand. Cheap writes, slow reads |
+| **Hybrid fan-out** | Push for normal users, pull for celebrities. What real systems do |
+| **Celebrity problem** | One account with millions of followers breaking fan-out-on-write |
+| **Precomputation** | Calculating results ahead of time so reads are cheap |
+| **Write amplification** | One user action causing many writes |
+| **Hot partition** | One shard receiving far more traffic than the others |
+| **Consistent hashing** | Distributing keys so adding a node moves few of them |
+| **Geohash / quadtree** | Ways of indexing locations for "what is near me" queries |
+| **Bloom filter** | A tiny structure answering "definitely not present" — avoids pointless lookups |
+| **Rate limiter** | Capping request volume per client |
+| **Token bucket** | The usual rate-limiting algorithm; permits short bursts |
+| **CDN** | Caching servers close to users |
+| **Object storage** | S3-style storage for files. Cheap, not a database |
+| **Push vs pull** | Server sends when there is news · client asks repeatedly |
+| **Dead letter queue** | Where permanently failing messages go |
+| **Back-of-envelope** | Rough capacity maths done out loud |
+
+---
+
 ## Table of Contents
 
 | # | Problem | Core lesson |

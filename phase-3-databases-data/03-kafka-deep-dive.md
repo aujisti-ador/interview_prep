@@ -1,5 +1,53 @@
 # Apache Kafka Deep Dive - Interview Q&A
 
+## In 60 seconds
+
+1. **Kafka is a log, not a queue.** Reading a message does not remove it. Everyone reads the
+   same log at their own position, and you can rewind. That single fact explains most of Kafka's
+   design.
+2. **A topic is split into partitions, and ordering is guaranteed only inside one partition** —
+   never across the whole topic. If order matters for a customer, send all their events to the
+   same partition using their id as the key.
+3. **Partitions are the unit of parallelism.** 6 partitions means at most 6 consumers in a group
+   can work. A 7th sits idle.
+4. **Your offset is your bookmark.** When you commit it decides your delivery guarantee: commit
+   before processing = at-most-once (may lose); commit after = at-least-once (may duplicate).
+5. **"Exactly-once" is real in Kafka but narrow** — it works within Kafka (read → process →
+   write to Kafka). It does not extend to your database or a third-party API.
+6. **Rebalancing pauses consumption.** When a consumer joins or dies, partitions are reassigned
+   and everyone stops briefly. Long processing times trigger this accidentally.
+
+**The interview trap to expect:** "you need to process orders in order, but also scale to 10
+consumers." The answer is partitioning by a key (customer id), which gives you order *per
+customer* while still parallelising — and knowing that global ordering and scaling are
+fundamentally in conflict.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Topic** | A named stream of messages |
+| **Partition** | One slice of a topic. The unit of both ordering and parallelism |
+| **Broker** | One Kafka server. Several brokers make a cluster |
+| **Offset** | Your position in a partition — the bookmark |
+| **Consumer group** | Consumers sharing the partitions of a topic between them |
+| **Message key** | Decides which partition a message goes to. Same key → same partition → ordered |
+| **Replication factor** | How many copies of each partition exist. 3 is typical |
+| **ISR** | In-Sync Replicas — the copies currently keeping up with the leader |
+| **acks=0/1/all** | How many replicas must confirm a write. `all` is safest, slowest |
+| **Retention** | How long messages are kept — by time or by size. Not "until read" |
+| **Log compaction** | Keep only the newest message per key, forever. Good for state snapshots |
+| **Rebalance** | Reassigning partitions when group membership changes. Consumption pauses |
+| **Consumer lag** | How far behind the latest message a consumer is. **The number to alert on** |
+| **Idempotent producer** | Kafka de-duplicates producer retries automatically |
+| **Transaction** | Write to several partitions atomically, inside Kafka |
+| **Kafka Connect** | Prebuilt connectors moving data in and out without writing code |
+| **Kafka Streams** | A library for processing streams — joins, aggregations, windows |
+| **Schema Registry** | Central store of message formats, so producers cannot break consumers |
+| **Poison message** | A message that always fails. Blocks its partition until handled |
+
+---
+
 ## Table of Contents
 1. [What is Kafka & Core Concepts](#q1-what-is-kafka--core-concepts)
 2. [Topics & Partitions](#q2-topics--partitions)

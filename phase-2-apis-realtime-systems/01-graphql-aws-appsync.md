@@ -1,5 +1,47 @@
 # GraphQL & AWS AppSync - Interview Q&A
 
+## In 60 seconds
+
+1. **GraphQL lets the client ask for exactly the fields it wants**, in one request. REST gives
+   you whatever the endpoint decided, often too much or too little.
+2. **It has one endpoint, not many.** `POST /graphql` for everything. That breaks a lot of
+   assumptions — HTTP caching, status codes, rate limiting all need rethinking.
+3. **The N+1 problem is the number one GraphQL interview question.** Ask for 100 posts and
+   their authors, and a naive resolver makes 101 database queries. **DataLoader** fixes it by
+   batching them into 2.
+4. **GraphQL errors return HTTP 200.** The errors live in the response body. Your monitoring
+   will lie to you unless you account for this.
+5. **A public GraphQL API is a denial-of-service risk by default** — a deeply nested query can
+   be very expensive. You need depth limiting and complexity scoring.
+6. **Federation is how GraphQL works with many teams**: each team owns a piece of the schema,
+   and a gateway stitches them into one graph.
+
+**The interview trap to expect:** "your GraphQL API got slow after you added a `comments` field
+to `Post`." The answer is N+1, and they want to hear DataLoader *and* why it works (batching
+within one tick of the event loop).
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Schema** | The contract: every type and field the API offers |
+| **Resolver** | The function that produces the value for one field |
+| **Query / Mutation / Subscription** | Read · write · live updates |
+| **N+1 problem** | Fetching a list, then making one more query per item in it |
+| **DataLoader** | A helper that collects the individual requests made in one tick and runs them as a single batched query |
+| **Over-fetching** | Getting fields you did not need — the REST problem GraphQL solves |
+| **Under-fetching** | Needing several round trips to build one screen |
+| **Introspection** | The API describing itself. Great in development, usually disabled in production |
+| **Query depth limiting** | Rejecting queries nested deeper than N levels, to stop abuse |
+| **Query complexity** | Giving each field a cost, and rejecting queries above a budget |
+| **Cursor pagination** | Paging with "give me 20 after this item" instead of "page 3" — stable when data changes |
+| **Federation** | Many services each own part of one big schema; a gateway combines them |
+| **Schema stitching** | The older way of combining schemas, done at the gateway |
+| **AppSync** | AWS's managed GraphQL service, with built-in subscriptions and auth |
+| **Persisted queries** | Client sends a hash instead of the query text — smaller and safer |
+
+---
+
 ## Table of Contents
 1. [GraphQL Fundamentals](#graphql-fundamentals)
 2. [Schema Design](#schema-design)

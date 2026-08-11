@@ -2,6 +2,47 @@
 
 > **The gate before the gate.** For senior/lead backend roles — especially international remote and agency-sourced (Turing, Toptal, Arc, Andela) — 60–80% of candidates are eliminated by an automated test they never speak to a human about. This file decodes *how each platform asks questions* so you can pattern-match instead of improvise.
 
+## In 60 seconds
+
+1. **This round is scored by a machine, and the machine does not care how good an engineer you
+   are.** It measures problems solved, within a time limit. Optimise for that specific thing.
+2. **Never leave a blank.** MCQs almost never carry negative marking, so a guess is strictly
+   better than an empty answer. Free points.
+3. **Brute force is a score. An elegant unfinished solution is zero.** Get something passing,
+   then optimise if the clock allows.
+4. **Read the constraint before choosing an algorithm.** `n ≤ 1000` allows O(n²).
+   `n ≤ 10⁶` does not. The constraint tells you the intended complexity.
+5. **"Run" is not "Submit".** Submit early, then keep improving. Candidates lose whole
+   questions to running out of time with working code they never submitted.
+6. **Assume proctoring is on.** Tab-switching, pasting and AI use are detected as standard now,
+   and a flag ends the process regardless of your score.
+
+**The single biggest mistake:** treating every question as equally worth solving. A mixed test
+usually has one hard problem worth the same as three easy ones. Sweep for the cheap points
+first, then spend what is left on the hard one.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **OA** | Online Assessment — the automated test before any human sees you |
+| **ATS** | The system that received your application and scheduled this |
+| **Proctoring** | Monitoring during the test — webcam, screen, tab focus |
+| **Plagiarism detection** | Comparing your code against other submissions and public solutions |
+| **Partial credit** | Scoring per passing test case, not all-or-nothing |
+| **Test case** | One input/output pair your solution must satisfy |
+| **Hidden test case** | Cases you cannot see, often the edge cases |
+| **Time limit (TLE)** | Time Limit Exceeded — correct but too slow |
+| **stdin/stdout harness** | Reading input from standard input and printing the answer. The Node setup matters |
+| **Constraint** | The stated limits on input size. They tell you the required complexity |
+| **Big-O** | How runtime grows as input grows |
+| **Growing-spec task** | CodeSignal's format: four levels, each adding requirements to the last |
+| **Skill test bundle** | TestGorilla-style: several short tests combined into one score |
+| **SJT** | Situational Judgement Test — "what would you do if…" scenarios |
+| **Psychometric test** | Personality or aptitude assessment, not technical |
+
+---
+
 ## Table of Contents
 1. [The Landscape — Who Uses What](#the-landscape--who-uses-what)
 2. [HackerRank for Work](#1-hackerrank-for-work)

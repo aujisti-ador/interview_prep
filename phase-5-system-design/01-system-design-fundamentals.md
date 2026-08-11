@@ -6,6 +6,61 @@
 
 ---
 
+## In 60 seconds
+
+1. **The system design round is not testing whether you know the right answer. It is testing
+   whether you can have a structured technical conversation** under uncertainty. Silence and
+   rambling both fail; a clear method passes.
+2. **Never start drawing.** Spend the first 5–10 minutes on requirements. Candidates who jump
+   to boxes-and-arrows fail this round more than any other way.
+3. **The seven-step framework, which you should follow visibly every time:**
+   ```
+   1. Requirements      what must it do, what must it not do
+   2. Scale estimates   users, QPS, storage — rough numbers, out loud
+   3. API design        the 3-5 endpoints that matter
+   4. Data model        tables/collections and the access patterns
+   5. High-level design the boxes, finally
+   6. Bottleneck        find the one that breaks first, fix it
+   7. Trade-offs        what you chose against, and why
+   ```
+4. **Estimation only needs to be roughly right.** 100M users, 10% daily active, 20 actions each
+   = 200M actions/day ≈ 2,300/sec average ≈ 7,000/sec peak. Nobody checks your arithmetic; they
+   check that you *do* it.
+5. **Every answer is "it depends", and the interview is about *what* it depends on.** Naming the
+   trade-off is the score. "I'd use Kafka" scores low; "I'd use Kafka because we need replay,
+   accepting the operational cost" scores high.
+6. **Drive the conversation.** Say what you are doing next: *"I'll do capacity estimates, then
+   the data model."* Passive candidates read as junior regardless of the design.
+
+**The interview trap to expect:** they will stay deliberately vague ("design Twitter") to see
+whether you ask questions. The vagueness *is* the first test.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Functional requirement** | What it must do — "users can post" |
+| **Non-functional requirement** | How well — latency, availability, scale. Usually the real difficulty |
+| **QPS / RPS** | Queries (requests) per second |
+| **Peak vs average load** | Peak is typically 2–5× average. Design for peak |
+| **Back-of-envelope estimate** | Rough maths done out loud to size the system |
+| **Vertical / horizontal scaling** | Bigger machine · more machines |
+| **Stateless service** | Keeps no local data, so any instance can serve any request. Easy to scale |
+| **Load balancer** | Spreads requests across instances |
+| **CDN** | Servers near users caching static content |
+| **Cache** | Fast storage in front of something slow |
+| **Read replica** | A copy of the database serving reads only |
+| **Sharding** | Splitting data across machines |
+| **Message queue** | A buffer decoupling producers from consumers |
+| **Fan-out** | Delivering one item to many recipients |
+| **Write-heavy / read-heavy** | Which direction dominates. Changes the whole design |
+| **Hot spot** | One key or partition taking disproportionate traffic |
+| **Single point of failure** | One component whose failure takes everything down |
+| **Bottleneck** | The constraint that limits the whole system |
+| **CAP** | Under a network partition, choose consistency or availability |
+
+---
+
 ## Table of Contents
 
 1. [The Interview Framework](#q1-the-interview-framework)

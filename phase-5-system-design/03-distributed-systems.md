@@ -6,6 +6,56 @@
 
 ---
 
+## In 60 seconds
+
+1. **The one idea underneath everything here: you cannot tell the difference between a slow
+   machine and a dead one.** Every hard problem in distributed systems comes from that.
+2. **Because of that, "did my request succeed?" is often unanswerable.** A timeout means you do
+   not know. Which is why **idempotency** matters so much — if you cannot tell, you must be able
+   to safely retry.
+3. **Clocks lie.** Two servers disagree about the time, so you cannot order events by
+   timestamp. That is why logical clocks and version vectors exist.
+4. **Consensus means getting several machines to agree on one value despite failures.** Raft is
+   the one to understand. You will never implement it; you will use things built on it (etcd,
+   Kafka's controller, Postgres failover).
+5. **A distributed lock without a fencing token is unsafe.** A process can pause (garbage
+   collection, network stall), lose its lock, resume believing it still holds it, and corrupt
+   data. A monotonically increasing token lets the storage layer reject the stale writer.
+6. **Assume the network fails, because it does.** Timeouts, retries with jitter, circuit
+   breakers and bulkheads are not optional extras — they are the baseline.
+
+**The interview trap to expect, quoted from this repo's own plan:** *"I do not ask you to
+implement Raft. I ask what happens when your leader is network-partitioned but still thinks it
+is the leader."* Fencing tokens are the answer being fished for.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Fallacies of distributed computing** | The eight false assumptions: the network is reliable, latency is zero, and so on |
+| **Partition** | Machines alive but unable to reach each other |
+| **Split brain** | Two nodes both believing they are the leader |
+| **Fencing token** | An increasing number proving your lock is still the current one |
+| **Consensus** | Getting several nodes to agree on one value despite failures |
+| **Raft / Paxos** | Consensus algorithms. Raft is the one designed to be understandable |
+| **Leader election** | Choosing one node to coordinate; re-choosing when it dies |
+| **Quorum** | A majority. Needed to make a decision safely |
+| **Logical clock** | Ordering events by causality rather than by wall-clock time |
+| **Vector clock** | Tracks causality across nodes, so you can detect concurrent updates |
+| **CRDT** | A data type that merges concurrent edits automatically without conflict |
+| **Idempotency** | Doing it twice has the same effect as once |
+| **Exactly-once** | Usually impossible end-to-end; approximated with at-least-once + idempotency |
+| **Two-phase commit** | Coordinated commit across systems. Blocks if the coordinator dies |
+| **Saga** | The practical alternative: local transactions with compensating undo steps |
+| **Consistent hashing** | Mapping keys to nodes so adding a node moves few keys |
+| **Gossip protocol** | Nodes randomly telling each other what they know, until all agree |
+| **Circuit breaker** | Stop calling a failing service; retry cautiously later |
+| **Bulkhead** | Isolating resources so one failure cannot consume everything |
+| **Backoff with jitter** | Retry after an increasing, randomised delay, to avoid synchronised retries |
+| **Thundering herd** | Everyone retrying at the same instant, re-breaking the thing |
+
+---
+
 ## Table of Contents
 
 1. [The Fallacies & Why Distribution Is Hard](#q1-the-fallacies--why-distribution-is-hard)

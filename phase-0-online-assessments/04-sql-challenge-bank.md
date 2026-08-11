@@ -62,6 +62,53 @@ CREATE TABLE events (
 
 ---
 
+## In 60 seconds — the highest-value file in Phase 0
+
+1. **SQL is the best points-per-minute section on any mixed assessment.** It is finite,
+   learnable in days, and most backend candidates are mediocre at it. This is free score.
+2. **Window functions are the dividing line between junior and senior SQL.** If you can write
+   `ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY created_at DESC)`, you are past most
+   candidates.
+3. **The single most-asked pattern: "top N per group."** Not top N overall — top N *within each*
+   category. `ROW_NUMBER()` in a subquery, then filter `WHERE rn <= 3`. Learn this one cold.
+4. **`WHERE` filters rows before grouping; `HAVING` filters after.** You cannot use an aggregate
+   in `WHERE`. This appears constantly.
+5. **NULL breaks intuition and that is deliberate.** `NULL = NULL` is not true. `NOT IN` with a
+   NULL in the list returns nothing at all. Use `IS NULL` and prefer `NOT EXISTS`.
+6. **`LEFT JOIN` + `WHERE right.col = x` silently becomes an INNER JOIN.** The condition belongs
+   in the `ON` clause. This is the most common join bug there is.
+
+**Learn to read `EXPLAIN`.** `Seq Scan` on a large table means no index is being used. That
+single observation answers most "why is this query slow?" questions.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **INNER JOIN** | Only rows matching on both sides |
+| **LEFT JOIN** | All rows from the left, NULLs where the right has no match |
+| **Anti-join** | Finding rows with *no* match — `NOT EXISTS` or `LEFT JOIN ... IS NULL` |
+| **`WHERE` vs `HAVING`** | Filter rows before grouping · filter groups after |
+| **Aggregate** | `COUNT`, `SUM`, `AVG`, `MIN`, `MAX` — collapse many rows into one |
+| **`GROUP BY`** | Collapse rows sharing a value into one row per value |
+| **CTE** | `WITH name AS (...)` — a named subquery, readable and reusable |
+| **Recursive CTE** | A CTE referring to itself. For hierarchies and trees |
+| **Window function** | Calculates across related rows *while keeping every row* |
+| **`PARTITION BY`** | Restarts the window calculation per group |
+| **`ROW_NUMBER` / `RANK` / `DENSE_RANK`** | 1,2,3 · 1,2,2,4 (gaps) · 1,2,2,3 (no gaps) |
+| **`LAG` / `LEAD`** | The previous · next row's value. For diffs and gaps |
+| **Running total** | `SUM(x) OVER (ORDER BY date)` — cumulative sum |
+| **Cohort analysis** | Grouping users by when they joined, then tracking each group over time |
+| **Funnel analysis** | Counting how many users reach each step in a sequence |
+| **Sessionisation** | Splitting a stream of events into sessions using time gaps |
+| **Gaps and islands** | Finding runs of consecutive values, and the breaks between them |
+| **`EXPLAIN`** | Shows how the database plans to run your query |
+| **Seq Scan** | Reading the whole table. Fine when small, a problem when not |
+| **Keyset pagination** | `WHERE id > last_seen` instead of `OFFSET`. Fast at any depth |
+| **Correlated subquery** | A subquery referencing the outer query. Often slow — usually rewritable as a JOIN |
+
+---
+
 ## Tier 1 — Select, Filter, Sort
 
 ### S1. Users from Bangladesh or India created in 2026, newest first.

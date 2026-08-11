@@ -6,6 +6,49 @@
 
 ---
 
+## In 60 seconds
+
+1. **This project's real subject is cost.** Serverless is not automatically cheaper — it is
+   cheaper at low and spiky traffic, and more expensive at sustained high traffic. Knowing where
+   the crossover is, is the senior insight.
+2. **Build it, then work out what it would cost at 1M requests a month.** That number, and how
+   you would reduce it, is the interview answer this project buys you.
+3. **DynamoDB forces you to design from your queries backwards.** Write down every access
+   pattern *before* you create the table, because you cannot add a join later.
+4. **Single-table design will feel wrong.** All entity types in one table with generic `PK`/`SK`
+   columns. It is correct, and being able to explain *why* separates you from most candidates.
+5. **Cold starts are the thing everyone asks about.** Keep the bundle small, put the database
+   client outside the handler so it is reused, and know that provisioned concurrency is the
+   paid fix.
+6. **Use CDK, not the console.** Clicking through the AWS console teaches you nothing
+   repeatable, and infrastructure-as-code is itself the interview signal.
+
+**What to be able to explain afterwards:** when you would *not* choose serverless, and what
+happens to your relational database when 1,000 Lambdas all try to connect at once.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Lambda** | A function that runs on demand, billed per millisecond |
+| **Cold start** | The delay when a new container has to be created |
+| **Execution context** | The reusable container. Put your DB client here, not in the handler |
+| **Provisioned concurrency** | Paying to keep containers warm |
+| **AppSync** | AWS's managed GraphQL service |
+| **Resolver** | The function producing one GraphQL field. In AppSync often a direct DynamoDB mapping |
+| **DynamoDB** | AWS's managed NoSQL key-value store |
+| **Partition key (PK)** | Decides which physical partition an item lives on |
+| **Sort key (SK)** | Orders items within a partition, and enables range queries |
+| **Single-table design** | Every entity type in one table with generic keys |
+| **GSI** | Global Secondary Index — a different key layout for another access pattern |
+| **Scan** | Reading the whole table. Slow and expensive — almost always a design mistake |
+| **Cognito** | AWS's managed user authentication |
+| **EventBridge** | An event bus routing events between services |
+| **CDK** | Defining AWS infrastructure in TypeScript |
+| **RCU / WCU** | Read and Write Capacity Units — how DynamoDB is measured and billed |
+
+---
+
 ## What You'll Learn
 
 - AWS AppSync (managed GraphQL)

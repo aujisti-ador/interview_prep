@@ -13,6 +13,53 @@
 
 ---
 
+## In 60 seconds — why this file matters most
+
+1. **This is the file that most closely matches the actual job**, and the one almost nobody
+   drills. Everyone grinds LeetCode; far fewer can implement a concurrency-limited async pool
+   correctly under time pressure.
+2. **Quoting this repo's own hiring lens:** *"The practical JS round is my cheapest high-signal
+   filter. Implementing an async pool correctly tells me more about your Node judgment than any
+   DP problem."*
+3. **The five you should be able to write from memory:** `Promise.all`, an async pool with a
+   concurrency limit, retry with exponential backoff **and jitter**, an O(1) LRU cache, and a
+   working `EventEmitter`.
+4. **Retry without jitter is a wrong answer.** Without randomness, every client retries at the
+   same moment and re-breaks the thing they are waiting for. Interviewers listen for the word
+   "jitter".
+5. **The LRU cache needs two structures, not one:** a hash map for O(1) lookup *plus* a doubly
+   linked list for O(1) recency updates. Either alone gives you O(n).
+6. **The CodeSignal growing-spec task is its own skill.** Four levels, each adding requirements
+   to the previous. Write code you can extend — the candidates who hard-code Level 1 lose Levels
+   3 and 4 rewriting it.
+
+**How to practise:** implement each one on a blank page with a 25-minute timer before reading
+the solution. Reading these feels productive and transfers almost nothing.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Async pool** | Run N promises at a time, no more, until all are done |
+| **Concurrency limit** | The maximum number of operations in flight simultaneously |
+| **Semaphore** | A counter controlling how many things may proceed at once |
+| **Exponential backoff** | Wait 1s, then 2s, then 4s between retries |
+| **Jitter** | Randomising the wait so clients do not retry in unison |
+| **Thundering herd** | Many clients retrying simultaneously, re-breaking the service |
+| **Idempotency store** | A record of processed request ids, so retries are safe |
+| **Debounce** | Wait until the calls stop, then act once |
+| **Throttle** | Act at most once per interval, regardless of how many calls arrive |
+| **LRU** | Least Recently Used — evict whatever was touched longest ago |
+| **Doubly linked list** | Nodes linked both ways, so removal from the middle is O(1) |
+| **EventEmitter** | Register listeners for named events, then emit them |
+| **Deep clone** | Copy every nested level. Must handle circular references |
+| **Circular reference** | An object containing itself, directly or indirectly. Breaks naive recursion |
+| **Sessionisation** | Grouping a stream of events into sessions by time gaps |
+| **Growing spec** | A task revealed in levels, each extending the last |
+| **Race condition** | Two operations interleaving and producing a wrong result |
+
+---
+
 ## Backend-Flavoured Simulation
 
 HackerRank's senior/lead tests lean heavily on these — they look like real work, not textbook DSA.

@@ -2,6 +2,50 @@
 
 > **📝 Screening drill:** status codes, idempotency, pagination and CORS are standard MCQ fodder ([Phase 0 — §5](../phase-0-online-assessments/02-mcq-bank-nodejs-backend.md#5-http--rest-api-design)), and HackerRank's **REST API question type** is drilled in [Phase 0 — REST API & Debugging](../phase-0-online-assessments/05-rest-api-and-debugging-challenges.md).
 
+## In 60 seconds
+
+1. **Idempotent means: doing it twice has the same effect as doing it once.** `GET`, `PUT` and
+   `DELETE` are idempotent. `POST` is not — which is why duplicate payments happen.
+2. **The fix for duplicate `POST`s is an idempotency key.** The client sends a unique id; you
+   store it; a repeat with the same key returns the original response instead of charging
+   again. This is how Stripe works, and it comes up constantly.
+3. **Status codes carry meaning.** `400` = your request is malformed. `401` = I do not know who
+   you are. `403` = I know who you are and you may not. `404` = not here. `409` = conflict with
+   current state. `422` = well-formed but semantically wrong.
+4. **Offset pagination breaks when data changes.** `?page=3` can skip or repeat rows if someone
+   inserts while you page. Cursor (keyset) pagination does not, and it stays fast at depth.
+5. **Version your API from day one**, but change it as rarely as possible. Additive changes
+   (new optional fields) do not need a new version. Removals do.
+6. **JWTs cannot be un-issued.** Once signed, a token is valid until it expires. If you need
+   instant revocation, you need short expiry plus a refresh token, or a denylist.
+
+**The interview trap to expect:** "a client's payment request timed out and they retried — how
+do you make sure they are not charged twice?" That is the idempotency-key question, and it is
+one of the most common senior backend questions there is.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Idempotent** | Doing it repeatedly has the same result as doing it once |
+| **Safe method** | Does not change anything — `GET`, `HEAD` |
+| **Idempotency key** | A client-supplied unique id used to detect and collapse retries |
+| **Offset pagination** | `?page=3&limit=20`. Simple, but unstable and slow on deep pages |
+| **Cursor / keyset pagination** | `?after=<id>`. Stable while data changes, and fast at any depth |
+| **Rate limiting** | Capping how many requests a client may make in a time window |
+| **Token bucket** | A rate-limit algorithm that allows short bursts. The most common choice |
+| **JWT** | A signed token carrying claims. Anyone can read it; only the server can forge it |
+| **OAuth2** | A protocol for getting permission to act on a user's behalf |
+| **Refresh token** | A long-lived token used only to get new short-lived access tokens |
+| **CORS** | The browser rule deciding which sites may call your API |
+| **ETag** | A version fingerprint for a resource, used for caching and safe updates |
+| **Webhook** | You call *them* when something happens, instead of them polling you |
+| **Mass assignment** | A bug where a client sets fields you never intended, e.g. `isAdmin: true` |
+| **HATEOAS** | Responses include links to what you can do next. Often discussed, rarely built |
+| **OpenAPI / Swagger** | A machine-readable description of your API, used to generate docs and clients |
+
+---
+
 ## Table of Contents
 1. [HTTP Methods & Semantics](#http-methods--semantics)
 2. [Status Codes](#status-codes)

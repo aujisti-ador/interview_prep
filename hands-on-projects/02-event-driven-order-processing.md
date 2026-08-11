@@ -6,6 +6,45 @@
 
 ---
 
+## In 60 seconds
+
+1. **The whole point of this project is the saga.** An order touches payment, inventory and
+   shipping — three services, three databases, and **no way to wrap them in one transaction.**
+2. **So you compensate instead of rolling back.** Payment taken but inventory unavailable? You
+   cannot un-commit; you issue a refund. Each forward step needs a matching undo step.
+3. **Orchestration vs choreography is the design decision to be able to defend.** A central
+   orchestrator is easier to debug and understand; pure choreography (each service reacting to
+   events) couples less but nobody can see the whole flow.
+4. **Every consumer must be idempotent**, because at-least-once delivery means the "payment
+   succeeded" event will occasionally arrive twice. Charging twice is the bug this project
+   teaches you to prevent.
+5. **The outbox pattern again** — you cannot atomically write to Postgres and publish to Kafka,
+   so you write the event to a table in the same transaction and publish it separately.
+6. **Build the unhappy path deliberately.** Force a payment failure at step 3 and watch the
+   compensations run. That test is the demo, and it is what an interviewer wants to see.
+
+**What to be able to explain afterwards:** what happens if the compensating transaction itself
+fails, and how you would find a stuck order in production.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Saga** | A sequence of local transactions across services, with undo steps |
+| **Compensating transaction** | The undo — a refund rather than a rollback |
+| **Orchestration** | A central coordinator directs each step |
+| **Choreography** | Each service reacts to events on its own; no coordinator |
+| **Outbox pattern** | Write the event to the database in the same transaction, publish later |
+| **At-least-once delivery** | Messages arrive, sometimes more than once |
+| **Idempotent consumer** | Handling the same message twice causes no extra effect |
+| **Eventual consistency** | The system becomes correct shortly, not instantly |
+| **State machine** | The explicit list of order states and which transitions are legal |
+| **Dead letter queue** | Where messages that always fail are parked |
+| **Correlation id** | One id on every message of a single order, so you can trace it |
+| **Two-phase commit** | The textbook alternative to sagas. Blocks if the coordinator dies — which is why sagas exist |
+
+---
+
 ## What You'll Learn
 
 - Saga pattern (choreography) for distributed transactions

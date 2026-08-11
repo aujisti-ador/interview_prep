@@ -6,6 +6,56 @@
 
 ---
 
+## In 60 seconds
+
+1. **100% reliability is the wrong target.** It costs infinitely more than 99.9% and buys
+   nothing users notice. Pick a number, justify it, and spend the difference elsewhere. Saying
+   this out loud is a lead-level signal.
+2. **Each extra nine costs roughly ten times more.** 99% = 7.2 hours down per month. 99.9% = 43
+   minutes. 99.99% = 4.3 minutes. Know these numbers.
+3. **Availability multiplies across dependencies.** Five services at 99.9% each, all required,
+   gives you 99.5% — worse than any individual part. Reducing hard dependencies improves
+   reliability more than making each one better.
+4. **Design for graceful degradation, not perfection.** When recommendations are down, show
+   popular items. A partly working product beats an error page, and proposing this unprompted
+   marks you out.
+5. **Security is layered, not a wall.** Assume any single control fails. Least privilege, defence
+   in depth, and blast-radius thinking apply to every design you present.
+6. **Cost is a design constraint, especially in your market.** Being able to say *"this shape
+   costs roughly $X a month, and here is the cheaper one"* is a genuine differentiator in BD
+   rounds where budgets are tight.
+
+**The interview trap to expect:** "how would you make this highly available?" A weak answer
+lists redundancy. A strong one asks what the availability *target* is and what the business
+cost of downtime is, then designs to that — because "highly available" is not a specification.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Availability** | The share of time the system works. Expressed in nines |
+| **The nines** | 99% ≈ 7.2h/month down · 99.9% ≈ 43min · 99.99% ≈ 4.3min |
+| **SLI / SLO / SLA** | The measurement · your target · the contract |
+| **Error budget** | The failure your SLO allows, spent deliberately on risk |
+| **Redundancy** | Spare capacity so one failure is survivable |
+| **Failover** | Switching to the standby |
+| **Active-active / active-passive** | Both serving · one waiting |
+| **Multi-region** | Copies in different geographies. Expensive; usually for latency or law |
+| **Graceful degradation** | Losing a feature instead of the whole product |
+| **Blast radius** | How much breaks when this one thing fails |
+| **Bulkhead** | Isolating resources so one failure cannot exhaust everything |
+| **Chaos engineering** | Deliberately breaking things in production to find weaknesses first |
+| **Defence in depth** | Layered controls, assuming each may fail |
+| **Least privilege** | The minimum access needed, nothing more |
+| **Zero trust** | Verify every request, even inside your own network |
+| **Threat model** | Systematically asking who would attack this, and how |
+| **TCO** | Total Cost of Ownership — including the engineers who operate it |
+| **Reserved / spot instances** | Cheaper capacity, in exchange for commitment · for interruptibility |
+| **Egress cost** | Data leaving the cloud. Frequently the surprise on the bill |
+| **FinOps** | Treating cost as an engineering metric with an owner |
+
+---
+
 ## Table of Contents
 
 ### Part A — Reliability Engineering

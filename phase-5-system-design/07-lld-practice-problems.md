@@ -8,6 +8,57 @@ SOLID and the GoF patterns are covered in [Design Patterns in Practice](../phase
 
 ---
 
+## In 60 seconds
+
+1. **LLD is the opposite altitude from HLD.** HLD asks "how many servers?" LLD asks "what
+   classes, what methods, what happens when two threads call this at once?" Both rounds exist
+   because they test different things.
+2. **You will be asked to actually write code**, usually in 30–45 minutes, usually one of: LRU
+   cache, rate limiter, task scheduler, parking lot, elevator, or an in-process pub/sub.
+3. **Start with the interface, not the implementation.** Say what the public methods are and
+   what each guarantees, *then* fill them in. It gives the interviewer something to react to
+   early and it structures the rest of the session.
+4. **Ask about concurrency explicitly.** "Is this called from multiple threads?" is a strong
+   question — most candidates never ask, and then their design is silently wrong.
+5. **Naming and boundaries are being scored.** A class that does one thing, an interface where a
+   detail might change, and no god object. This is where your
+   [design patterns](../phase-1-core-programming/05-design-patterns-in-practice.md) knowledge
+   shows up in practice.
+6. **Say your complexity out loud.** "Get and put are both O(1) — hash map for lookup, doubly
+   linked list for recency." Interviewers wait for this, and most candidates make them ask.
+
+**The interview trap to expect:** the LRU cache. It is the single most common LLD question, and
+the reason is that the naive answer (an array, scanning for the oldest) is O(n) — they want to
+see you reach for a hash map **plus** a doubly linked list, and explain why neither alone is
+enough.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **LLD** | Low-Level Design — classes, interfaces, methods. Code-level design |
+| **OOD** | Object-Oriented Design. Used interchangeably with LLD in interviews |
+| **Interface** | The contract: what can be called, without saying how |
+| **Encapsulation** | Hiding internal state so it cannot be corrupted from outside |
+| **God object** | One class that does everything. The classic LLD failure |
+| **Composition over inheritance** | Prefer holding objects to extending classes |
+| **Thread safety** | Correct even when several threads call it at the same time |
+| **Race condition** | Two operations interleaving and producing a wrong result |
+| **Mutex / lock** | Ensuring only one thread is inside a section at a time |
+| **Atomic operation** | Happens entirely or not at all; cannot be interrupted halfway |
+| **Doubly linked list** | Each node points both ways, so removal is O(1). Half of the LRU answer |
+| **Hash map** | Key → value in O(1). The other half |
+| **Amortised O(1)** | Usually constant time, occasionally slower — averages out |
+| **Sliding window** | A rate-limit approach counting events in a moving time range |
+| **Token bucket** | Rate limiting that permits short bursts |
+| **Priority queue / heap** | Always gives you the smallest or largest item next. Used in schedulers |
+| **Trie** | A tree for prefix lookups — autocomplete, word search |
+| **Observer** | Objects register interest and get notified. The basis of pub/sub |
+| **Idempotent** | Calling it twice has the same effect as once |
+| **Backoff** | Waiting longer between each retry |
+
+---
+
 ## Table of Contents
 
 1. [The LLD Interview Method](#1-the-lld-interview-method)

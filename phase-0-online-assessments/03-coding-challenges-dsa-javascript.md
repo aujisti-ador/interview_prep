@@ -8,6 +8,62 @@
 
 ---
 
+## In 60 seconds — how to use this guide
+
+1. **Pattern recognition is the entire skill.** There are not hundreds of problems; there are
+   about thirteen patterns. Once you can name the pattern in the first 60 seconds, the code is
+   mechanical.
+2. **The highest-frequency pattern by far is hashing.** "Have I seen this before?" or "how many
+   of each?" — a `Map` or `Set` turns an O(n²) scan into O(n). Roughly 30% of screening
+   problems.
+3. **The signal → pattern table below is what to memorise**, not the solutions:
+
+   | If the problem says | Reach for |
+   |---|---|
+   | "seen before", "count of each", "pairs summing to" | Hash map / Set |
+   | "sorted array", "find a pair", "in place" | Two pointers |
+   | "longest/shortest substring", "window of size k" | Sliding window |
+   | "sorted" + "find" + "O(log n)" | Binary search |
+   | "matching brackets", "next greater element" | Stack |
+   | "top K", "k largest" | Heap |
+   | "all combinations", "all permutations" | Backtracking |
+   | "shortest path", "connected", "grid" | BFS / DFS |
+
+4. **Talk before you type**, even in a silent automated test — narrating forces you to pick the
+   pattern deliberately instead of drifting into brute force.
+5. **Write the brute force first if you are stuck.** It banks partial credit and it very often
+   reveals the optimisation.
+6. **Test the empty case, the single-element case, and duplicates.** That is where hidden test
+   cases live.
+
+**Every problem here follows the same six-part format:** Question → Signal (how to recognise
+it) → Strategy (in plain English) → Code → Trace table → Complexity & pitfalls. **Read the
+Signal section even for problems you skip** — that is the part that transfers.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Time complexity** | How runtime grows as input grows. O(n) = doubles when input doubles |
+| **Space complexity** | How much extra memory you use, beyond the input |
+| **O(1)** | Constant — same cost regardless of size |
+| **O(log n)** | Halving each step. Binary search |
+| **O(n log n)** | The cost of sorting. Usually the best achievable for comparison problems |
+| **O(n²)** | Nested loops. Fine at n=1,000, fatal at n=100,000 |
+| **In place** | Modifying the input without allocating a new array |
+| **Two pointers** | Two indices moving through an array, often from both ends |
+| **Sliding window** | A moving range over an array, expanded and shrunk |
+| **Prefix sum** | Precomputed running totals, so any range sum is O(1) |
+| **Hash map / Set** | O(1) lookup by key · O(1) membership test |
+| **Monotonic stack** | A stack kept sorted, used for "next greater element" problems |
+| **BFS** | Breadth-First Search — explore level by level. Finds shortest paths |
+| **DFS** | Depth-First Search — go deep before backtracking |
+| **Memoisation** | Caching results of repeated subproblems |
+| **Greedy** | Take the locally best option each step. Fast when it works, wrong when it does not |
+| **Edge case** | Empty input, one element, duplicates, negatives, overflow |
+
+---
+
 ## Table of Contents
 
 **Part A — The Meta Layer (read this first)**

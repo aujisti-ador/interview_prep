@@ -6,6 +6,55 @@
 
 ---
 
+## In 60 seconds
+
+1. **"Microservices" is not the senior answer. "It depends on the team" is.** Microservices
+   trade a code problem for a distributed-systems problem — network failures, partial outages,
+   eventual consistency, and much harder debugging.
+2. **The strongest argument for microservices is organisational, not technical:** independent
+   teams deploying independently. If you have one team of six, a monolith is almost certainly
+   correct.
+3. **Start with a modular monolith.** Clear internal boundaries, one deployment. If a module
+   later needs its own scaling or its own team, you extract it — and you already know where the
+   seam is.
+4. **The hardest part of microservices is data.** Each service owning its own database means no
+   joins and no cross-service transactions. That is what forces sagas, outboxes and eventual
+   consistency onto you.
+5. **A distributed monolith is the worst outcome:** services that must be deployed together.
+   You pay every cost of distribution and get none of the independence.
+6. **The strangler fig pattern is how migrations actually happen** — put a proxy in front, move
+   one route at a time to the new service, delete the old code when nothing calls it. Big-bang
+   rewrites fail.
+
+**The interview trap to expect:** "would you use microservices here?" Answering yes immediately
+is a red flag. The expected shape: ask about team size and deploy independence first, then say
+what would make you change your mind.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Monolith** | One deployable application. Not an insult |
+| **Modular monolith** | One deployment, strong internal boundaries. Often the right answer |
+| **Microservices** | Independently deployable services owning their own data |
+| **Distributed monolith** | Separate services that must deploy together. The worst of both |
+| **Service boundary** | Where one service's responsibility ends. Getting this wrong is expensive |
+| **Bounded context** | The DDD term for a boundary where words have one consistent meaning |
+| **API gateway** | A single entry point routing to services, handling auth and rate limits |
+| **BFF** | Backend-For-Frontend — a gateway shaped for one client, e.g. mobile |
+| **Service mesh** | Infrastructure handling service-to-service traffic, retries and mTLS |
+| **Sidecar** | A helper container beside your app handling networking concerns |
+| **Strangler fig** | Migrating gradually by routing traffic away from the old system piece by piece |
+| **Anti-corruption layer** | A translation layer so a legacy model does not leak into new code |
+| **Event-driven architecture** | Services react to events instead of calling each other directly |
+| **Orchestration vs choreography** | A coordinator directs the steps · each service reacts on its own |
+| **Saga** | A transaction across services, with compensating undo steps |
+| **Serverless** | Functions that run on demand. A deployment model, not an architecture |
+| **CQRS** | Separate read and write models |
+| **Hexagonal architecture** | Business logic in the centre; databases and APIs plug in at the edges |
+
+---
+
 ## Table of Contents
 
 1. [Monolith vs Microservices vs SOA](#q1-monolith-vs-microservices-vs-soa)

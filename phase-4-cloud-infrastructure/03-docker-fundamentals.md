@@ -2,6 +2,51 @@
 
 > **📝 Screening drill:** layer caching, `CMD` vs `ENTRYPOINT`, exit code 137 and multi-stage builds are all standard MCQs — see [Phase 0 — DevOps MCQ Bank §1](../phase-0-online-assessments/06-devops-cloud-mcq-bank.md#1-docker).
 
+## In 60 seconds
+
+1. **A container is not a small virtual machine.** It is just a normal process on the host,
+   isolated by Linux features (namespaces and cgroups). That is why it starts in milliseconds
+   while a VM takes a minute.
+2. **An image is a stack of read-only layers.** Each Dockerfile instruction adds one. A
+   container adds a thin writable layer on top.
+3. **Layer caching is the whole reason `COPY package.json` comes before `COPY . .`** — if you
+   copy your source first, every code change invalidates the cache and reinstalls all your
+   dependencies. This is the most common Dockerfile mistake and a routine interview question.
+4. **Multi-stage builds are how you get from a 1.2 GB image to 150 MB.** Build with the full
+   toolchain in stage one, copy only the output into a slim runtime stage.
+5. **Never run as root and never bake secrets in.** A secret in a layer stays in the image
+   history forever, even if a later layer deletes it.
+6. **`CMD` vs `ENTRYPOINT`:** `ENTRYPOINT` is the command that always runs; `CMD` is the default
+   arguments, which the user can override.
+
+**The interview trap to expect:** "your Docker build takes 8 minutes on every commit even though
+you only changed one line." That is the layer-ordering problem in point 3.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Image** | The read-only template. Like a class |
+| **Container** | A running instance of an image. Like an object |
+| **Layer** | One step in an image, cached and reusable across images |
+| **Dockerfile** | The recipe for building an image |
+| **Build cache** | Reusing unchanged layers. Broken by putting changing files early |
+| **Multi-stage build** | Build in one stage, copy just the artefacts into a smaller final stage |
+| **Base image** | What you start `FROM`. `alpine` is tiny; `slim` is a middle ground |
+| **Namespace** | The Linux feature giving a container its own view of processes and network |
+| **cgroup** | The Linux feature limiting a container's CPU and memory |
+| **Volume** | Storage that outlives the container. Containers are otherwise disposable |
+| **Bind mount** | Mapping a host directory into the container. Used in development |
+| **`EXPOSE`** | Documentation only. It does not actually publish a port |
+| **Port mapping (`-p`)** | What actually connects a host port to a container port |
+| **`CMD` / `ENTRYPOINT`** | Default arguments · the command that always runs |
+| **`.dockerignore`** | Keeps `node_modules` and `.git` out of the build context. Big speed win |
+| **Registry** | Where images are stored — Docker Hub, ECR, GHCR |
+| **Distroless** | An image with no shell or package manager. Smaller attack surface |
+| **Docker Compose** | Running several containers together from one YAML file |
+
+---
+
 ## Table of Contents
 1. [What is Docker & Containerization](#what-is-docker--containerization)
 2. [Docker Images & Dockerfile](#docker-images--dockerfile)

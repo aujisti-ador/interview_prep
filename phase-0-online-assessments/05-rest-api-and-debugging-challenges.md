@@ -14,6 +14,55 @@
 
 ---
 
+## In 60 seconds
+
+1. **The REST API question type is not about API design.** You are given a URL and asked to
+   fetch paginated data, combine it, and return an answer. It tests whether you can loop over
+   pages and handle failures — nothing more.
+2. **Write the paginated-fetch helper once, memorise it, reuse it.** Every variant of this
+   question is the same helper with a different filter afterwards. That is a solved problem you
+   should never solve twice.
+3. **Handle `429` and timeouts even when the question does not mention them.** Retrying with
+   backoff costs you four lines and is exactly the judgement being assessed.
+4. **For find-the-bug questions, scan in a fixed order** rather than reading top to bottom:
+   ```
+   1. async/await missing on a promise call     ← most common
+   2. off-by-one in a loop bound
+   3. mutating an array while iterating it
+   4. == where === was meant
+   5. error swallowed by an empty catch
+   6. resource never closed / listener never removed
+   7. race condition between read and write
+   ```
+5. **The code-review round scores your priorities, not your thoroughness.** Lead with security
+   and correctness, then performance, then readability. Opening with "the variable naming is
+   inconsistent" when there is an SQL injection reads as junior.
+6. **Say what you would *not* change.** Restraint is a senior signal, and it takes one sentence.
+
+**The trap in find-the-bug questions:** there is usually more than one bug, and one of them is
+subtle (a race, a leak) while the others are obvious. Candidates find the obvious one and stop.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Pagination** | Results split across pages. You must loop until done |
+| **`page` / `per_page` / `total_pages`** | The usual pagination fields in these questions |
+| **Rate limit (`429`)** | "Too many requests." Wait and retry, honouring `Retry-After` |
+| **Exponential backoff** | Waiting longer after each failed attempt |
+| **Timeout** | Giving up on a request that takes too long. Always set one |
+| **Idempotent** | Safe to repeat. Determines whether a retry is safe |
+| **Race condition** | Two operations interleaving with a wrong result |
+| **Mass assignment** | Letting a client set fields you never intended, e.g. `isAdmin` |
+| **Memory leak** | Holding references so memory is never released |
+| **Unhandled rejection** | A promise that failed with nobody catching it |
+| **N+1 query** | One query, then one more per result |
+| **Off-by-one** | `<` where `<=` was needed, or starting from 1 instead of 0 |
+| **Swallowed error** | `catch {}` with nothing inside. Hides the failure |
+| **Code review priority** | Security → correctness → performance → readability → style |
+
+---
+
 ## The HackerRank REST API Question Type
 
 **What you're given:** a base URL to a live mock API, a description of its response shape, and a function stub. **No test cases are visible.** You must call the API over HTTP and return a computed answer.

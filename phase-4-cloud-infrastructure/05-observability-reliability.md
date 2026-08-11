@@ -6,6 +6,57 @@
 
 ---
 
+## In 60 seconds
+
+> **This guide contains the fastest way to sound like a lead.** Nothing separates "built
+> features" from "ran a system" more quickly than being able to state an SLI, its SLO, and what
+> you did when the error budget burned.
+
+1. **Monitoring answers questions you knew to ask. Observability lets you ask new ones** after
+   something breaks in a way you never predicted.
+2. **The three pillars, and what each is for:** *Metrics* — numbers over time, cheap, tell you
+   **something** is wrong. *Logs* — detailed events, tell you **what** happened. *Traces* —
+   one request's journey across services, tell you **where** the time went.
+3. **SLI / SLO / SLA in one line each:** SLI is the *measurement* ("99.2% of requests succeeded
+   this month"). SLO is your *target* ("99.9%"). SLA is the *contract* with money attached.
+4. **The error budget is the clever part.** A 99.9% SLO permits ~43 minutes of failure a month.
+   That is your budget to *spend* on risky deploys. Budget gone → stop shipping features and fix
+   reliability. It turns an argument into arithmetic.
+5. **Alert on symptoms, not causes.** Alert on "checkout error rate is up", not "CPU is at 80%".
+   High CPU may be fine; a broken checkout never is.
+6. **The four golden signals cover most of it:** latency, traffic, errors, saturation.
+
+**The interview trap to expect:** "how do you decide what to alert on?" Weak answer: a list of
+metrics. Strong answer: alert on user-visible symptoms tied to an SLO, page only when the error
+budget is genuinely at risk, and everything else is a dashboard, not a page.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Observability** | Being able to understand what your system is doing from its outputs |
+| **Metric** | A number tracked over time — requests/sec, error rate |
+| **Log** | A timestamped record of one event |
+| **Structured logging** | Logs as JSON with fields, so they can be searched, not just read |
+| **Trace** | The full path of one request through every service |
+| **Span** | One step inside a trace — a single service call or query |
+| **Trace/correlation id** | The id tying all logs and spans of one request together |
+| **SLI** | The measurement of how well you are doing |
+| **SLO** | The target you set for that measurement |
+| **SLA** | The contractual promise, with penalties |
+| **Error budget** | The failure your SLO permits. Spend it deliberately |
+| **Golden signals** | Latency, traffic, errors, saturation |
+| **Percentile (p50/p95/p99)** | p99 = the slowest 1% of requests. Averages hide these |
+| **Cardinality** | How many distinct label values a metric has. High cardinality (e.g. user id) explodes cost |
+| **Alert fatigue** | So many alerts that people stop reading them. A reliability risk itself |
+| **Runbook** | Written steps for handling a specific alert at 3am |
+| **Postmortem** | Blameless write-up after an incident: what happened, why, what changes |
+| **MTTR / MTBF** | Mean time to recovery · mean time between failures |
+| **On-call rotation** | Who gets woken up this week |
+| **Blast radius** | How much breaks when this one thing fails |
+
+---
+
 ## Table of Contents
 
 1. [Three Pillars of Observability](#q1-three-pillars-of-observability)

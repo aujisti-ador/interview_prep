@@ -18,6 +18,50 @@
 
 ---
 
+## In 60 seconds — how to use this bank
+
+1. **This is the bank that maps most directly to the job**, and to the HackerRank Node.js
+   certification worth putting on your CV.
+2. **The recurring theme is: what blocks, and what does not.** Anything CPU-heavy blocks
+   everything. File I/O uses a 4-thread pool. Network I/O does not use threads at all.
+3. **HTTP semantics questions are free points if you know two things:** which methods are
+   idempotent (`GET`, `PUT`, `DELETE` — not `POST`), and what each status code actually means.
+4. **Security questions cluster around a few items:** bcrypt not SHA for passwords, JWTs cannot
+   be revoked, parameterised queries stop SQL injection, and `helmet` sets the headers.
+5. **NestJS questions are almost always about the pipeline order** — Middleware → Guard →
+   Interceptor → Pipe → Handler — and which one you should use for a given job.
+6. **Isolation levels and caching strategies** show up more than people expect. `READ COMMITTED`
+   is the Postgres default, and cache-aside is the default caching pattern.
+
+**Where to spend your time:** the streams and event-loop sections. They are the highest
+concentration of questions that a Node-focused test actually asks, and the deep-dive round
+follows up on the same material.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **libuv** | The C library giving Node its event loop and async I/O |
+| **Thread pool** | 4 background threads used for file I/O, DNS and crypto |
+| **Blocking** | Occupying the single thread so nothing else can be served |
+| **Stream** | Data handled in pieces instead of all at once |
+| **Backpressure** | A slow consumer telling a fast producer to wait |
+| **Cluster** | Several copies of your app, one per CPU core |
+| **Worker thread** | A real thread for CPU-heavy work |
+| **Idempotent** | Doing it twice has the same effect as once |
+| **Status code** | `400` malformed · `401` unknown · `403` forbidden · `409` conflict · `422` invalid |
+| **JWT** | A signed token. Readable by anyone, cannot be revoked before expiry |
+| **bcrypt** | A deliberately slow password hash. Slow is the feature |
+| **SQL injection** | Input treated as SQL. Fixed with parameterised queries |
+| **CORS** | The browser rule deciding which origins may call your API |
+| **Middleware / Guard / Interceptor / Pipe** | The four NestJS pipeline stages, in that order |
+| **DI** | Dependency Injection — the framework supplies what your class asks for |
+| **Isolation level** | How much of other transactions you can see |
+| **Cache-aside** | Check cache → miss → read database → write back to cache |
+| **Semver** | `MAJOR.MINOR.PATCH`. `^1.2.3` allows minor updates, `~1.2.3` only patches |
+
+---
+
 ## 1. Node.js Runtime & Event Loop
 
 **Q1.** Which is the correct order of Node event loop phases?

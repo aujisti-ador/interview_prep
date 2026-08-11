@@ -6,6 +6,60 @@
 
 ---
 
+## In 60 seconds — how to use this guide
+
+1. **This is Part 2: the patterns that decide the *hard* question** on an assessment. Part 1
+   gets you a passing score; this gets you the top band.
+2. **Trees are almost always recursion, and almost always the same three lines:** handle the
+   null case, recurse left, recurse right. Once you see that skeleton, most tree problems
+   collapse.
+3. **Dynamic programming is the one people fear, and it has a fixed recipe:**
+   ```
+   1. What is the state?        (what do I need to know at step i?)
+   2. What is the recurrence?   (how does step i depend on earlier steps?)
+   3. What are the base cases?
+   4. Which order do I fill it in?
+   ```
+   If you can write the recurrence out loud, the code is five lines.
+4. **Start every DP problem with the recursive brute force, then add memoisation.** Going
+   straight to a bottom-up table is how people get stuck at step zero.
+5. **Graphs: BFS for shortest path in an unweighted graph, DFS for "is it connected / find all
+   paths", topological sort for dependency ordering.** Grid problems are graph problems where
+   the neighbours are up/down/left/right.
+6. **Backtracking is DFS that undoes its move.** Choose → recurse → un-choose. That third step
+   is the one people forget.
+
+**The realistic advice:** you will not master DP in 30 days. Learn the six standard shapes
+(climbing stairs, house robber, coin change, longest increasing subsequence, word break,
+knapsack). Most DP questions in real assessments are one of those wearing a costume.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Recursion** | A function calling itself on a smaller input |
+| **Base case** | The condition that stops recursion. Missing it = stack overflow |
+| **Call stack** | The chain of in-progress function calls. Deep recursion overflows it |
+| **Tree traversal** | Pre-order (node first), in-order (left, node, right), post-order (children first) |
+| **BST** | Binary Search Tree — left subtree smaller, right subtree larger. In-order gives sorted output |
+| **Heap** | A tree that always gives you the min or max next. Basis of priority queues |
+| **Top-K** | Find the k largest/smallest. A heap of size k does it in O(n log k) |
+| **Greedy** | Take the best local option. Must be proved correct, not assumed |
+| **Interval problems** | Sort by start or end first. That sort *is* the trick |
+| **Backtracking** | Try an option, recurse, undo it, try the next |
+| **Pruning** | Abandoning a branch early when it cannot lead to a solution |
+| **DP** | Dynamic Programming — solve subproblems once, reuse the answers |
+| **Memoisation** | Top-down DP: recursion plus a cache |
+| **Tabulation** | Bottom-up DP: fill a table iteratively |
+| **State** | The variables that fully describe where you are in a DP problem |
+| **Recurrence relation** | The formula expressing a state in terms of earlier states |
+| **Topological sort** | Ordering nodes so every dependency comes first. Detects cycles |
+| **Adjacency list** | Graph stored as node → list of neighbours. The usual representation |
+| **Union-Find** | A structure for "are these two connected?" questions |
+| **Bit manipulation** | Using binary operations — XOR to find a unique element, masks for subsets |
+
+---
+
 ## Table of Contents
 
 | # | Pattern | Problems | The one idea |

@@ -2,6 +2,47 @@
 
 > **📝 Screening drill:** before the deep dive, test yourself against the 75 rapid-fire questions in [Phase 0 — MCQ Bank: JavaScript & TypeScript](../phase-0-online-assessments/01-mcq-bank-javascript-typescript.md). That's the exact format HackerRank, TestGorilla, iMocha and Mettl use to filter candidates.
 
+## In 60 seconds
+
+If you read nothing else in this guide, know these:
+
+1. **JavaScript runs on one thread.** It looks like it does many things at once because slow
+   work (network, disk, timers) is handed to the system and picked up later. That hand-off is
+   the **event loop**.
+2. **`await` does not pause the program — it pauses one function.** Everything else keeps
+   running. This is the single most common misunderstanding in interviews.
+3. **A closure is a function that remembers where it was born.** It keeps access to the
+   variables around it even after that outer function has finished.
+4. **`this` is decided by *how a function is called*, not where it is written.** Arrow
+   functions are the exception — they take `this` from the surrounding code.
+5. **TypeScript disappears at runtime.** It checks your types while you write, then compiles to
+   plain JavaScript. A type error is never a runtime error.
+6. **Microtasks (promises) run before macrotasks (timers).** This is the answer to almost every
+   "what does this print?" puzzle.
+
+**The interview trap to expect:** they show you code with `setTimeout`, a promise, and a normal
+`console.log`, and ask what order they print. Section 1 explains why.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Event loop** | The mechanism that decides what your single thread does next |
+| **Call stack** | The list of functions currently running. When it is empty, the event loop can do more work |
+| **Microtask** | A job that jumps the queue — `.then()`, `await`. Runs before any timer |
+| **Macrotask** | A normal queued job — `setTimeout`, I/O callbacks |
+| **Closure** | A function that still has access to the variables it was created next to |
+| **Prototype** | The object your object falls back to when a property is missing. This is how JS does inheritance |
+| **Hoisting** | Declarations are moved to the top of their scope before the code runs |
+| **TDZ** | Temporal Dead Zone — the gap where a `let`/`const` variable exists but cannot be touched yet |
+| **ESM / CommonJS** | The two module systems. `import/export` vs `require/module.exports` |
+| **Generic** | A type with a blank in it, filled in when used — like `Array<string>` |
+| **Structural typing** | TypeScript compares the *shape* of types, not their names |
+| **WeakMap** | A map that lets the garbage collector delete entries when nothing else uses the key |
+| **Proxy** | An object that intercepts operations on another object (get, set, delete) |
+
+---
+
 ## Table of Contents
 1. [Event Loop](#event-loop)
 2. [Closures](#closures)

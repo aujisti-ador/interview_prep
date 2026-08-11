@@ -1,5 +1,49 @@
 # Database Architecture Fundamentals - Interview Q&A
 
+## In 60 seconds
+
+1. **CAP theorem, plainly: when the network between your servers breaks, you must choose.**
+   Either keep answering with possibly-stale data (**AP**), or refuse to answer until you are
+   sure it is correct (**CP**). You cannot have both during a partition.
+2. **The common misreading:** "pick 2 of 3." You do not get to pick. Network partitions happen
+   to you. The only real choice is what you do *when* one happens.
+3. **PACELC adds the half everyone forgets:** *even when there is no partition* (**E**lse), you
+   still trade **L**atency against **C**onsistency. Waiting for all replicas to agree is slower.
+4. **Partitioning splits a table inside one database. Sharding splits it across different
+   machines.** People use the words loosely; knowing the distinction is a cheap signal.
+5. **Read replica lag causes the most confusing class of bug:** a user saves something, is
+   redirected, reads from a replica that has not caught up yet, and sees the old value. Fix by
+   reading from the primary right after a write.
+6. **MVCC is why Postgres readers never block writers** — each transaction sees its own
+   snapshot of the data instead of taking locks.
+
+**The interview trap to expect:** "is your system CP or AP?" A weak answer names a letter. A
+strong one says *"different parts differ — the payment ledger is CP because a wrong balance is
+unacceptable; the activity feed is AP because a slightly stale feed is fine."*
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **CAP theorem** | During a network partition, choose availability or consistency |
+| **Partition (network)** | Servers alive but unable to talk to each other |
+| **CP system** | Refuses to answer rather than risk being wrong |
+| **AP system** | Keeps answering, accepting possible staleness |
+| **PACELC** | If Partition → A or C; Else → Latency or Consistency |
+| **Strong consistency** | Every read sees the latest write |
+| **Eventual consistency** | Reads catch up shortly. Fine for feeds, not for balances |
+| **Partitioning** | Splitting one table into pieces within one database |
+| **Sharding** | Splitting data across separate database servers |
+| **Shard key** | The value deciding which shard a row goes to. Hard to change later |
+| **Consistent hashing** | Assigning keys to servers so adding a server moves few of them |
+| **Primary / replica** | The server that accepts writes · the copies that serve reads |
+| **Replica lag** | How far behind a replica is. The cause of "I saved it but it's gone" |
+| **Read-your-writes** | The guarantee that you see your own change immediately |
+| **MVCC** | Each transaction reads a snapshot, so reads and writes do not block each other |
+| **Quorum** | Requiring a majority to agree before confirming a read or write |
+
+---
+
 ## Table of Contents
 1. [CAP & PACELC Theorems](#cap--pacelc-theorems)
 2. [Sharding vs. Partitioning](#sharding-vs-partitioning)

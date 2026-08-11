@@ -6,6 +6,56 @@
 
 ---
 
+## In 60 seconds
+
+1. **DDD's core claim: your code should use the same words the business uses.** If the business
+   says "policy lapsed" and your code says `status = 3`, every conversation needs translation,
+   and translation is where bugs live.
+2. **A bounded context is a boundary where one word means exactly one thing.** "Customer" in
+   Billing (an account with a payment method) is not "Customer" in Support (a person with
+   tickets). Forcing one shared Customer model across both is a classic mistake.
+3. **An aggregate is a cluster of objects you change together, with one entry point.** The
+   practical rule: **one transaction should modify one aggregate.** That rule is what makes a
+   system splittable into services later.
+4. **Entity vs Value Object:** an Entity has an identity that persists as its data changes (a
+   User). A Value Object is defined entirely by its values (an Address, a Money amount) and
+   should be immutable.
+5. **Ubiquitous language is the deliverable, not the diagrams.** If engineers and domain experts
+   use the same vocabulary in the same meeting, DDD is working.
+6. **You do not need all of DDD.** Bounded contexts, aggregates and ubiquitous language pay for
+   themselves in most systems. Full event sourcing usually does not.
+
+**The interview trap to expect:** "how would you split this monolith into services?" The
+expected answer runs through bounded contexts — find where the language changes, and cut
+there — rather than splitting by technical layer (a "database service", an "API service"),
+which is the classic wrong answer.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Domain** | The business problem area you are modelling |
+| **Ubiquitous language** | One shared vocabulary used by engineers and business alike |
+| **Bounded context** | A boundary inside which each term has exactly one meaning |
+| **Context map** | How your bounded contexts relate and integrate |
+| **Entity** | Has an identity that survives changes to its data |
+| **Value Object** | Defined by its values, has no id, and is immutable |
+| **Aggregate** | A group of objects changed together as one unit |
+| **Aggregate root** | The single object through which the aggregate is accessed |
+| **Invariant** | A rule that must always hold — enforced inside the aggregate |
+| **Repository** | The interface for loading and saving aggregates |
+| **Domain event** | A record that something meaningful happened in the domain |
+| **Anti-corruption layer** | Translation preventing another system's model from leaking into yours |
+| **Anemic domain model** | Objects with only getters and setters, all logic elsewhere. Usually a smell |
+| **Data warehouse** | A separate store optimised for analytics, not transactions |
+| **Data lake** | Raw data stored cheaply, structured later |
+| **OLTP / OLAP** | Transaction workloads · analytical workloads. Very different designs |
+| **CDC** | Change Data Capture — streaming database changes to other systems |
+| **Star schema** | Analytics modelling: one fact table surrounded by dimension tables |
+| **Medallion (bronze/silver/gold)** | Raw → cleaned → aggregated stages in a data pipeline |
+
+---
+
 ## Table of Contents
 
 ### Part A — Domain-Driven Design

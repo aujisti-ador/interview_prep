@@ -8,6 +8,60 @@ At this level the questions stop being "can you design it?" and become "can you 
 
 ---
 
+## In 60 seconds
+
+> **This is the guide that addresses your specific gap.** This repo's own market read says your
+> material is *"heavy on systems and light on decisions that shaped a team."* That is exactly
+> what architect-level rounds probe.
+
+1. **The altitude changes at this level.** Senior rounds ask "can you design this?" Architect
+   rounds ask "how do you get twelve engineers across three teams to build it, and what happens
+   when two of them disagree?"
+2. **Writing is the job.** ADRs, RFCs, migration plans. At this level your influence travels
+   through documents you are not in the room for. This is also the artifact this repo says you
+   are missing — see
+   [../resume/02-linkedin-and-profiles.md](../resume/02-linkedin-and-profiles.md#8-the-english-problem-and-four-cheap-fixes).
+3. **An ADR is four headings:** Context, Decision, Alternatives considered, Consequences. The
+   *alternatives* section is what makes it senior — it proves you chose rather than defaulted.
+4. **You are expected to talk about cost, risk and timeline**, not only elegance. "This design
+   is better but takes an extra quarter, so I would ship the simpler one and revisit at 2M
+   users" is an architect answer.
+5. **Migration is the most realistic architect question**, because it is most of the real job.
+   Strangler fig, expand/contract, dual writes, and always a rollback at every step.
+6. **Blueprints beat improvisation.** Most systems are a variation on a handful of known shapes.
+   Recognising "this is a layered business service with an async worker" lets you spend your
+   time on what is genuinely unusual.
+
+**The interview trap to expect:** "two senior engineers on your team disagree about whether to
+adopt Kafka. What do you do?" They are testing whether you make it a technical decision with
+explicit criteria and a written record — or whether you pick a side, or avoid it.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **ADR** | Architecture Decision Record — a short doc: context, decision, alternatives, consequences |
+| **RFC** | Request For Comments — a proposal circulated for feedback before committing |
+| **Design doc** | A longer document describing a system before it is built |
+| **Tech radar** | A team's shared view of what to adopt, trial, or avoid |
+| **Blueprint** | A reusable architecture shape for a recurring class of problem |
+| **Reference architecture** | The standard approved shape for a type of system in your org |
+| **Migration plan** | The ordered, reversible steps from current state to target state |
+| **Strangler fig** | Migrate gradually by routing traffic away from the old system piece by piece |
+| **Expand/contract** | Add the new, move over, remove the old — the safe change pattern |
+| **Technical debt** | Deliberate or accidental shortcuts that slow future work |
+| **Conway's Law** | Your architecture will mirror your org chart, whether you intend it or not |
+| **Inverse Conway manoeuvre** | Reshaping teams deliberately to get the architecture you want |
+| **Platform team** | A team whose customers are other engineers |
+| **Multi-tenancy** | One system serving several customers with isolation between them |
+| **Tenant isolation** | Shared database with a tenant id · separate schemas · separate databases |
+| **Build vs buy** | Whether to write it or pay for it. Usually a cost-and-focus decision |
+| **Blast radius** | How much breaks when this fails |
+| **Reversible vs irreversible decision** | Cheap to undo → decide fast. Expensive → slow down |
+| **Staff/Principal ladder** | The individual-contributor track above Senior |
+
+---
+
 ## Table of Contents
 
 ### Part A — Leadership Practices

@@ -19,6 +19,57 @@
 
 ---
 
+## In 60 seconds
+
+> **This is the round where a strong engineer most often loses to a weaker one**, because it
+> tests delivery rather than knowledge — and for a non-native English speaker applying
+> internationally, that gap is real and it is trainable.
+
+1. **A one-way video interview has no interviewer.** You read a question, get 30 seconds to
+   think, and record 90 seconds. There is no one to read your face or help you recover.
+2. **The 90-second formula, which you should rehearse until it is automatic:**
+   ```
+   0-10s   Direct answer to the question asked
+   10-60s  One specific example, with a number
+   60-85s  What the result was
+   85-90s  What you took from it
+   ```
+3. **Most candidates fail by rambling.** Without an interviewer to interrupt, people talk for
+   three minutes and never answer the question. **Structure beats fluency** — a simply worded,
+   well-structured answer outperforms an eloquent shapeless one.
+4. **Record yourself and watch it back.** This is uncomfortable and it is the single most
+   effective preparation available. You will immediately notice the filler words and the
+   rushing.
+5. **Set-up is worth real marks:** camera at eye level, light in front of you not behind, plain
+   background, wired internet, phone silent. Look at the *lens*, not at your own image.
+6. **Aptitude and psychometric tests are speed tests.** For numerical and logical sections,
+   practice is genuinely effective — the question types repeat. For personality inventories,
+   answer consistently rather than strategically; they check for contradictions.
+
+**Slow down deliberately.** Nervous speech speeds up, and accent comprehension drops sharply
+with pace. Speaking 15% slower than feels natural is the highest-value adjustment you can make.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **One-way / asynchronous video** | You record answers alone; nobody is watching live |
+| **Talview / HireVue** | The two platforms most likely to be used on you |
+| **Think time** | The seconds between seeing the question and recording starting |
+| **Retakes** | How many attempts you get. Often one. Check before starting |
+| **STAR** | Situation, Task, Action, Result — the structure for behavioural answers |
+| **Filler words** | "um", "like", "you know". Recording yourself is how you notice them |
+| **SJT** | Situational Judgement Test — "what would you do if…" |
+| **Big Five / OCEAN** | The personality model most inventories are based on |
+| **Consistency check** | The same trait asked several ways, to catch strategic answering |
+| **Numerical reasoning** | Reading data from tables and charts under time pressure |
+| **Logical reasoning** | Pattern and sequence completion |
+| **Verbal reasoning** | True / False / Cannot Say, based strictly on a passage |
+| **Cannot Say** | The most-missed answer: the passage does not settle it, even if you know it is true |
+| **Percentile score** | Your rank against other candidates, not a percentage correct |
+
+---
+
 ## One-Way Video Interviews — Mechanics
 
 | Setting | Typical value | What it means for you |
