@@ -1,0 +1,194 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-ink-950 text-ink-200 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04';
+  }
+  ::selection {
+    @apply bg-accent/30;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-ink-800 bg-ink-900/70 p-5;
+  }
+  .card-tight {
+    @apply rounded-lg border border-ink-800 bg-ink-900/70 p-4;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-ink-700 bg-ink-850 px-3.5 py-2
+           text-sm font-medium text-ink-200 transition hover:border-ink-600 hover:bg-ink-800
+           disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .btn-primary {
+    @apply border-accent-dim bg-accent/15 text-accent-soft hover:border-accent hover:bg-accent/25;
+  }
+  .btn-ghost {
+    @apply border-transparent bg-transparent hover:bg-ink-850;
+  }
+  .input {
+    @apply w-full rounded-lg border border-ink-700 bg-ink-950/60 px-3 py-2 text-sm text-ink-100
+           placeholder:text-ink-500 focus:border-accent-dim focus:outline-none focus:ring-1 focus:ring-accent-dim;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide;
+  }
+  .label {
+    @apply text-xs font-medium uppercase tracking-wider text-ink-400;
+  }
+}
+
+/* Markdown rendering for the market analysis / playbook docs */
+.prose-doc {
+  @apply text-[15px] leading-relaxed text-ink-200;
+}
+.prose-doc h1 {
+  @apply mb-4 mt-2 text-2xl font-semibold text-ink-100;
+}
+.prose-doc h2 {
+  @apply mb-3 mt-8 border-b border-ink-800 pb-2 text-xl font-semibold text-ink-100;
+}
+.prose-doc h3 {
+  @apply mb-2 mt-6 text-base font-semibold text-ink-100;
+}
+.prose-doc p {
+  @apply my-3;
+}
+.prose-doc ul {
+  @apply my-3 list-disc space-y-1.5 pl-5;
+}
+.prose-doc ol {
+  @apply my-3 list-decimal space-y-1.5 pl-5;
+}
+.prose-doc a {
+  @apply text-accent-soft underline underline-offset-2;
+}
+.prose-doc strong {
+  @apply font-semibold text-ink-100;
+}
+.prose-doc code {
+  @apply rounded bg-ink-850 px-1.5 py-0.5 font-mono text-[13px] text-accent-soft;
+}
+.prose-doc pre {
+  @apply my-4 overflow-x-auto rounded-lg border border-ink-800 bg-ink-950 p-4;
+}
+.prose-doc pre code {
+  @apply bg-transparent p-0 text-ink-200;
+}
+.prose-doc blockquote {
+  @apply my-4 border-l-2 border-accent-dim bg-ink-900/60 px-4 py-2 text-ink-300;
+}
+.prose-doc hr {
+  @apply my-8 border-ink-800;
+}
+.prose-doc table {
+  @apply my-4 w-full border-collapse text-sm;
+}
+.prose-doc th {
+  @apply border border-ink-800 bg-ink-850 px-3 py-2 text-left font-semibold text-ink-100;
+}
+.prose-doc td {
+  @apply border border-ink-800 px-3 py-2 align-top;
+}
+
+/* Long guides read better with a little breathing room and stable anchors. */
+.prose-doc h2,
+.prose-doc h3,
+.prose-doc h4 {
+  scroll-margin-top: 1.5rem;
+}
+.prose-doc h4 {
+  @apply mb-1.5 mt-5 text-sm font-semibold text-ink-100;
+}
+.prose-doc li > p {
+  @apply my-1;
+}
+.prose-doc li::marker {
+  @apply text-ink-500;
+}
+/* Wide tables and code must scroll inside themselves, never the page. */
+.prose-doc table {
+  @apply block max-w-full overflow-x-auto whitespace-nowrap;
+}
+.prose-doc td,
+.prose-doc th {
+  @apply whitespace-normal;
+}
+.prose-doc img {
+  @apply max-w-full;
+}
+
+/* highlight.js — a small palette tuned to the app's ink/accent scale. */
+.hljs {
+  @apply text-ink-200;
+}
+.hljs-comment,
+.hljs-quote {
+  @apply italic text-ink-500;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-doctag {
+  color: #c792ea;
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute {
+  color: #a5d6a7;
+}
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet {
+  color: #f0a35e;
+}
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-selector-id {
+  color: #82aaff;
+}
+.hljs-type,
+.hljs-class .hljs-title,
+.hljs-built_in {
+  color: #ffcb6b;
+}
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-property {
+  color: #7fdbca;
+}
+.hljs-deletion {
+  color: #f0616d;
+}
+.hljs-meta {
+  @apply text-ink-400;
+}
+.hljs-emphasis {
+  @apply italic;
+}
+.hljs-strong {
+  @apply font-semibold;
+}
+
+.cm-editor {
+  @apply text-[13px];
+}
+/*
+ * CodeMirror paints its own focus ring, which clashes with the app's. Replace
+ * it rather than removing it: this editor is the whole of a timed problem, and
+ * a keyboard user needs to see that focus landed there.
+ */
+.cm-editor.cm-focused {
+  outline: 2px solid theme('colors.accent.DEFAULT') !important;
+  outline-offset: -1px;
+}

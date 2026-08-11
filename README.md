@@ -3,13 +3,14 @@
 > Comprehensive interview prep for **Senior/Lead Backend roles** targeting Bangladesh and international remote markets.
 > Stack: Node.js, NestJS, TypeScript, AWS Serverless, PostgreSQL, Redis, Kafka, RabbitMQ, Docker, Kubernetes.
 
-**Total Content:** 33 guides + 7 project walkthroughs | 84,000+ lines | 280+ Q&A sections, 34 worked system design problems
+**Total Content:** 45 guides + 7 project walkthroughs | 100,000+ lines | 290+ Q&A sections, 34 worked system design problems, 117 solved coding-interview problems, 250+ screening-test MCQs, 52 SQL challenges, 5 full-length timed mocks
 
 ---
 
 ## Table of Contents
 
 - [Preparation Plan](#preparation-plan)
+- [Phase 0: Online Assessments & Coding Interviews](#phase-0-online-assessments--coding-interviews-week-0-ongoing)
 - [Phase 1: Core Programming & Languages](#phase-1-core-programming--languages-week-12)
 - [Phase 2: APIs & Real-Time Systems](#phase-2-apis--real-time-systems-week-23)
 - [Phase 3: Databases & Data Management](#phase-3-databases--data-management-week-34)
@@ -25,6 +26,58 @@
 | # | Resource | Description |
 |---|----------|-------------|
 | 0 | [prep.md](prep.md) | Master checklist — timeline, daily split, resources, all phases outlined |
+| 1 | [30-DAY-PLAN.md](30-DAY-PLAN.md) | Day-by-day 30-day sprint — 163 scheduled tasks, each linked to the guide it draws on |
+| 2 | [job-cracker/](job-cracker/) | **The platform.** Dockerised study + testing + progress tracker built around this repo |
+
+---
+
+## Job Cracker — the interactive platform
+
+```bash
+cd job-cracker && make up      # → http://localhost:8080
+```
+
+A self-hosted app that turns this repo into a trackable 30-day sprint. Everything below is
+still the source material; the app decides what you do today, runs your code, scores you, and
+remembers.
+
+| | |
+|---|---|
+| **Today / Plan** | 30 days, 163 tasks, each with a hiring-manager note on what the round is actually testing |
+| **Library** | Every guide in this repo, readable in the app — full-text search across all 59 files, per-document TOC, syntax highlighting, working cross-links |
+| **Practice** | 101 coding problems with real test cases executed in-browser — timed, weak-pattern, blind and spaced-review modes |
+| **Quiz** | 136 recall questions across 21 topics, scored with explanations |
+| **Design** | 18 timed design drills with weighted rubrics you score yourself against |
+| **Behavioral** | STAR bank with 14 prompts, each carrying "what good looks like" and "red flags" |
+| **Skills** | 32 skills rated against market demand; gap = `(demand − level) × demand` |
+| **Pipeline** | Application tracker with funnel conversion rates |
+| **Market analysis** | Where you get cut in the funnel, comp bands, channel strategy |
+
+Setup, architecture and how to edit the content: [job-cracker/README.md](job-cracker/README.md).
+
+---
+
+## Phase 0: Online Assessments & Coding Interviews (Week 0 / Ongoing)
+
+> **The gate before the gate.** Most candidates are filtered by an automated coding test before a human ever reads their CV. Run this phase in parallel with everything else.
+
+| # | Guide | Topics | Problems |
+|---|-------|--------|----------|
+| 0 | [Online Assessment Platform Playbook](phase-0-online-assessments/00-platform-playbook.md) | HackerRank, Codility, CodeSignal, TestGorilla, Talview, Mercer Mettl, iMocha, DevSkiller, Karat/CoderPad, Turing/Toptal/Arc/Andela funnels, scoring models, proctoring, time allocation, Node.js submission harness | — |
+| 1 | [Coding Interview — Problem Solving in JS (Part 1)](phase-0-online-assessments/03-coding-challenges-dsa-javascript.md) | The 6-step ritual, pattern-recognition table, complexity budget, JS interview toolkit + traps · **Hashing & frequency counting, prefix/running values, two pointers, sliding window, strings & ad-hoc, stack & monotonic stack, binary search (incl. on the answer), linked lists** | 55 (P1–P55) |
+| 2 | [Coding Interview — Advanced Patterns (Part 2)](phase-0-online-assessments/03b-coding-challenges-advanced-patterns.md) | **Trees & recursion, heaps & top-K, greedy, intervals, backtracking, dynamic programming, graphs, bit manipulation/math/matrix** · 4-week practice plan, timed-assessment triage, Top 40 must-do list, stuck-recovery script | 62 (P56–P117) |
+| 3 | [Node/Async & Simulation Tasks](phase-0-online-assessments/03c-nodejs-async-and-simulation-tasks.md) | The senior discriminators: implement `Promise.all`, concurrency-limited async pool, retry with backoff+jitter, O(1) LRU, debounce/throttle, EventEmitter, deep clone with cycles · log sessionisation, transaction validation, rate-limiter simulation · **the CodeSignal Level 1–4 growing-spec task** · edge-case checklist, complexity cheat sheet | 10 tasks + 1 multi-level |
+| 4 | [MCQ Bank — JavaScript & TypeScript](phase-0-online-assessments/01-mcq-bank-javascript-typescript.md) | Output prediction & event loop, coercion/equality, hoisting/TDZ/closures/`this`, arrays & built-ins, prototypes & classes, TypeScript (`unknown` vs `any`, `never`, utility types, `satisfies`, generics, decorator metadata), ESM vs CommonJS | 75 MCQs |
+| 5 | [MCQ Bank — Node.js & Backend](phase-0-online-assessments/02-mcq-bank-nodejs-backend.md) | libuv thread pool, streams & backpressure, clustering vs worker threads, npm/packaging, HTTP semantics & REST design, idempotency, auth & security (JWT, bcrypt, OWASP), NestJS pipeline & DI, caching/Kafka/isolation levels, testing | 84 MCQs |
+| 6 | [SQL Challenge Bank](phase-0-online-assessments/04-sql-challenge-bank.md) | Select/aggregate/join tiers, NULL & anti-join traps, CTEs & recursion, **window functions** (top-N per group, running totals, LAG, sessionisation, gaps & islands), cohort retention, funnels, EXPLAIN reading, indexing & keyset pagination | 52 + 18 MCQs |
+| 7 | [REST API, Debugging & Code Review](phase-0-online-assessments/05-rest-api-and-debugging-challenges.md) | HackerRank's REST API question type + universal paginated-fetch helper, 429/retry/timeout handling · **16 find-the-bug snippets** (races, injection, leaks, mass assignment, cache defects, shutdown) · code-review priority ladder · DevSkiller/take-home playbook & rubric | 6 + 16 |
+| 8 | [MCQ Bank — DevOps, Cloud, Linux & Git](phase-0-online-assessments/06-devops-cloud-mcq-bank.md) | Docker layers/multi-stage/exit codes, Kubernetes probes & QoS & zero-downtime, Linux triage, Git recovery & workflows, CI/CD & DORA, AWS (SG vs NACL, SQS, RDS, cost), NGINX/TLS/mTLS, observability & SLOs | 90 MCQs |
+| 9 | [Video, Aptitude & Psychometric](phase-0-online-assessments/07-video-interview-and-psychometric.md) | Talview/HireVue one-way video mechanics, the 90-second answer formula, **24 real questions**, situational judgement tests, Big-5/culture-fit inventories, numerical & logical & verbal aptitude, data interpretation, English fluency drills, recording setup | 24 Q + 40 drills |
+| 10 | [Timed Mock Assessments](phase-0-online-assessments/08-timed-mock-assessments.md) | Five full-length simulations — HackerRank enterprise (90 min), TestGorilla bundle (45 min), Codility/Toptal (60 min), Talview video (20 min), Mettl BD corporate (120 min) — with answer keys, diagnostic scorecard and a 14-day plan | 5 mocks |
+
+**Every coding problem follows one format:** Question → Signal (how to recognise it) → Strategy (the insight, in plain English) → JavaScript solution (commented) → Trace table → Complexity & Pitfalls. All 117 solutions are verified against 309 test assertions including edge cases.
+
+**Start here:** [phase-0-online-assessments/README.md](phase-0-online-assessments/README.md) — index, platform-by-platform study order, and the "one weekend before a test" plan.
 
 ---
 
@@ -80,6 +133,7 @@
 | 6 | [Security & Compliance](phase-4-cloud-infrastructure/06-security-compliance.md) | OWASP Top 10, JWT/OAuth2/RBAC/ABAC, secrets management, GDPR, SOC 2, BD Digital Security Act, supply chain security, infrastructure security, data protection | 10 |
 | 7 | [Performance Engineering](phase-4-cloud-infrastructure/07-performance-engineering.md) | Load testing (k6), Node.js profiling (clinic.js), database optimization, caching, worker threads, auto-scaling, benchmarking, capacity planning | 10 |
 | 8 | [CI/CD & DevOps](phase-4-cloud-infrastructure/08-cicd-devops.md) | GitHub Actions, Jenkins, Terraform, Prometheus+Grafana, Git workflows, release management, feature flags, environment management, DORA metrics, GitOps | 9 |
+| 9 | [DevOps Operations](phase-4-cloud-infrastructure/09-devops-operations.md) | Autoscaling (HPA/KEDA) in production, connection-pool exhaustion, read replicas, cache failure modes, backup strategy & restore drills, RPO/RTO & region failover, golden signals, cardinality/cost control, on-call & incident command, capacity planning, zero-downtime migrations & rollbacks, scenario drills | 10 |
 
 ---
 
