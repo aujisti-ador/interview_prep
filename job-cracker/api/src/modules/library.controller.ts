@@ -51,6 +51,11 @@ const SECTION_LABELS: Record<string, { label: string; blurb: string; order: numb
     blurb: 'Build walkthroughs with architecture, data flows and interview talking points',
     order: 7,
   },
+  resume: {
+    label: 'Resume, profiles & outreach',
+    blurb: 'The artifacts that run on every application — resume system, master template, LinkedIn and GitHub, outreach scripts',
+    order: 8,
+  },
 };
 
 interface LibraryFile {

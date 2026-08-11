@@ -3,7 +3,7 @@
 > Generated from the Job Cracker platform (`job-cracker/`). Run `cd job-cracker && make up` and open
 > http://localhost:8080 to work through this with progress tracking, a code runner, and scoring.
 
-**Contents:** 30 days · 163 tasks · 101 coding problems · 136 recall questions · 18 design drills · 32 tracked skills · 14 behavioral prompts
+**Contents:** 30 days · 167 tasks · 101 coding problems · 136 recall questions · 18 design drills · 32 tracked skills · 14 behavioral prompts
 
 ## The bet behind this plan
 
@@ -78,7 +78,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-2"></a>
 ### Day 2 — Arrays, hashing & the resume rewrite
 
-*The highest-frequency OA pattern + the highest-leverage document* · ~3h 50m
+*The highest-frequency OA pattern + the highest-leverage document* · ~4h 10m
 
 **Focus.** Hash-map patterns are ~30% of screening problems. Your resume is the only artifact 100% of interviewers read.
 
@@ -92,8 +92,12 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 40m** — MCQ bank — JavaScript & TypeScript (75 questions)
       The written bank behind the quiz. TestGorilla and iMocha draw from exactly this surface: coercion, hoisting, `this`, prototypes, generics.
       `phase-0-online-assessments/01-mcq-bank-javascript-typescript.md`
-- [ ] **Admin · 45m** — Resume rewrite pass 1 — metrics on every bullet
-      Every bullet: verb + system + scale + outcome. "Built notification service" -> "Designed Kafka-backed notification service delivering 4M+/day to 41M subscribers, p99 under 2s". No bullet survives without a number or a named trade-off.
+- [ ] **Read · 20m** — The resume system — how it is actually read
+      Twenty minutes that decide whether the next forty-five are worth anything. The ATS parsing rules, the six-second scan order, the bullet formula, and the three bullets that separate a Senior resume from a Lead one.
+      `resume/00-resume-system.md`
+- [ ] **Admin · 45m** — Resume rewrite pass 1 — fill the bullet bank
+      One sitting, no splitting it across days. Dump every project, then recover a number for each using the six angles (scale, time, money, reliability, breadth, risk removed), then convert the best into verb + system + scale + outcome. Write more bullets than fit — selection comes after. Include the three lead signals: a decision with a rejected alternative, a standard you set, people you levelled.
+      `resume/01-master-resume.md`
 
 <a id="day-3"></a>
 ### Day 3 — Two pointers & Node.js internals
@@ -133,13 +137,14 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Story · 45m** — One-way video interview setup and the 90-second answer formula
       Talview, HireVue and TestGorilla screens arrive early in the funnel and get no second take. Set up lighting, framing and audio once, then record two practice answers.
       `phase-0-online-assessments/07-video-interview-and-psychometric.md`
-- [ ] **Admin · 40m** — LinkedIn rewrite — English-first, keyword dense
-      Headline formula: "Senior Backend Engineer | Node.js · NestJS · AWS · Kafka | Built for 41M users". About section: 4 short paragraphs, first line states scale.
+- [ ] **Admin · 40m** — LinkedIn + GitHub rewrite — English-first, keyword dense
+      Headline formula: "Senior Backend Engineer | Node.js · NestJS · AWS · Kafka | Built for 41M users". About section: 4 short paragraphs, first line states scale, written in first person. Then the GitHub profile README and two pinned repos — that pair is your written-English evidence, which is the thing a remote hiring manager is currently guessing about.
+      `resume/02-linkedin-and-profiles.md`
 
 <a id="day-5"></a>
 ### Day 5 — Stacks & the Node practical round
 
-*Stack patterns + the "implement this utility" round* · ~3h 45m
+*Stack patterns + the "implement this utility" round* · ~4h 10m
 
 **Focus.** Node/backend OAs love "implement promiseAll / debounce / a concurrency pool". These are free points if drilled.
 
@@ -155,6 +160,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 45m** — Design patterns in practice — SOLID, repository, circuit breaker
       `phase-1-core-programming/05-design-patterns-in-practice.md`
 - [ ] **Story · 25m** — STAR story #2 — live streaming architecture (Right Tracks / Agora)
+- [ ] **Admin · 25m** — Set the outreach rhythm — referrals beat volume
+      A referred application converts roughly five times better than a cold one, and the ask costs one message. Write the three referral scripts against real names from your network, and put the weekly rhythm on your calendar: source Monday, apply Tuesday and Thursday, two warm touches Wednesday, follow-ups Friday. Applying is not studying — both get scheduled or neither happens.
+      `resume/03-outreach-and-referrals.md`
 
 <a id="day-6"></a>
 ### Day 6 — System design fundamentals + first real HLD
@@ -326,7 +334,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-14"></a>
 ### Day 14 — Week 2 checkpoint + first full mock
 
-*Put it together under pressure* · ~3h 45m
+*Put it together under pressure* · ~4h 5m
 
 **Focus.** Timed OA #2, a full 45-minute design mock, and a behavioral block.
 
@@ -337,6 +345,9 @@ You already have deep written material in this repo. What kills candidates at yo
       Screen-share excalidraw. Grade yourself against the rubric afterwards, honestly.
 - [ ] **Quiz · 30m** — Mixed quiz — 30 questions, weeks 1-2
 - [ ] **Admin · 45m** — Apply to 6 roles + follow up on week 1 batch
+- [ ] **Admin · 20m** — Build your reverse-interview shortlist
+      Week 1 applications start converting to screens about now, and "do you have any questions for us?" is scored. Pick ten from the bank and write them down: three universal, three that decide whether you would accept, two remote-specific, and the closing question about hesitations. Ask from notes — it reads as preparation, not weakness.
+      `phase-0-online-assessments/10-reverse-interview-bank.md`
 - [ ] **Admin · 20m** — Review progress, rebalance week 3
 
 ## Week 3
@@ -364,7 +375,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-16"></a>
 ### Day 16 — Graphs II / topological sort & AWS serverless
 
-*Dependency ordering + the cloud round* · ~3h 45m
+*Dependency ordering + the cloud round* · ~4h 15m
 
 **Focus.** Course Schedule family and Lambda/API Gateway/AppSync cost and cold-start realities.
 
@@ -376,6 +387,9 @@ You already have deep written material in this repo. What kills candidates at yo
       `phase-4-cloud-infrastructure/02-aws-serverless-deep-dive.md`
 - [ ] **Quiz · 15m** — Quiz: AWS & serverless
 - [ ] **Design · 50m** — HLD drill — Payment processing (Stripe-like) with idempotency
+- [ ] **Read · 30m** — Take-home assignments — the rubric you are not shown
+      At senior level this has largely replaced the timed test for remote roles, and the failure is almost never "the code did not work" — it is scope, structure or silence. Read it before one lands, because the decisions that lose it are made in the first thirty minutes. The project you are building this week is the rehearsal.
+      `phase-0-online-assessments/09-take-home-assignments.md`
 - [ ] **Story · 25m** — STAR story #5 — a cost or performance optimisation with numbers
 
 <a id="day-17"></a>

@@ -10,6 +10,7 @@
 ## Table of Contents
 
 - [Preparation Plan](#preparation-plan)
+- [Resume, Profiles & Outreach](#resume-profiles--outreach)
 - [Phase 0: Online Assessments & Coding Interviews](#phase-0-online-assessments--coding-interviews-week-0-ongoing)
 - [Phase 1: Core Programming & Languages](#phase-1-core-programming--languages-week-12)
 - [Phase 2: APIs & Real-Time Systems](#phase-2-apis--real-time-systems-week-23)
@@ -28,6 +29,7 @@
 | 0 | [prep.md](prep.md) | Master checklist — timeline, daily split, resources, all phases outlined |
 | 1 | [30-DAY-PLAN.md](30-DAY-PLAN.md) | Day-by-day 30-day sprint — 163 scheduled tasks, each linked to the guide it draws on |
 | 2 | [job-cracker/](job-cracker/) | **The platform.** Dockerised study + testing + progress tracker built around this repo |
+| 3 | [resume/](resume/README.md) | **The artifacts.** Resume system, master template, LinkedIn/GitHub, outreach scripts — the documents that run on every application |
 
 ---
 
@@ -57,6 +59,23 @@ Setup, architecture and how to edit the content: [job-cracker/README.md](job-cra
 
 ---
 
+## Resume, Profiles & Outreach
+
+> Everything else in this repo is knowledge you might be asked about. These are the documents a
+> stranger actually reads — and they gate all 97,000 lines behind them.
+
+| Guide | Covers |
+|---|---|
+| [The Resume System](resume/00-resume-system.md) | How resumes are read by ATS, recruiter and hiring manager; the 6-second scan; the `verb + system + scale + outcome` formula; recovering numbers you think you don't have; what separates a Senior resume from a Lead one; layout rules; the seven failure modes; tailoring at volume; BD vs international remote |
+| [The Master Resume](resume/01-master-resume.md) | The fill-in template and a worked example; the bullet bank organised by the dimension each bullet proves; summary-line variants per posting type; the Selected Work section; a 90-minute filling session |
+| [LinkedIn, GitHub & the Public Surface](resume/02-linkedin-and-profiles.md) | Headline and About that survive recruiter search; the GitHub profile README; making two repos count; the written-English problem and the four cheapest fixes for it |
+| [Outreach, Referrals & Follow-ups](resume/03-outreach-and-referrals.md) | The volume arithmetic; the two-sentence note; three referral scripts; cold outreach to hiring managers; the salary question asked early; follow-ups; after the interview; after a rejection; a weekly rhythm |
+
+**Start here if you have one hour:** [the bullet formula](resume/00-resume-system.md#4-the-bullet-formula)
+and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting-numbers-when-you-think-you-have-none).
+
+---
+
 ## Phase 0: Online Assessments & Coding Interviews (Week 0 / Ongoing)
 
 > **The gate before the gate.** Most candidates are filtered by an automated coding test before a human ever reads their CV. Run this phase in parallel with everything else.
@@ -74,6 +93,8 @@ Setup, architecture and how to edit the content: [job-cracker/README.md](job-cra
 | 8 | [MCQ Bank — DevOps, Cloud, Linux & Git](phase-0-online-assessments/06-devops-cloud-mcq-bank.md) | Docker layers/multi-stage/exit codes, Kubernetes probes & QoS & zero-downtime, Linux triage, Git recovery & workflows, CI/CD & DORA, AWS (SG vs NACL, SQS, RDS, cost), NGINX/TLS/mTLS, observability & SLOs | 90 MCQs |
 | 9 | [Video, Aptitude & Psychometric](phase-0-online-assessments/07-video-interview-and-psychometric.md) | Talview/HireVue one-way video mechanics, the 90-second answer formula, **24 real questions**, situational judgement tests, Big-5/culture-fit inventories, numerical & logical & verbal aptitude, data interpretation, English fluency drills, recording setup | 24 Q + 40 drills |
 | 10 | [Timed Mock Assessments](phase-0-online-assessments/08-timed-mock-assessments.md) | Five full-length simulations — HackerRank enterprise (90 min), TestGorilla bundle (45 min), Codility/Toptal (60 min), Talview video (20 min), Mettl BD corporate (120 min) — with answer keys, diagnostic scorecard and a 14-day plan | 5 mocks |
+| 11 | [Take-Home Assignments](phase-0-online-assessments/09-take-home-assignments.md) | The rubric you are not shown, scoping discipline, the 4-hour time budget, senior-reading project structure, testing depth, the README and TRADEOFFS documents, commit hygiene, the follow-up call, 7 assignment archetypes, when and how to decline | 2 checklists |
+| 12 | [The Reverse Interview](phase-0-online-assessments/10-reverse-interview-bank.md) | Questions *you* ask — by who is in the room (recruiter, hiring manager, engineers, principal, CTO), the diagnostic set that decides whether to accept, remote-specific and lead-level questions, reading the answers, red flags, and the closing question | ~70 questions |
 
 **Every coding problem follows one format:** Question → Signal (how to recognise it) → Strategy (the insight, in plain English) → JavaScript solution (commented) → Trace table → Complexity & Pitfalls. All 117 solutions are verified against 309 test assertions including edge cases.
 

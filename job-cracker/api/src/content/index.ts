@@ -46,7 +46,7 @@ export const profileSeed = {
  * Bump this when content changes in a way that should overwrite what is already
  * in the database. Progress, attempts, stories and notes are never touched.
  */
-export const CONTENT_VERSION = '1.4.0';
+export const CONTENT_VERSION = '1.5.0';
 
 export { plan, quiz, drills, starPrompts, skills, docs };
 export * from './types';

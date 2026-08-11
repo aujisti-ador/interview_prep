@@ -112,11 +112,19 @@ export const plan: PlanDaySeed[] = [
         minutes: 40,
       },
       {
-        kind: 'admin',
-        title: 'Resume rewrite pass 1 — metrics on every bullet',
+        kind: 'read',
+        title: 'The resume system — how it is actually read',
         detail:
-          'Every bullet: verb + system + scale + outcome. "Built notification service" -> "Designed Kafka-backed notification service delivering 4M+/day to 41M subscribers, p99 under 2s". No bullet survives without a number or a named trade-off.',
-        ref: 'playbook#resume',
+          'Twenty minutes that decide whether the next forty-five are worth anything. The ATS parsing rules, the six-second scan order, the bullet formula, and the three bullets that separate a Senior resume from a Lead one.',
+        ref: 'resume/00-resume-system.md',
+        minutes: 20,
+      },
+      {
+        kind: 'admin',
+        title: 'Resume rewrite pass 1 — fill the bullet bank',
+        detail:
+          'One sitting, no splitting it across days. Dump every project, then recover a number for each using the six angles (scale, time, money, reliability, breadth, risk removed), then convert the best into verb + system + scale + outcome. Write more bullets than fit — selection comes after. Include the three lead signals: a decision with a rejected alternative, a standard you set, people you levelled.',
+        ref: 'resume/01-master-resume.md',
         minutes: 45,
       },
     ],
@@ -199,10 +207,10 @@ export const plan: PlanDaySeed[] = [
       },
       {
         kind: 'admin',
-        title: 'LinkedIn rewrite — English-first, keyword dense',
+        title: 'LinkedIn + GitHub rewrite — English-first, keyword dense',
         detail:
-          'Headline formula: "Senior Backend Engineer | Node.js · NestJS · AWS · Kafka | Built for 41M users". About section: 4 short paragraphs, first line states scale.',
-        ref: 'playbook#linkedin',
+          'Headline formula: "Senior Backend Engineer | Node.js · NestJS · AWS · Kafka | Built for 41M users". About section: 4 short paragraphs, first line states scale, written in first person. Then the GitHub profile README and two pinned repos — that pair is your written-English evidence, which is the thing a remote hiring manager is currently guessing about.',
+        ref: 'resume/02-linkedin-and-profiles.md',
         minutes: 40,
       },
     ],
@@ -248,6 +256,14 @@ export const plan: PlanDaySeed[] = [
         kind: 'behavioral',
         title: 'STAR story #2 — live streaming architecture (Right Tracks / Agora)',
         ref: 'behavioral',
+        minutes: 25,
+      },
+      {
+        kind: 'admin',
+        title: 'Set the outreach rhythm — referrals beat volume',
+        detail:
+          'A referred application converts roughly five times better than a cold one, and the ask costs one message. Write the three referral scripts against real names from your network, and put the weekly rhythm on your calendar: source Monday, apply Tuesday and Thursday, two warm touches Wednesday, follow-ups Friday. Applying is not studying — both get scheduled or neither happens.',
+        ref: 'resume/03-outreach-and-referrals.md',
         minutes: 25,
       },
     ],
@@ -607,6 +623,14 @@ export const plan: PlanDaySeed[] = [
       },
       { kind: 'quiz', title: 'Mixed quiz — 30 questions, weeks 1-2', ref: 'quiz?mode=mixed', minutes: 30 },
       { kind: 'admin', title: 'Apply to 6 roles + follow up on week 1 batch', ref: 'pipeline', minutes: 45 },
+      {
+        kind: 'admin',
+        title: 'Build your reverse-interview shortlist',
+        detail:
+          'Week 1 applications start converting to screens about now, and "do you have any questions for us?" is scored. Pick ten from the bank and write them down: three universal, three that decide whether you would accept, two remote-specific, and the closing question about hesitations. Ask from notes — it reads as preparation, not weakness.',
+        ref: 'phase-0-online-assessments/10-reverse-interview-bank.md',
+        minutes: 20,
+      },
       { kind: 'admin', title: 'Review progress, rebalance week 3', ref: 'progress', minutes: 20 },
     ],
   },
@@ -671,6 +695,14 @@ export const plan: PlanDaySeed[] = [
       },
       { kind: 'quiz', title: 'Quiz: AWS & serverless', ref: 'quiz?topic=AWS', minutes: 15 },
       { kind: 'design', title: 'HLD drill — Payment processing (Stripe-like) with idempotency', ref: 'design/hld-payment-system', minutes: 50 },
+      {
+        kind: 'read',
+        title: 'Take-home assignments — the rubric you are not shown',
+        detail:
+          'At senior level this has largely replaced the timed test for remote roles, and the failure is almost never "the code did not work" — it is scope, structure or silence. Read it before one lands, because the decisions that lose it are made in the first thirty minutes. The project you are building this week is the rehearsal.',
+        ref: 'phase-0-online-assessments/09-take-home-assignments.md',
+        minutes: 30,
+      },
       { kind: 'behavioral', title: 'STAR story #5 — a cost or performance optimisation with numbers', ref: 'behavioral', minutes: 25 },
     ],
   },

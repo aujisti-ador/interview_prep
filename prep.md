@@ -31,8 +31,22 @@
 - [ ] SQL: [52 query challenges + 18 MCQs](phase-0-online-assessments/04-sql-challenge-bank.md) — window functions, cohorts, EXPLAIN
 - [ ] [REST API question type, 16 find-the-bug snippets, code-review round](phase-0-online-assessments/05-rest-api-and-debugging-challenges.md)
 - [ ] [One-way video, aptitude & psychometric](phase-0-online-assessments/07-video-interview-and-psychometric.md) — record the five STAR stories, drill numerical/logical reasoning
+- [ ] [Take-home assignments](phase-0-online-assessments/09-take-home-assignments.md) — the hidden rubric, scoping, the README and TRADEOFFS docs, the follow-up call
+- [ ] [The reverse interview](phase-0-online-assessments/10-reverse-interview-bank.md) — build your shortlist of questions before the first screen, not during it
 - [ ] Earn the free HackerRank certifications: **Node.js (Intermediate)**, **SQL (Advanced)**, **Problem Solving (Intermediate)** — recruiters filter by these badges
 - [ ] Re-take Mock A after two weeks and compare scores
+
+## Phase 0.5: The Artifacts — Resume, Profiles & Outreach (Do this in week 1)
+
+> The resume is the only document 100% of interviewers read, and it gates every one of the
+> 97,000 lines below it. Full material: [resume/](resume/README.md)
+
+- [ ] Read the [resume system](resume/00-resume-system.md) — ATS mechanics, the 6-second scan, the `verb + system + scale + outcome` formula
+- [ ] Fill the [master resume](resume/01-master-resume.md) in one 90-minute sitting — bullet bank first, selection second
+- [ ] Write the three lead-signal bullets: a decision with a rejected alternative, a standard you set, people you levelled
+- [ ] [LinkedIn headline + About](resume/02-linkedin-and-profiles.md), GitHub profile README, two pinned repos
+- [ ] Publish one ADR publicly — the fastest fix for the "no written English artifacts" hesitation
+- [ ] Set up the [outreach rhythm](resume/03-outreach-and-referrals.md) — ~8 applications and 2 warm touches per week
 
 ## Phase 1: Core Programming & Languages (Week 1–2)
 

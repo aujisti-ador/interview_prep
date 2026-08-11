@@ -21,6 +21,12 @@
 | 6 | [MCQ Bank — DevOps, Cloud, Linux & Git](06-devops-cloud-mcq-bank.md) | 90 questions: Docker, Kubernetes, Linux/shell, Git, CI/CD, AWS, NGINX/TLS, observability | TestGorilla/iMocha infra tests, Mettl technical section |
 | 7 | [Video, Aptitude & Psychometric](07-video-interview-and-psychometric.md) | One-way video mechanics, the 90-second answer formula, 24 real questions, SJTs, Big-5 tests, numerical/logical/verbal aptitude, English drills, recording setup | **Talview, HireVue, TestGorilla cognitive, Mettl aptitude** |
 | 8 | [Timed Mock Assessments](08-timed-mock-assessments.md) | Five full-length simulations (HackerRank / TestGorilla / Codility / Talview / Mettl), diagnostic scorecard, 14-day plan | Find your weakest bucket before a real test does |
+| 9 | [Take-Home Assignments](09-take-home-assignments.md) | The hidden rubric, scoping discipline, project structure, the README and TRADEOFFS docs, commit hygiene, the follow-up call, when to decline | **Proxify, Toptal, European product companies** — at senior level this has largely replaced the timed test |
+| 10 | [The Reverse Interview](10-reverse-interview-bank.md) | Questions *you* ask, by who is in the room; the diagnostic set that tells you whether to accept; red flags; the closing question | Every round from the recruiter screen onward |
+
+> **9 and 10 are the human-facing filters that bracket the automated ones.** Files 0–8 get you
+> past a machine. A take-home is what replaces that machine at senior level, and your own
+> questions are scored in every round that follows.
 
 ---
 
@@ -50,6 +56,8 @@
 | [06 DevOps MCQ](06-devops-cloud-mcq-bank.md) | [Phase 4 — Docker](../phase-4-cloud-infrastructure/03-docker-fundamentals.md), [Kubernetes](../phase-4-cloud-infrastructure/04-kubernetes-basics.md), [Observability](../phase-4-cloud-infrastructure/05-observability-reliability.md) |
 | [07 video/behavioural](07-video-interview-and-psychometric.md) | Phase 6 — Behavioural & Market Fit ([prep.md](../prep.md)) |
 | [08 mocks — design questions](08-timed-mock-assessments.md) | [Phase 5 — HLD Practice Problems](../phase-5-system-design/06-hld-practice-problems.md) |
+| [09 take-home](09-take-home-assignments.md) | [Phase 1 — Testing & Quality](../phase-1-core-programming/04-testing-and-quality.md), [Design Patterns](../phase-1-core-programming/05-design-patterns-in-practice.md); the finished repo becomes [Selected Work](../resume/02-linkedin-and-profiles.md#7-making-two-repos-count) |
+| [10 reverse interview](10-reverse-interview-bank.md) | [Resume — Outreach & the salary question](../resume/03-outreach-and-referrals.md) |
 
 ---
 
