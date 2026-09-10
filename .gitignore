@@ -1,0 +1,4 @@
+# Machine-local Claude Code permissions — not shared
+.claude/settings.local.json
+
+.DS_Store

@@ -6,6 +6,54 @@
 
 ---
 
+## In 60 seconds
+
+1. **Kubernetes is one of those topics where reading teaches you almost nothing.** Six hours of
+   `kubectl` on Minikube gives you more usable knowledge than any amount of documentation,
+   because you will break it and have to diagnose it.
+2. **Build up in this order**, and understand each before moving on:
+   ```
+   Pod  →  Deployment  →  Service  →  Ingress  →  ConfigMap/Secret  →  probes  →  HPA
+   ```
+3. **Deliberately cause the two famous failures**, because you will be asked about both:
+   - Set a memory limit too low → watch `OOMKilled`
+   - Point a liveness probe at a slow endpoint → watch `CrashLoopBackOff`
+4. **Probes are the highest-value thing here.** Readiness failing = removed from traffic.
+   Liveness failing = **restarted**. Getting them backwards causes restart loops during normal
+   slow startup, and that is exactly the interview question.
+5. **Requests vs limits decide scheduling and survival.** Requests are what you are guaranteed
+   and what the scheduler uses; limits are the hard ceiling that kills you.
+6. **Practise the debugging commands until they are automatic:** `kubectl describe pod`,
+   `kubectl logs --previous`, `kubectl get events --sort-by=.lastTimestamp`. Every real
+   Kubernetes conversation starts with one of these.
+
+**What to be able to explain afterwards:** what happens from `kubectl apply` to traffic
+reaching your new Pod, and where you would look when it does not.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Minikube** | A single-node Kubernetes cluster on your laptop |
+| **`kubectl`** | The command-line tool for talking to a cluster |
+| **Pod** | The smallest unit — one or more containers sharing an address |
+| **Deployment** | Manages Pods: how many, which image, how to roll out |
+| **Service** | A stable address in front of a changing set of Pods |
+| **Ingress** | Routes external HTTP into Services. Usually NGINX underneath |
+| **ConfigMap / Secret** | Non-sensitive · sensitive configuration |
+| **Liveness probe** | Fails → **restart me** |
+| **Readiness probe** | Fails → **stop sending me traffic** |
+| **Request / Limit** | Guaranteed resources · the hard ceiling |
+| **`OOMKilled`** | Killed for exceeding the memory limit |
+| **`CrashLoopBackOff`** | Repeatedly starting and crashing |
+| **`ImagePullBackOff`** | Cannot fetch the image — wrong name, tag, or credentials |
+| **Rolling update** | Replacing Pods gradually so the service stays up |
+| **HPA** | Autoscaler that adds Pods when a metric rises |
+| **Helm** | A package manager for Kubernetes manifests |
+| **Namespace** | A folder for grouping and isolating resources |
+
+---
+
 ## What You'll Learn
 
 - Setting up a local K8s cluster with Minikube

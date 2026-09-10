@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: jc-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-jobcracker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jobcracker}
+      POSTGRES_DB: ${POSTGRES_DB:-jobcracker}
+    volumes:
+      - jc-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jobcracker} -d ${POSTGRES_DB:-jobcracker}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "${DB_PORT:-55432}:5432"
+
+  api:
+    build:
+      context: ./api
+    container_name: jc-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-jobcracker}:${POSTGRES_PASSWORD:-jobcracker}@db:5432/${POSTGRES_DB:-jobcracker}?schema=public
+      PORT: 4000
+      NODE_ENV: production
+      RESEED: ${RESEED:-false}
+      REPO_ROOT: /repo
+    volumes:
+      # The interview_prep repo, read-only — this is what the Library tab serves.
+      - ../:/repo:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-4000}:4000"
+
+  web:
+    build:
+      context: ./web
+    container_name: jc-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
+
+volumes:
+  jc-pgdata:

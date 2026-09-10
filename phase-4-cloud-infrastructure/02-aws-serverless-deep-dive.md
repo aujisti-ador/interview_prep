@@ -6,6 +6,50 @@
 
 ---
 
+## In 60 seconds
+
+1. **Lambda runs your function only when called, and you pay per millisecond.** No traffic, no
+   cost. That is the appeal — and the reason cost questions dominate the interview.
+2. **A cold start is the delay when Lambda has to create a new container** for your function.
+   Warm invocations reuse it. Node cold starts are usually 100–500ms; a VPC or a huge bundle
+   makes it much worse.
+3. **Code outside the handler runs once per container, not once per request.** Put your database
+   client there and it is reused. Put it inside the handler and you create a new connection
+   every single time.
+4. **Lambda + a relational database is a known trap.** 1,000 concurrent Lambdas try to open
+   1,000 connections and Postgres falls over. That is what RDS Proxy exists for.
+5. **Lambda memory is really a CPU dial.** More memory means proportionally more CPU, so raising
+   it often makes the function *cheaper* by finishing sooner.
+6. **Being able to say "this design costs roughly $X a month, and here is the cheaper shape"
+   stands out enormously** — especially in the BD market where cost is a first-class constraint.
+
+**The interview trap to expect:** "your Lambda works in testing but times out under load."
+Usually connection exhaustion against the database, or a cold-start storm — both above.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Serverless** | You run code without managing servers. Servers still exist; they are not your problem |
+| **Lambda** | AWS's function-as-a-service. Runs your code on demand |
+| **Cold start** | The extra delay when a new container must be created |
+| **Warm start** | Reusing an existing container. Much faster |
+| **Provisioned concurrency** | Paying to keep containers warm, removing cold starts |
+| **Handler** | The function AWS calls. Code above it runs once per container |
+| **Execution context** | The reusable container. Where you cache connections |
+| **Concurrency limit** | How many copies of your function may run at once |
+| **API Gateway** | The HTTP front door that triggers Lambdas |
+| **AppSync** | AWS's managed GraphQL service |
+| **Cognito** | AWS's managed user authentication |
+| **RDS Proxy** | A connection pool between Lambda and a relational database |
+| **DLQ** | Where a Lambda's failed events go after retries are exhausted |
+| **Step Functions** | Orchestrating several Lambdas into a workflow with state |
+| **EventBridge** | An event bus for routing events between AWS services |
+| **CDK** | Defining AWS infrastructure in TypeScript instead of YAML |
+| **Cost per invocation** | Requests × duration × memory. The formula behind every cost question |
+
+---
+
 ## Q1: AWS Lambda Fundamentals & Execution Model
 
 ### Q: What is AWS Lambda and how does its execution model work?

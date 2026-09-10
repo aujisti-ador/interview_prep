@@ -2,6 +2,49 @@
 
 > **Focus:** TypeScript, Node.js, NestJS | **Level:** Senior / Lead Backend Engineer
 
+## In 60 seconds
+
+1. **Test behaviour, not implementation.** A good test survives a refactor. If renaming a
+   private method breaks your test, the test was wrong.
+2. **The pyramid: many fast unit tests, some integration tests, few end-to-end tests.** E2E
+   tests are slow and flaky, so you keep only the handful that cover money-critical paths.
+3. **Mock / stub / spy / fake are four different things** and interviewers check that you know
+   which. Fake = a working simple version. Stub = returns canned answers. Mock = a stub that
+   also asserts it was called. Spy = watches a real function.
+4. **Coverage is a smoke detector, not a goal.** 100% coverage with no assertions proves
+   nothing. 70% on the code that handles money beats 95% spread evenly.
+5. **Test names should describe the behaviour**, so a failing test tells you what broke without
+   opening it: `rejects a duplicate order with the same idempotency key`.
+6. **Mock at the boundary, not inside your own code.** Mock the payment provider. Do not mock
+   your own service to test your own controller.
+
+**The interview trap to expect:** "how do you test something that talks to a database?" The
+senior answer is testcontainers or a real test database — *not* mocking the ORM, which tests
+your mocks rather than your SQL.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Unit test** | Tests one piece in isolation, with its dependencies replaced |
+| **Integration test** | Tests several real pieces together — often including a real database |
+| **E2E test** | Drives the whole system the way a user would, through the real HTTP API |
+| **Test double** | Any stand-in for a real dependency. The umbrella term for the four below |
+| **Fake** | A simple working implementation, e.g. an in-memory repository |
+| **Stub** | Returns fixed answers. Does not check how it was used |
+| **Mock** | A stub that also asserts it was called correctly |
+| **Spy** | Wraps a real function to record calls, while still running it |
+| **TDD** | Test-Driven Development — write the failing test first, then the code |
+| **Red-Green-Refactor** | The TDD cycle: failing test → make it pass → clean it up |
+| **Coverage** | The percentage of your code that ran during tests |
+| **Branch coverage** | Whether *both* sides of every `if` were tested. Stricter and more useful than line coverage |
+| **Flaky test** | A test that sometimes passes and sometimes fails without code changes. Worse than no test |
+| **Testcontainers** | A library that starts a real database in Docker for the duration of your test |
+| **Fixture** | Prepared test data used to put the system in a known state |
+| **AAA** | Arrange, Act, Assert — the three parts of a well-shaped test |
+
+---
+
 ## Table of Contents
 1. [Q1: Testing Pyramid and Testing Strategy](#q1-testing-pyramid-and-testing-strategy)
 2. [Q2: Unit Testing with Jest](#q2-unit-testing-with-jest)

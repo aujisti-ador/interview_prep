@@ -1,5 +1,50 @@
 # NestJS Mastery - Interview Q&A
 
+> **📝 Screening drill:** NestJS pipeline order, provider scopes, DI tokens and `ValidationPipe` options appear as MCQs — see [Phase 0 — MCQ Bank: Node.js & Backend](../phase-0-online-assessments/02-mcq-bank-nodejs-backend.md#7-nestjs).
+
+## In 60 seconds
+
+1. **NestJS is structure, not magic.** It is Express underneath, with a fixed place for
+   everything so that large teams do not each invent their own layout.
+2. **Dependency Injection means you never write `new`.** You ask for a service in your
+   constructor and Nest gives it to you. This is what makes testing easy — in a test you hand
+   it a fake instead.
+3. **A request passes through five things, in a fixed order:**
+   `Middleware → Guard → Interceptor → Pipe → your Controller`.
+   **Interviewers ask this order constantly.** Knowing which one to use for a task is the real
+   test.
+4. **The quick rule for choosing:** Guard = "are you allowed in?" · Pipe = "is this input
+   valid?" · Interceptor = "wrap the call" (logging, caching, timing) · Filter = "something
+   broke, format the error".
+5. **Providers are singletons by default** — one instance shared by the whole app. Changing
+   that to request-scoped is easy and quietly expensive.
+6. **Circular dependencies happen** when two modules import each other. `forwardRef()` fixes
+   the symptom; usually the real fix is a third shared module.
+
+**The interview trap to expect:** "where would you put rate limiting — middleware, guard, or
+interceptor?" There is a defensible answer for each, and they want your *reasoning*.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **DI (Dependency Injection)** | You declare what you need; the framework creates and supplies it |
+| **Provider** | Anything Nest can inject — usually a service class |
+| **Module** | A box grouping related controllers and providers, and declaring what it shares |
+| **Controller** | The class that maps URLs to functions |
+| **Guard** | Runs before the handler and answers yes/no — used for auth and permissions |
+| **Interceptor** | Wraps the handler; can change the input, the output, or measure the time |
+| **Pipe** | Transforms and validates incoming data before the handler sees it |
+| **Exception filter** | Catches thrown errors and turns them into HTTP responses |
+| **Middleware** | Plain Express middleware — runs first, before Nest knows which route you hit |
+| **Decorator** | The `@Something()` syntax. It attaches metadata that Nest reads at startup |
+| **Scope** | How long a provider lives: `DEFAULT` (singleton), `REQUEST`, or `TRANSIENT` |
+| **DTO** | Data Transfer Object — a class describing the shape of a request body |
+| **`forwardRef()`** | A workaround telling Nest "this dependency exists, resolve it later" |
+| **Microservice transport** | How Nest services talk to each other — TCP, Redis, Kafka, gRPC |
+
+---
+
 ## Table of Contents
 1. [Core Concepts](#core-concepts)
 2. [Modules](#modules)
@@ -15,6 +60,12 @@
 12. [Microservices](#microservices)
 13. [Testing](#testing)
 14. [Best Practices](#best-practices)
+15. [Q15: Caching Strategies with Redis in NestJS](#q15-caching-strategies-with-redis-in-nestjs)
+16. [Q16: Configuration & Environment Validation](#q16-configuration--environment-validation)
+17. [Q17: Circular Dependencies in NestJS](#q17-circular-dependencies-in-nestjs)
+18. [Q18: NestJS Database Transactions](#q18-nestjs-database-transactions)
+19. [Q19: NestJS Task Scheduling & Queue Processing](#q19-nestjs-task-scheduling--queue-processing)
+20. [Quick Reference Table](#quick-reference-table)
 
 ---
 

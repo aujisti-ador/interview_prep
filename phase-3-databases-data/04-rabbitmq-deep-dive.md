@@ -3,6 +3,54 @@
 > **Target Role:** Senior/Lead Backend Engineer
 > **Focus:** Architecture decisions, reliability patterns, production experience
 
+## In 60 seconds
+
+1. **RabbitMQ is a queue: once a message is handled and acknowledged, it is gone.** That is the
+   opposite of Kafka, and it is the main thing to be clear about in an interview.
+2. **Producers never send to a queue directly.** They send to an **exchange**, and the exchange
+   decides which queues get a copy based on routing rules. This indirection is RabbitMQ's real
+   strength.
+3. **Four exchange types, and choosing correctly is the test:** `direct` (exact match),
+   `topic` (wildcard patterns like `order.*.created`), `fanout` (copy to everyone), `headers`
+   (rarely used).
+4. **Acknowledge *after* processing, never before.** If you ack first and then crash, the
+   message is lost forever. Ack after, and a crash means redelivery — which is why your
+   consumers must be idempotent.
+5. **`prefetch` is the setting people forget.** Without it, one consumer grabs thousands of
+   messages while others sit idle. Set it low (1–10) for slow work.
+6. **A dead-letter exchange catches messages that keep failing**, so one bad message does not
+   block the queue forever.
+
+**The interview trap to expect:** "when would you choose RabbitMQ over Kafka?" Good answer:
+complex routing, per-message acknowledgement, priority queues, and low volume with many
+consumers doing different things. Kafka wins on replay, ordering-at-scale, and very high
+throughput.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Exchange** | The router. Producers publish here, not to queues |
+| **Binding** | The rule connecting an exchange to a queue |
+| **Routing key** | A label on the message the exchange uses to decide where it goes |
+| **Direct exchange** | Routing key must match exactly |
+| **Topic exchange** | Wildcard matching — `order.*.created`, `payment.#` |
+| **Fanout exchange** | Every bound queue gets a copy. Ignores routing keys |
+| **Queue** | Where messages wait for a consumer |
+| **Ack / Nack** | "Done, delete it" · "Failed, requeue or dead-letter it" |
+| **Auto-ack** | Acknowledge on delivery, before processing. **Fast and unsafe** |
+| **Prefetch (QoS)** | How many unacknowledged messages one consumer may hold at once |
+| **DLX / DLQ** | Dead Letter Exchange/Queue — where failed or expired messages go |
+| **TTL** | How long a message may sit before expiring |
+| **Durable queue** | Survives a broker restart |
+| **Persistent message** | Written to disk, so it survives a restart. Durability needs *both* |
+| **Publisher confirms** | The broker tells the producer the message was safely accepted |
+| **Quorum queue** | The modern replicated queue type. Prefer over classic mirrored queues |
+| **Poison message** | Always fails, redelivers forever. Needs a retry limit and a DLQ |
+| **Competing consumers** | Several consumers on one queue, each message going to only one |
+
+---
+
 ## Table of Contents
 1. [Core Concepts & Architecture](#q1-what-is-rabbitmq--core-concepts)
 2. [Exchange Types](#q2-exchange-types)

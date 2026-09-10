@@ -6,6 +6,53 @@
 
 ---
 
+## In 60 seconds
+
+1. **Measure first. Always.** The rule that matters most here: you are wrong about where the
+   time goes. Every experienced engineer has optimised the wrong thing.
+2. **Use percentiles, not averages.** An average of 200ms can hide a p99 of 8 seconds. The
+   average customer is fine; the angry customer is at p99.
+3. **Latency and throughput are different problems.** Latency = how long one request takes.
+   Throughput = how many you handle per second. Adding servers fixes throughput and does
+   nothing for latency.
+4. **Find the bottleneck before you tune anything**, because improving anything else changes
+   nothing. In a Node backend it is usually the database, then external calls, then the event
+   loop — rarely your algorithm.
+5. **Caching is the highest-leverage fix and the easiest to get wrong.** It turns a performance
+   problem into a correctness problem, so decide invalidation before you add it.
+6. **Load test with realistic data.** A table with 1,000 rows behaves nothing like one with 50
+   million, because at 1,000 rows the wrong index still looks fine.
+
+**The interview trap to expect:** "the API is slow, walk me through what you do." They are
+testing your *method*, not your knowledge. The right shape: reproduce it → measure where time
+goes (tracing) → find the single biggest contributor → fix that one thing → measure again.
+Jumping straight to "I'd add Redis" is the wrong answer.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Latency** | How long one request takes |
+| **Throughput** | How many requests per second you handle |
+| **p50 / p95 / p99** | The median · the slowest 5% · the slowest 1% |
+| **Tail latency** | The slow end of the distribution — where user complaints come from |
+| **Bottleneck** | The one constraint actually limiting you. Fixing anything else does nothing |
+| **Profiling** | Measuring where CPU time or memory actually goes |
+| **Flame graph** | A picture of a profile. Wide bars are what to fix |
+| **Event loop lag** | How long your Node thread is blocked. **The key Node metric** |
+| **Connection pool** | Reused database connections. A too-small pool is a hidden bottleneck |
+| **N+1 query** | One query plus one more per result. A very common cause of slowness |
+| **Load test** | Simulated traffic to find the breaking point |
+| **Soak test** | A long load test, to reveal memory leaks |
+| **Stress test** | Pushing past capacity to see *how* it fails |
+| **k6 / Artillery** | Load-testing tools |
+| **Horizontal / vertical scaling** | More machines · a bigger machine |
+| **Backpressure** | Signalling upstream to slow down instead of collapsing |
+| **Amdahl's law** | The part you cannot parallelise limits your total possible speedup |
+| **Premature optimisation** | Optimising before measuring. The reason rule 1 exists |
+
+---
+
 ## Table of Contents
 
 1. [Performance Engineering Fundamentals](#q1-performance-engineering-fundamentals)

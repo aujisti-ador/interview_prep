@@ -19,7 +19,42 @@
 - **Mock Practice**: Record answers (behavioral + technical). Use STAR method.
 - **English Communication**: Practice explaining technical decisions fluently in English — this is the #1 gatekeeper for international remote roles. Use Pramp/Interviewing.io for live practice.
 
+## Phase 0: Online Assessments — The Screening Gate (Week 0 / Ongoing)
+
+> Run this in parallel with everything else. Most applications are rejected by an automated test on HackerRank, Codility, CodeSignal, TestGorilla, Talview or Mercer Mettl **before a human reads your CV**. Full material: [phase-0-online-assessments/](phase-0-online-assessments/README.md)
+
+- [ ] Read the [Platform Playbook](phase-0-online-assessments/00-platform-playbook.md) — question types, scoring models, proctoring rules, Node stdin harness
+- [ ] Take [Mock A](phase-0-online-assessments/08-timed-mock-assessments.md) cold and fill in the diagnostic scorecard
+- [ ] MCQ banks: [JavaScript/TypeScript](phase-0-online-assessments/01-mcq-bank-javascript-typescript.md) (75) · [Node/Backend](phase-0-online-assessments/02-mcq-bank-nodejs-backend.md) (84) · [DevOps/Cloud/Git](phase-0-online-assessments/06-devops-cloud-mcq-bank.md) (90)
+- [ ] Coding: [Patterns Part 1](phase-0-online-assessments/03-coding-challenges-dsa-javascript.md) + [Part 2](phase-0-online-assessments/03b-coding-challenges-advanced-patterns.md) (117 problems)
+- [ ] Coding: [Node/async & simulation tasks](phase-0-online-assessments/03c-nodejs-async-and-simulation-tasks.md) — async pool, retry+jitter, LRU, EventEmitter, CodeSignal growing-spec task
+- [ ] SQL: [52 query challenges + 18 MCQs](phase-0-online-assessments/04-sql-challenge-bank.md) — window functions, cohorts, EXPLAIN
+- [ ] [REST API question type, 16 find-the-bug snippets, code-review round](phase-0-online-assessments/05-rest-api-and-debugging-challenges.md)
+- [ ] [One-way video, aptitude & psychometric](phase-0-online-assessments/07-video-interview-and-psychometric.md) — record the five STAR stories, drill numerical/logical reasoning
+- [ ] [Take-home assignments](phase-0-online-assessments/09-take-home-assignments.md) — the hidden rubric, scoping, the README and TRADEOFFS docs, the follow-up call
+- [ ] [The reverse interview](phase-0-online-assessments/10-reverse-interview-bank.md) — build your shortlist of questions before the first screen, not during it
+- [ ] [The interview loop](phase-0-online-assessments/12-the-interview-loop.md) — **read this first**: the full 4–6 stage process, what each stage really filters for, and where your profile is most likely to be cut
+- [ ] [Live coding & pairing](phase-0-online-assessments/11-live-coding-and-pairing.md) — the round a human scores; book two mock interviews, because self-scoring inflates
+- [ ] [Offer to first 90 days](phase-0-online-assessments/13-offer-to-first-90-days.md) — negotiating, resigning well, and the first three months
+- [ ] Earn the free HackerRank certifications: **Node.js (Intermediate)**, **SQL (Advanced)**, **Problem Solving (Intermediate)** — recruiters filter by these badges
+- [ ] Re-take Mock A after two weeks and compare scores
+
+## Phase 0.5: The Artifacts — Resume, Profiles & Outreach (Do this in week 1)
+
+> The resume is the only document 100% of interviewers read, and it gates every one of the
+> 97,000 lines below it. Full material: [resume/](resume/README.md)
+
+- [ ] Read the [resume system](resume/00-resume-system.md) — ATS mechanics, the 6-second scan, the `verb + system + scale + outcome` formula
+- [ ] Fill the [master resume](resume/01-master-resume.md) in one 90-minute sitting — bullet bank first, selection second
+- [ ] Write the three lead-signal bullets: a decision with a rejected alternative, a standard you set, people you levelled
+- [ ] [LinkedIn headline + About](resume/02-linkedin-and-profiles.md), GitHub profile README, two pinned repos
+- [ ] Publish one ADR publicly — the fastest fix for the "no written English artifacts" hesitation
+- [ ] Set up the [outreach rhythm](resume/03-outreach-and-referrals.md) — ~8 applications and 2 warm touches per week
+
 ## Phase 1: Core Programming & Languages (Week 1–2)
+
+- [ ] [Reading unfamiliar code](phase-1-core-programming/06-reading-unfamiliar-code.md) — orient, trace, map; git as a research tool; characterisation tests before you change anything
+- [ ] [AI-assisted development](phase-1-core-programming/07-ai-assisted-development.md) — where it helps, where it hurts, the review discipline, and having a policy when asked
 
 - [ ] JavaScript / TypeScript Deep Dive
   - Event loop, closures, prototypes, async/await, promises, error handling
@@ -55,6 +90,9 @@
   - (International note: FAANG-adjacent remote companies test harder — aim for 100+ if targeting Toptal/FAANG-remote)
 
 ## Phase 2: APIs & Real-Time Systems (Week 2–3)
+
+- [ ] [WebRTC & real-time media](phase-2-apis-realtime-systems/07-webrtc-and-media-infrastructure.md) — **your differentiator**: mesh vs SFU vs MCU, NAT traversal, WebRTC vs HLS at scale
+- [ ] [Webhooks & integration reliability](phase-2-apis-realtime-systems/08-webhooks-and-integrations.md) — signature verification, idempotency via unique constraint, reconciliation, SSRF
 
 - [ ] GraphQL + AWS AppSync
   - Schema design, resolvers, subscriptions, batching
@@ -94,6 +132,12 @@
 
 ## Phase 3: Databases & Data Management (Week 3–4)
 
+- [ ] [Choosing the Right Database](phase-3-databases-data/09-choosing-the-right-database.md) — **read this first**
+- [ ] [Functions, triggers & in-database jobs](phase-3-databases-data/10-functions-triggers-and-in-database-jobs.md) — PL/pgSQL, procedures, triggers, savepoints, advisory locks, LISTEN/NOTIFY, pg_cron, and where to draw the line
+  - The 12 database types, what each is genuinely for, and the access pattern that decides it
+  - Search, time-series, graph, columnar and vector stores — the categories the other guides do not cover
+  - The 30-second decision path, and why "PostgreSQL until it hurts" is the right default
+  - Five complete systems worked end to end, plus the mistakes that get noticed in interviews
 - [ ] [Database Architecture Fundamentals](phase-3-databases-data/08-database-architecture-fundamentals.md)
   - CAP Theorem & PACELC Theorem Deep Dive (Crucial for System Design)
   - Sharding algorithms (Consistent Hashing), Partitioning vs Sharding
@@ -189,6 +233,9 @@
 
 ## Phase 5: System Design & Architecture (Week 5–7)
 
+> **Guides:** [Roadmap](phase-5-system-design/00-roadmap.md) · [Fundamentals](phase-5-system-design/01-system-design-fundamentals.md) · [Architecture Patterns](phase-5-system-design/02-architecture-patterns.md) · [Distributed Systems](phase-5-system-design/03-distributed-systems.md) · [DDD & Data Architecture](phase-5-system-design/04-ddd-and-data-architecture.md) · [Reliability, Security & Cost](phase-5-system-design/05-reliability-security-cost.md) · [HLD Problems](phase-5-system-design/06-hld-practice-problems.md) · [LLD Problems](phase-5-system-design/07-lld-practice-problems.md) · [Architect-Level Practice](phase-5-system-design/08-architect-level-practice.md)
+
+- [ ] [System design fundamentals](phase-5-system-design/01-system-design-fundamentals.md) — the 7-step framework, capacity estimation, latency numbers, building blocks
 - [ ] Common BD-relevant Designs to Practice (verbal + diagram)
   - Scalable Notification Service (41M+ users like BL-Power)
   - Real-time Live Streaming Backend (Agora + AWS)
@@ -196,7 +243,8 @@
   - Identity & Access Management (IAM-like)
   - High-traffic Order Processing Microservice
   - Mobile Financial Service backend (bKash/Nagad-like — relevant for BD fintech)
-- [ ] International-standard System Design Problems (commonly asked by remote companies)
+  - → Worked designs: [notification system](phase-5-system-design/06-hld-practice-problems.md#3-notification-system-41m-users--bd-context), [live streaming](phase-5-system-design/06-hld-practice-problems.md#14-live-streaming-agora--rtmp), [voucher system](phase-5-system-design/06-hld-practice-problems.md#15-voucher--coupon-system-daraz-context), [MFS](phase-5-system-design/06-hld-practice-problems.md#7-mobile-financial-service-bkashnagad-like)
+- [ ] International-standard System Design Problems (commonly asked by remote companies) — [all 15 worked here](phase-5-system-design/06-hld-practice-problems.md)
   - URL shortener (classic warm-up)
   - Rate limiter (distributed)
   - Chat system (WhatsApp/Slack-like)
@@ -207,7 +255,11 @@
   - Search autocomplete / typeahead
   - Video streaming platform (Netflix-like CDN + transcoding)
   - Multi-tenant SaaS platform design
-- [ ] **Microservices Architecture Deep Dive**
+- [ ] [Low-Level Design (LLD)](phase-5-system-design/07-lld-practice-problems.md) — parking lot, elevator, vending machine, LRU cache, pub/sub, Splitwise, scheduler; Node.js concurrency for LLD
+- [ ] [Distributed systems theory](phase-5-system-design/03-distributed-systems.md) — CAP/PACELC, consistency models, Raft, fencing tokens, clocks, CRDTs, sharding
+- [ ] [DDD & data architecture](phase-5-system-design/04-ddd-and-data-architecture.md) — bounded contexts, aggregates, CDC, stream processing, data mesh
+- [ ] [Reliability, security & cost architecture](phase-5-system-design/05-reliability-security-cost.md) — SLOs & error budgets, DR, chaos, zero trust, OAuth2/PKCE, FinOps
+- [ ] **[Microservices Architecture Deep Dive](phase-5-system-design/02-architecture-patterns.md)**
   - Core principles: Bounded contexts, single responsibility, independent deployability
   - Communication patterns: Synchronous (REST/gRPC) vs Asynchronous (events/messages)
   - Key Design Patterns (must-know for interviews):
@@ -245,7 +297,7 @@
   - Refactoring legacy code with team
   - Technical debt prioritization
   - Deploying containerized apps in cost-constrained BD environments
-- [ ] Technical Leadership & Documentation (Lead-level expectation)
+- [ ] [Technical Leadership & Documentation](phase-5-system-design/08-architect-level-practice.md) (Lead-level expectation)
   - Writing RFCs (Request for Comments) / ADRs (Architecture Decision Records)
   - Technical roadmap planning, agile estimation (story points vs time), handling scope creep
   - Build vs Buy decision frameworks

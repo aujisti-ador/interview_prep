@@ -4,6 +4,47 @@
 > **Relevance**: Maps directly to Banglalink BL-Power experience (41M+ users). Top system design interview question.
 > **Estimated Build Time**: 10-12 hours
 
+---
+
+## In 60 seconds
+
+1. **Build this one first.** It is the closest thing in this repo to the work you already did at
+   telecom scale, which means every part of it becomes a resume bullet you can defend.
+2. **The core problem is fan-out:** one event has to reach many users, across several channels
+   (push, SMS, email, in-app), when some of those channels are down.
+3. **The three things that make this a senior project, not a tutorial:**
+   - **Idempotency** — the same event arriving twice must not send two notifications
+   - **Per-channel circuit breakers** — SMS being down must not stop push notifications
+   - **The outbox pattern** — the notification is saved and published in one transaction
+4. **The interview story this gives you:** "delivering N messages/day, holding p99 under 2s
+   through provider outages." That sentence is the shape of a strong resume bullet.
+5. **Do not skip the failure handling to get it working faster.** The retry logic and the dead
+   letter queue *are* the project. A version that only works when everything is healthy
+   demonstrates nothing.
+6. **Write the README as you go**, not at the end. It is the artifact a hiring manager actually
+   reads — see [../resume/02-linkedin-and-profiles.md](../resume/02-linkedin-and-profiles.md#7-making-two-repos-count).
+
+**What to be able to explain afterwards:** why Kafka rather than a database table polled by a
+cron; what happens when a user has 50,000 followers; and how you would know, at 3am, that
+notifications had stopped.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Fan-out** | One event delivered to many recipients |
+| **Channel** | A delivery route — push, SMS, email, in-app |
+| **Idempotency key** | An id used to recognise and ignore a duplicate event |
+| **Outbox pattern** | Save the event in the same DB transaction as the data; publish separately |
+| **Circuit breaker** | Stop calling a failing provider for a while instead of retrying forever |
+| **Dead letter queue** | Where permanently failing messages go, so they stop blocking the queue |
+| **Retry with backoff** | Waiting longer between each attempt, with randomness added |
+| **Bull queue** | A Redis-backed job queue for Node — used here for scheduled and retried sends |
+| **WebSocket / Socket.io** | The live connection delivering in-app notifications |
+| **Consumer group** | Kafka consumers sharing the work of a topic |
+| **Delivery receipt** | Confirmation from a provider that a message actually arrived |
+| **Throttling** | Limiting how many notifications one user can receive |
+
 ## What You'll Learn
 - Fan-out notification patterns (push vs pull)
 - Kafka for high-throughput event ingestion

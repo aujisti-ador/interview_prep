@@ -6,6 +6,57 @@
 
 ---
 
+## In 60 seconds
+
+1. **CI vs CD vs CD.** *Continuous Integration* = merge and test often. *Continuous Delivery* =
+   always **ready** to release, a human clicks. *Continuous Deployment* = every green build
+   **goes** to production automatically.
+2. **The counter-intuitive finding: deploying more often is safer, not riskier.** Small changes
+   are easy to review, easy to debug, and easy to roll back. The scary deploys are the ones
+   containing three weeks of work.
+3. **Blue-green vs canary.** *Blue-green* = run two identical environments, switch all traffic
+   at once, switch back instantly if wrong. *Canary* = send 5% of traffic to the new version,
+   watch, then ramp up.
+4. **Feature flags separate deploying from releasing.** Ship the code turned off, turn it on
+   later for 1% of users. This is how you deploy on a Friday safely.
+5. **Rollback must be boring and practised.** If your rollback plan has never been tested, you
+   do not have one. Rehearsing it is the difference between a five-minute incident and an hour.
+6. **The four DORA metrics are the industry's shared vocabulary:** deployment frequency, lead
+   time for change, change failure rate, time to restore. Knowing these lets you talk about
+   delivery quantitatively.
+
+**The interview trap to expect:** "how would you deploy a change that requires a database
+migration, with zero downtime?" This joins CI/CD to
+[expand/contract migrations](../phase-3-databases-data/06-database-migrations-schema-evolution.md)
+— the deploy and the schema change have to be separate, ordered steps.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Pipeline** | The automated sequence run on every push: build, test, deploy |
+| **CI** | Merging and testing frequently, so problems surface small |
+| **CD (Delivery)** | Always ready to ship; a human approves |
+| **CD (Deployment)** | Every passing build ships automatically |
+| **Artifact** | The built output you deploy — usually a Docker image |
+| **Blue-green** | Two environments; switch traffic all at once |
+| **Canary** | Send a small slice of traffic to the new version first |
+| **Rolling deploy** | Replace instances gradually. Kubernetes' default |
+| **Feature flag** | A switch letting you turn a feature on without deploying |
+| **Rollback** | Returning to the previous version |
+| **IaC** | Infrastructure as Code — your servers defined in files, in git |
+| **Terraform** | The most common IaC tool |
+| **Idempotent (in IaC)** | Running it twice produces the same result |
+| **Drift** | Reality no longer matching your IaC files, usually from a manual change |
+| **Secret injection** | Supplying credentials at runtime rather than baking them in |
+| **DORA metrics** | The four delivery-performance measures in point 6 |
+| **Lead time for change** | Commit → running in production |
+| **Change failure rate** | The share of deploys causing an incident |
+| **Trunk-based development** | Everyone commits to main frequently, behind flags |
+| **GitOps** | Git is the source of truth; a controller makes the cluster match it |
+
+---
+
 ## Table of Contents
 
 1. [CI/CD Fundamentals](#q1-cicd-fundamentals)

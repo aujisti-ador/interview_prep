@@ -1,5 +1,55 @@
 # Redis Deep Dive - Interview Q&A
 
+## In 60 seconds
+
+1. **Redis is fast because it keeps everything in memory** — and single-threaded, so commands
+   never race each other. That simplicity is a feature.
+2. **Cache-aside is the default pattern:** look in Redis, miss, read the database, write it back
+   to Redis. Most caching questions are variations on this.
+3. **The three cache disasters have names, and interviewers use them:**
+   - **Stampede / avalanche** — many keys expire at the same moment, all traffic hits the
+     database at once. *Fix: add random jitter to TTLs.*
+   - **Penetration** — requests for a key that does not exist, so the cache never helps.
+     *Fix: cache the "not found" answer too.*
+   - **Hot key** — one key gets so much traffic it saturates a single node.
+4. **Cache invalidation is the hard part.** The safe default is a short TTL plus deleting the
+   key on write — not trying to update the cached value.
+5. **A distributed lock in Redis is easy to get subtly wrong.** You must set a timeout, and you
+   must only delete the lock if you still own it (compare a random token first).
+6. **Redis can lose data.** It is a cache with optional persistence, not a database. Design for
+   the cache being empty at any moment.
+
+**The interview trap to expect:** "your cache TTL is 1 hour and your database melts every hour
+on the hour — why?" That is the stampede, and the answer is jittered expiry.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **In-memory** | Data lives in RAM. Very fast, and gone if the process dies without persistence |
+| **TTL** | Time To Live — how long a key survives before Redis deletes it |
+| **Cache-aside** | App checks cache, falls back to database, writes result back |
+| **Write-through** | Every write goes to cache and database together |
+| **Write-behind** | Write to cache now, database later. Fast, and risky |
+| **Cache hit / miss** | Found in cache · not found |
+| **Stampede / avalanche** | Many keys expiring together, flooding the database |
+| **Jitter** | Adding a small random amount to TTLs so they do not expire in sync |
+| **Cache penetration** | Repeated requests for keys that do not exist anywhere |
+| **Bloom filter** | A tiny structure that can say "definitely not present", used to stop penetration |
+| **Hot key** | A single key taking so much traffic it overloads one node |
+| **Eviction policy** | What Redis deletes when memory is full. `allkeys-lru` is the usual choice |
+| **LRU** | Least Recently Used — evict whatever has not been touched for longest |
+| **Distributed lock** | Using Redis so only one server does a job at a time |
+| **Redlock** | An algorithm for locking across several Redis nodes. Debated; know the criticisms |
+| **Pub/Sub** | Fire-and-forget messaging. If nobody is listening, the message is gone |
+| **Redis Streams** | A durable log, unlike Pub/Sub. Consumers can catch up after being offline |
+| **Pipeline** | Send many commands at once to save round trips |
+| **Lua script** | Runs several commands atomically inside Redis |
+| **RDB / AOF** | Snapshot persistence · append-only log persistence |
+| **Redis Cluster** | Sharding data across nodes using 16,384 hash slots |
+
+---
+
 ## Table of Contents
 1. [What is Redis & Why Use It?](#q1-what-is-redis--why-use-it)
 2. [Redis Data Structures](#q2-redis-data-structures)

@@ -4,6 +4,50 @@
 > **Format:** Q&A with practical TypeScript and NestJS code examples
 > **Goal:** Confidently answer any ORM / query builder question in a senior backend interview
 
+## In 60 seconds
+
+1. **An ORM maps database rows to objects in your code**, so you write `user.orders` instead of
+   a JOIN. It saves time and hides SQL — and hiding SQL is exactly where the problems start.
+2. **The N+1 query problem is the number one ORM interview question.** Loop over 100 users
+   asking for `user.orders` inside the loop, and you have just run 101 queries instead of 2.
+   The fix is eager loading (`include` in Prisma, `relations` in TypeORM).
+3. **Lazy vs eager loading is the whole trade-off.** Lazy = fetch when accessed (convenient,
+   causes N+1). Eager = fetch upfront (one query, possibly more data than needed).
+4. **A senior engineer knows when to drop to raw SQL.** ORMs generate poor SQL for complex
+   aggregations, window functions and recursive queries. Being able to say *"here I would write
+   the SQL by hand, and here is why"* is a strong signal.
+5. **Migrations and the ORM are separate concerns.** Auto-syncing your schema from your models
+   (`synchronize: true`) is fine locally and dangerous in production — it will happily drop a
+   column.
+6. **Always log the generated SQL in development.** Most ORM performance bugs are invisible in
+   your code and obvious in the query log.
+
+**The interview trap to expect:** "your endpoint got slow after you added a related field to
+the response." The answer is N+1, and they want the fix *and* how you would have caught it —
+query logging, or an assertion on query count in a test.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **ORM** | Object-Relational Mapper — turns rows into objects and back |
+| **Query builder** | A layer that helps you compose SQL, without hiding it (Knex) |
+| **N+1 problem** | One query for the list, then one more per item. The classic ORM bug |
+| **Eager loading** | Fetch related data upfront in one query. The N+1 fix |
+| **Lazy loading** | Fetch related data only when you access it. Convenient, causes N+1 |
+| **Active Record** | The model object knows how to save itself: `user.save()` (TypeORM's default) |
+| **Data Mapper** | A separate repository saves the object: `repo.save(user)`. Cleaner separation |
+| **Repository** | The class you ask for data, hiding how it is stored |
+| **Entity / Model** | The class representing a table |
+| **Relation** | A link between entities — one-to-many, many-to-many |
+| **Connection pool** | Reused database connections. Exhausting it causes mysterious hangs |
+| **Transaction** | Several operations that succeed or fail together |
+| **`synchronize: true`** | Auto-update the schema from your models. **Never in production** |
+| **Raw query** | Writing SQL directly, bypassing the ORM |
+| **Prisma / TypeORM / Knex** | Schema-first ORM · decorator-based ORM · query builder |
+
+---
+
 ## Table of Contents
 1. [What Are ORMs & Why Use Them](#q1-what-are-orms--why-use-them)
 2. [Prisma Deep Dive](#q2-prisma-deep-dive)

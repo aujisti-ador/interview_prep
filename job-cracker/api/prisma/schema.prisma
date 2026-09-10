@@ -1,0 +1,240 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------- profile
+
+model Profile {
+  id                 Int      @id @default(1)
+  name               String
+  headline           String
+  yearsExperience    Int      @default(6)
+  targetRoles        String[]
+  targetMarkets      String[]
+  primaryStack       String[]
+  startDate          DateTime @default(now())
+  dailyMinutesTarget Int      @default(210)
+  notes              String   @default("")
+  updatedAt          DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------- 30-day plan
+
+model PlanDay {
+  id          Int      @id
+  week        Int
+  title       String
+  theme       String
+  focus       String
+  hiringLens  String
+  targetMins  Int      @default(210)
+  tasks       PlanTask[]
+}
+
+model PlanTask {
+  id         String   @id
+  dayId      Int
+  day        PlanDay  @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  order      Int
+  kind       String // read | dsa | design | quiz | behavioral | project | admin | mock
+  title      String
+  detail     String   @default("")
+  ref        String   @default("") // relative path into the interview_prep repo, or a slug
+  minutes    Int      @default(30)
+  progress   TaskProgress?
+}
+
+model TaskProgress {
+  taskId      String    @id
+  task        PlanTask  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  status      String    @default("todo") // todo | doing | done | skipped
+  notes       String    @default("")
+  minutesSpent Int      @default(0)
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+}
+
+// ---------------------------------------------------------------- DSA / coding tests
+
+model Problem {
+  id           String   @id // slug
+  title        String
+  pattern      String
+  difficulty   String // easy | medium | hard
+  week         Int      @default(1)
+  frequency    Int      @default(3) // 1..5 — how often it shows up in real OAs
+  prompt       String
+  functionName String
+  starterCode  String
+  hints        String[]
+  solution     String
+  complexity   String   @default("")
+  companies    String[]
+  leetcode     String   @default("") // LeetCode slug, empty for Node practicals
+  tests        Json
+  status       ProblemStatus?
+  attempts     ProblemAttempt[]
+}
+
+model ProblemStatus {
+  problemId      String    @id
+  problem        Problem   @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  status         String    @default("todo") // todo | attempted | solved | mastered
+  confidence     Int       @default(0) // 0..5
+  timesSolved    Int       @default(0)
+  bestRuntimeMs  Int?
+  lastSolvedAt   DateTime?
+  nextReviewAt   DateTime?
+  savedCode      String    @default("")
+  updatedAt      DateTime  @updatedAt
+}
+
+model ProblemAttempt {
+  id         String   @id @default(uuid())
+  problemId  String
+  problem    Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  passed     Boolean
+  passedCount Int     @default(0)
+  totalCount Int      @default(0)
+  durationSec Int     @default(0)
+  code       String
+  createdAt  DateTime @default(now())
+}
+
+// ---------------------------------------------------------------- quiz / rapid fire
+
+model QuizQuestion {
+  id          String   @id
+  topic       String
+  phase       String   @default("")
+  difficulty  String   @default("medium")
+  question    String
+  options     String[]
+  answerIndex Int
+  explanation String
+  ref         String   @default("")
+}
+
+model QuizSession {
+  id         String   @id @default(uuid())
+  mode       String // topic | mixed | mock
+  topics     String[]
+  total      Int
+  score      Int      @default(0)
+  durationSec Int     @default(0)
+  detail     Json
+  createdAt  DateTime @default(now())
+}
+
+// ---------------------------------------------------------------- system design drills
+
+model Drill {
+  id         String   @id
+  title      String
+  kind       String // hld | lld | architecture
+  difficulty String
+  timeboxMin Int      @default(45)
+  prompt     String
+  constraints String  @default("")
+  rubric     Json // [{ id, label, weight, hint }]
+  ref        String   @default("")
+  attempts   DrillAttempt[]
+}
+
+model DrillAttempt {
+  id         String   @id @default(uuid())
+  drillId    String
+  drill      Drill    @relation(fields: [drillId], references: [id], onDelete: Cascade)
+  notes      String   @default("")
+  scores     Json
+  totalScore Int      @default(0)
+  maxScore   Int      @default(0)
+  durationMin Int     @default(0)
+  createdAt  DateTime @default(now())
+}
+
+// ---------------------------------------------------------------- behavioral
+
+model StarPrompt {
+  id         String @id
+  competency String
+  prompt     String
+  whatGoodLooksLike String
+  redFlags   String
+}
+
+model StarStory {
+  id         String   @id @default(uuid())
+  promptId   String?
+  title      String
+  competency String   @default("")
+  situation  String   @default("")
+  task       String   @default("")
+  action     String   @default("")
+  result     String   @default("")
+  metrics    String   @default("")
+  tags       String[]
+  rehearsals Int      @default(0)
+  confidence Int      @default(0)
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+}
+
+// ---------------------------------------------------------------- misc tracking
+
+model Skill {
+  id           String   @id
+  name         String
+  category     String
+  demandBD     Int
+  demandRemote Int
+  assumed      Int
+  why          String
+  proveIt      String
+  ref          String   @default("")
+  // self-rating 0..5; -1 means "not rated yet", so the seeded assumption is used
+  level        Int      @default(-1)
+  note         String   @default("")
+  updatedAt    DateTime @updatedAt
+}
+
+model StudyLog {
+  id        String   @id @default(uuid())
+  date      DateTime
+  minutes   Int
+  category  String // theory | dsa | design | behavioral | project
+  note      String   @default("")
+  createdAt DateTime @default(now())
+}
+
+model Application {
+  id         String   @id @default(uuid())
+  company    String
+  role       String
+  market     String   @default("bd") // bd | remote
+  source     String   @default("")
+  status     String   @default("wishlist") // wishlist | applied | screen | oa | tech | design | final | offer | rejected
+  compNote   String   @default("")
+  nextAction String   @default("")
+  link       String   @default("")
+  appliedAt  DateTime?
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+}
+
+model Doc {
+  id      String @id // market-analysis | playbook | ...
+  title   String
+  body    String
+}
+
+model SeedMeta {
+  key       String   @id
+  version   String
+  appliedAt DateTime @default(now())
+}

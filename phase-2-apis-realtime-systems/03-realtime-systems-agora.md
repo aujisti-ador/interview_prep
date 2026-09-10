@@ -1,5 +1,53 @@
 # Real-Time Systems & Agora.io - Interview Q&A
 
+## In 60 seconds
+
+> **This guide covers your strongest differentiator.** Live streaming and real-time work is the
+> one thing on your CV that most candidates do not have. Know this material cold.
+
+1. **Pick the simplest transport that works.** Server→client only? Use **SSE** — it is plain
+   HTTP and reconnects itself. Both directions? Use **WebSockets**. Neither? Plain polling is
+   fine more often than people admit.
+2. **WebSockets are stateful, and that is the whole problem.** Each connection lives on one
+   specific server. Scaling to a second server means those two servers cannot see each other's
+   clients — until you add a Redis pub/sub adapter between them.
+3. **A connection is not a session.** Phones lose signal constantly. You need reconnection with
+   backoff, and a way to replay what was missed, or users see gaps.
+4. **Memory is the limit, not CPU.** Each open socket holds buffers. 50,000 idle connections
+   can be more expensive than 500 busy ones.
+5. **For live video, you do not stream from your own server.** You use an SFU (Agora, LiveKit)
+   because relaying video to N viewers from one box does not scale.
+6. **Latency and cost trade directly against each other.** Sub-second latency costs
+   dramatically more than 3–5 second latency. Knowing where the cliff is, is a senior answer.
+
+**The interview trap to expect:** "your chat works fine on one server. What breaks when you add
+a second one?" The answer is that user A on server 1 cannot reach user B on server 2 — and the
+fix is a shared pub/sub layer.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **WebSocket** | A connection that stays open, both sides can send at any time |
+| **SSE** | Server-Sent Events — server pushes to client over normal HTTP. One direction only |
+| **Long polling** | Client asks, server holds the request open until it has news. The old fallback |
+| **Socket.IO** | A library on top of WebSockets adding rooms, reconnection and fallbacks |
+| **Room / channel** | A named group of connections you can broadcast to |
+| **Namespace** | A way of splitting one Socket.IO server into separate logical apps |
+| **Sticky session** | Load-balancer setting that keeps one client on the same server |
+| **Pub/Sub adapter** | Redis (usually) letting multiple servers relay messages to each other |
+| **Backpressure** | A slow client's messages piling up in server memory |
+| **Heartbeat / ping-pong** | Periodic messages proving the connection is still alive |
+| **SFU** | Selective Forwarding Unit — a server that receives one video stream and forwards it to many viewers |
+| **MCU** | Like an SFU, but it also mixes streams together. More CPU, fewer streams out |
+| **RTMP** | The protocol used to *push* a live stream into a platform |
+| **HLS** | Chunked video over HTTP. Very scalable, but adds seconds of latency |
+| **TURN / STUN** | Servers that help two peers connect through firewalls and NAT |
+| **Presence** | Tracking who is currently online |
+| **Fan-out** | Delivering one message to many recipients |
+
+---
+
 ## Table of Contents
 1. [Real-Time Communication Fundamentals](#real-time-communication-fundamentals)
 2. [WebSockets](#websockets)
@@ -12,6 +60,22 @@
 9. [RTMP Ingest](#rtmp-ingest)
 10. [Live Streaming Architecture](#live-streaming-architecture)
 11. [Latency vs Cost Trade-offs](#latency-vs-cost-trade-offs)
+
+12. [Quick Reference](#quick-reference)
+13. [Common Interview Questions](#common-interview-questions)
+14. [Scaling WebSocket Servers Horizontally](#scaling-websocket-servers-horizontally)
+15. [Socket.io Rooms and Namespaces](#socketio-rooms-and-namespaces)
+16. [Connection State Recovery and Resilience](#connection-state-recovery-and-resilience)
+17. [Real-Time Performance Optimization](#real-time-performance-optimization)
+18. [Real-Time Patterns for Common Use Cases](#real-time-patterns-for-common-use-cases)
+19. [Q12: Scaling WebSocket Servers Horizontally](#q12-scaling-websocket-servers-horizontally)
+20. [Q13: Socket.io Rooms & Namespaces](#q13-socketio-rooms--namespaces)
+21. [Q14: Connection State Recovery & Resilience](#q14-connection-state-recovery--resilience)
+22. [Q15: WebSocket Memory Management & Performance](#q15-websocket-memory-management--performance)
+23. [Q16: Scaling WebSocket Servers — NestJS & Redis Adapter Implementation](#q16-scaling-websocket-servers--nestjs--redis-adapter-implementation)
+24. [Q17: Socket.io Rooms & Namespaces — NestJS Implementation](#q17-socketio-rooms--namespaces--nestjs-implementation)
+25. [Q18: Connection State Recovery — Offline Queue & Reconnection](#q18-connection-state-recovery--offline-queue--reconnection)
+26. [Q19: WebSocket Memory Management — Limits, Batching & Monitoring](#q19-websocket-memory-management--limits-batching--monitoring)
 
 ---
 
@@ -4248,7 +4312,7 @@ setInterval(() => {
 
 ---
 
-## Q12: Scaling WebSocket Servers Horizontally
+## Q16: Scaling WebSocket Servers — NestJS & Redis Adapter Implementation
 
 **Q: How do you scale WebSocket connections across multiple server instances?**
 
@@ -4377,7 +4441,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 ---
 
-## Q13: Socket.io Rooms & Namespaces
+## Q17: Socket.io Rooms & Namespaces — NestJS Implementation
 
 **Q: How do you organize real-time connections in Socket.io?**
 
@@ -4515,7 +4579,7 @@ client.join(`presence:dashboard`);
 
 ---
 
-## Q14: Connection State Recovery & Resilience
+## Q18: Connection State Recovery — Offline Queue & Reconnection
 
 **Q: How do you handle disconnections and state recovery in real-time systems?**
 
@@ -4716,7 +4780,7 @@ Client reconnects:
 
 ---
 
-## Q15: WebSocket Memory Management & Performance
+## Q19: WebSocket Memory Management — Limits, Batching & Monitoring
 
 **Q: How do you prevent memory leaks and optimize performance in WebSocket servers?**
 

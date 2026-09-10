@@ -4,6 +4,57 @@ A comprehensive, topic-wise learning plan covering Low-Level Design, High-Level 
 
 ---
 
+## In 60 seconds — how to read this roadmap
+
+1. **This is a map, not a reading list.** It is far more material than a 30-day sprint can
+   cover. Its job is to show you where each topic sits, so you can tell what you are choosing
+   *not* to study.
+2. **The three levels are different interviews, tested by different people:**
+   - **LLD** — classes, interfaces, thread safety. "Design an LRU cache." Usually 45 minutes of
+     actual code.
+   - **HLD** — services, databases, queues, scale. "Design Twitter." Boxes and numbers.
+   - **Architect** — decisions, migrations, teams, cost. "How would you get twelve engineers to
+     build this, and what would you write down?"
+3. **If you are targeting Senior, HLD carries the most weight. If you are targeting Lead, the
+   architect layer is what actually separates you** — and, per this repo's own market read, it
+   is where your material is currently thinnest.
+4. **Do not study this in order.** Do a timed drill first, find out what you fumbled, then read
+   the section that covers it. Reading fundamentals front-to-back feels productive and transfers
+   poorly.
+5. **Everything here reduces to a small number of ideas.** Caching, replication, partitioning,
+   queues, and consistency trade-offs. Almost every design problem is a recombination of those
+   five.
+6. **The order to actually work through the phase:** `01` (the framework) → `06` (HLD drills,
+   timed) → whichever of `02`–`05` your drills exposed → `07` (LLD) → `08` (architect).
+
+**The rule that matters most:** you cannot learn system design by reading about it. One recorded
+45-minute attempt teaches more than five hours of reading, because it forces you to produce
+rather than recognise.
+
+## Key terms in this roadmap
+
+| Term | Plain meaning |
+|---|---|
+| **LLD** | Low-Level Design — classes, methods, interfaces. Code-level |
+| **HLD** | High-Level Design — services, storage, queues, scale. System-level |
+| **Architect level** | Decisions, trade-offs, migrations, teams, cost |
+| **Functional requirement** | What it must do |
+| **Non-functional requirement** | How well — latency, availability, scale. Usually the hard part |
+| **Back-of-envelope estimate** | Rough capacity maths done out loud |
+| **Load balancing** | Spreading requests across servers |
+| **Caching** | Fast storage in front of something slow |
+| **Replication** | Keeping copies of data on other machines |
+| **Partitioning / sharding** | Splitting data into pieces · across machines |
+| **Consistency model** | How up-to-date a read is guaranteed to be |
+| **CAP / PACELC** | The consistency-vs-availability trade-offs under and without partition |
+| **Message queue** | A buffer decoupling producers from consumers |
+| **Idempotency** | Doing it twice has the same effect as once |
+| **SLI / SLO** | The reliability measurement · the target |
+| **Bottleneck** | The one constraint limiting the whole system |
+| **Trade-off** | What you gave up for what you gained. **Naming this is what is scored** |
+
+---
+
 ## Phase 1: Fundamentals
 
 ### Networking & Communication
@@ -132,6 +183,7 @@ A comprehensive, topic-wise learning plan covering Low-Level Design, High-Level 
 - DNS, TLS/SSL, OAuth2/OIDC
 - Blue-green / canary deployments
 - GitOps (ArgoCD, Flux)
+- Production operations — scaling (HPA/KEDA, connection pooling), backup & DR (RPO/RTO, restore drills, failover), monitoring (golden signals, alerting, on-call), capacity planning & cost control → [DevOps Operations](../phase-4-cloud-infrastructure/09-devops-operations.md)
 
 ---
 

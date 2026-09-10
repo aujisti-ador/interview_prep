@@ -1,5 +1,51 @@
 # gRPC & Protocol Buffers — Interview Preparation Guide
 
+## In 60 seconds
+
+1. **gRPC is for service-to-service calls inside your own system.** It is faster and stricter
+   than REST, but browsers cannot speak it directly. Use REST or GraphQL at the edge, gRPC
+   between your services.
+2. **You write the contract first** (a `.proto` file), and code is generated from it for every
+   language. The contract cannot drift from the code, because the code *is* the contract.
+3. **Protobuf is binary, not text.** Much smaller and faster to parse than JSON — but you
+   cannot read it in a browser network tab, which makes debugging harder.
+4. **Field numbers are permanent.** `name = 1` means field 1 forever. Renaming the field is
+   safe; **changing or reusing its number breaks every existing client.** This is the most
+   commonly tested Protobuf detail.
+5. **There are four call shapes:** one request/one response · client streams · server streams ·
+   both stream. Streaming is where gRPC clearly beats REST.
+6. **gRPC has its own status codes**, not HTTP ones — `NOT_FOUND`, `DEADLINE_EXCEEDED`,
+   `UNAVAILABLE`. And deadlines propagate automatically down the call chain, which is genuinely
+   useful.
+
+**The interview trap to expect:** "how do you add a field without breaking old clients?" Add it
+with a **new** field number and make it optional. Never reuse a retired number — mark it
+`reserved`.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **gRPC** | A framework for calling functions on another service as if they were local |
+| **Protobuf** | The binary format gRPC uses to encode messages |
+| **`.proto` file** | The contract — the messages and the service methods |
+| **Code generation** | Turning the `.proto` into real classes in your language |
+| **Field number** | The permanent id of a field in the binary encoding. Never change or reuse it |
+| **`reserved`** | Marks a removed field number as off-limits forever |
+| **Unary** | The normal shape: one request, one response |
+| **Server streaming** | One request, many responses over time |
+| **Client streaming** | Many requests, one response at the end |
+| **Bidirectional streaming** | Both sides send freely, like a conversation |
+| **Deadline** | "Give up after N ms." Passed down automatically to every downstream call |
+| **Channel** | The long-lived connection to a service. Reused across many calls |
+| **Interceptor** | gRPC's middleware — for auth, logging, retries |
+| **gRPC-Web** | A translation layer so browsers can talk to gRPC via a proxy |
+| **Status code** | gRPC's own error codes, e.g. `UNAVAILABLE`, `DEADLINE_EXCEEDED` |
+| **Backward compatible** | Old clients still work against the new server |
+| **Forward compatible** | New clients still work against the old server |
+
+---
+
 ## Table of Contents
 1. [What is gRPC and Why Use It?](#q1-what-is-grpc-and-why-use-it)
 2. [Protocol Buffers (Protobuf) Deep Dive](#q2-protocol-buffers-protobuf-deep-dive)

@@ -6,6 +6,46 @@
 
 ---
 
+## In 60 seconds
+
+1. **The lesson here is that subscriptions break the moment you run two servers.** User A is
+   connected to server 1, user B to server 2. Server 1 has no idea B exists. Build it, see it
+   fail, then fix it — that experience is worth more than reading about it.
+2. **The fix is Redis Pub/Sub between the servers.** Server 1 publishes to Redis; every server
+   subscribes and pushes to its own connected clients.
+3. **Presence ("who is online") is harder than it looks.** A closed tab fires a disconnect
+   event; a dead phone on a train does not. You need heartbeats and expiry, not just
+   connect/disconnect handlers.
+4. **Watch for N+1 in the resolvers** — fetch 50 messages, then one query per sender for their
+   name. DataLoader is the fix, and it is the most-asked GraphQL question.
+5. **Decide what happens to messages sent while a user is offline.** Store and replay, or drop?
+   That is a product decision you should make deliberately and write down.
+6. **Message ordering is a real problem.** Two messages sent in the same second can arrive out
+   of order. Sequence numbers per room, not timestamps, since clocks disagree.
+
+**What to be able to explain afterwards:** how you would scale to 100,000 concurrent
+connections, and what breaks first when you do.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Subscription** | GraphQL's live-updates operation, over a WebSocket |
+| **Pub/Sub** | Publish a message; everyone subscribed receives it |
+| **Redis Pub/Sub adapter** | The bridge letting several servers relay messages to each other |
+| **Presence** | Tracking who is currently online |
+| **Heartbeat** | A periodic ping proving a connection is still alive |
+| **Room / channel** | A named group of connections you broadcast to |
+| **DataLoader** | Batches per-item queries into one, fixing N+1 |
+| **N+1 problem** | One query for the list, then one per item |
+| **Sticky session** | Keeping a client on the same server across reconnects |
+| **Backfill / history** | Loading older messages when a client joins |
+| **Read receipt** | Marking who has seen a message |
+| **Optimistic UI** | Showing the message immediately, before the server confirms |
+| **Sequence number** | A per-room counter giving reliable ordering when clocks disagree |
+
+---
+
 ## What You'll Learn
 
 - GraphQL subscriptions over WebSocket (graphql-ws protocol)

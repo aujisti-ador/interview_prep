@@ -1,8 +1,60 @@
 # Kubernetes (K8s) — Interview Preparation Guide
 
+> **📝 Screening drill:** probes, requests vs limits, QoS classes and zero-downtime deploys are the most-tested K8s MCQs — see [Phase 0 — DevOps MCQ Bank §2](../phase-0-online-assessments/06-devops-cloud-mcq-bank.md#2-kubernetes).
+
 > **Target Role:** Senior / Lead Backend Engineer
 > **Format:** Q&A with practical YAML examples and kubectl commands
 > **Last Updated:** 2026-03-13
+
+---
+
+## In 60 seconds
+
+1. **Kubernetes is a control loop.** You describe the state you want ("5 copies of this
+   container"), and it continuously works to make reality match. You never tell it *how*.
+2. **The object hierarchy is simple once seen:**
+   `Deployment` → manages a `ReplicaSet` → manages `Pods` → each holds one or more containers.
+   A `Service` gives that changing set of Pods one stable address.
+3. **Pods are disposable and get new IPs constantly.** That is *why* Services exist. Never
+   connect to a Pod IP.
+4. **Liveness vs readiness probes is the most-asked K8s question.**
+   *Readiness* = "can I take traffic right now?" (fails → removed from the Service).
+   *Liveness* = "am I broken?" (fails → **restarted**). Getting these backwards causes restart
+   loops during normal slow startup.
+5. **Requests vs limits decide your reliability.** *Requests* are what you are guaranteed and
+   what scheduling uses. *Limits* are the hard ceiling — exceed the memory limit and you are
+   killed with `OOMKilled`.
+6. **Zero-downtime deploys need three things together:** a readiness probe, a rolling update
+   strategy, and graceful shutdown handling `SIGTERM` in your app.
+
+**The interview trap to expect:** "your pods restart every few minutes under load." Usually a
+liveness probe timing out because the app is busy — the probe is doing the opposite of its job.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Pod** | The smallest unit — one or more containers sharing a network address |
+| **Deployment** | Manages Pods: how many, which image, how to roll out changes |
+| **ReplicaSet** | Keeps N identical Pods running. Created by the Deployment |
+| **Service** | A stable address in front of a changing set of Pods |
+| **Ingress** | Routes external HTTP traffic to Services. Usually NGINX underneath |
+| **Namespace** | A folder for grouping and isolating resources |
+| **ConfigMap / Secret** | Non-sensitive config · sensitive config (base64, not encrypted by default) |
+| **Liveness probe** | "Am I broken?" Failing means **restart me** |
+| **Readiness probe** | "Can I serve traffic?" Failing means **stop sending me requests** |
+| **Startup probe** | Extra grace for slow-starting apps, so liveness does not kill them |
+| **Request** | The resources guaranteed to your Pod. Used for scheduling |
+| **Limit** | The hard ceiling. Exceed memory → `OOMKilled` |
+| **`OOMKilled`** | Killed for using more memory than its limit |
+| **`CrashLoopBackOff`** | Starting, crashing, restarting, repeatedly. Kubernetes slows the retries |
+| **HPA** | Horizontal Pod Autoscaler — add Pods when a metric rises |
+| **Rolling update** | Replace Pods gradually so the service stays up |
+| **StatefulSet** | Like a Deployment but with stable names and storage. For databases |
+| **DaemonSet** | One Pod on every node. For log collectors and agents |
+| **Node** | A machine in the cluster |
+| **kubectl** | The command-line tool for talking to the cluster |
+| **`SIGTERM`** | The "please stop" signal before the 30-second grace period ends |
 
 ---
 

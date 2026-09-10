@@ -1,8 +1,58 @@
 # PostgreSQL Deep Dive — Interview Preparation Guide
 
+> **📝 Screening drill:** SQL is the highest points-per-minute section on any mixed assessment. Work the 52 query challenges and 18 rapid-fire MCQs in [Phase 0 — SQL Challenge Bank](../phase-0-online-assessments/04-sql-challenge-bank.md) before your next test.
+
 > **Target Role:** Senior / Lead Backend Engineer
 > **Format:** Q&A with practical SQL, TypeScript, and NestJS code examples
 > **Goal:** Confidently answer any PostgreSQL question in a senior backend interview
+
+## In 60 seconds
+
+1. **An index is a sorted shortcut.** Without one the database reads every row. With one it
+   jumps straight there. This is the single most-asked database topic in interviews.
+2. **Indexes are not free.** Every index makes writes slower and uses disk. An unused index is
+   pure cost — and most databases have several.
+3. **Column order in a composite index matters enormously.** An index on `(user_id, created_at)`
+   helps a query filtering by `user_id`. It does **not** help one filtering only by
+   `created_at`. Think of a phone book sorted by surname then first name.
+4. **`EXPLAIN ANALYZE` is how you stop guessing.** `Seq Scan` on a big table = no index being
+   used. That one word finds most slow queries.
+5. **PostgreSQL uses MVCC:** readers never block writers and writers never block readers,
+   because each transaction sees its own snapshot. The cost is dead rows, which is why `VACUUM`
+   exists.
+6. **Isolation levels decide what weirdness you tolerate.** `READ COMMITTED` (the default) still
+   allows the same query to return different results twice in one transaction.
+
+**The interview trap to expect:** "this query is slow, here is the EXPLAIN output — what do you
+do?" They want you to read the plan, spot the sequential scan or the bad row estimate, and
+propose a specific index — not to say "add an index" generically.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Index** | A sorted structure that lets the database find rows without reading all of them |
+| **B-tree** | The default index type. Good for `=`, `<`, `>`, and sorting |
+| **GIN index** | For searching *inside* values — JSONB fields, full-text, arrays |
+| **Composite index** | An index on several columns. The order of those columns decides what it can help |
+| **Covering index** | An index containing every column the query needs, so the table is never touched |
+| **Seq Scan** | "I read the whole table." Fine on small tables, a red flag on large ones |
+| **EXPLAIN ANALYZE** | Runs the query and shows what it actually did and how long each step took |
+| **ACID** | Atomic · Consistent · Isolated · Durable — the four guarantees of a transaction |
+| **MVCC** | Multi-Version Concurrency Control — every transaction sees a snapshot, so reads never block writes |
+| **VACUUM** | Cleanup that reclaims space from rows deleted or updated by MVCC |
+| **Isolation level** | How much other transactions' work you can see. Default is `READ COMMITTED` |
+| **Dirty read / phantom read** | Anomalies that different isolation levels do or do not prevent |
+| **Deadlock** | Two transactions each waiting for a lock the other holds. Postgres kills one |
+| **JSONB** | Binary JSON stored in a column. Indexable, unlike plain `json` |
+| **Partitioning** | Splitting one big table into smaller physical pieces, usually by date |
+| **Replication** | Keeping a copy of the database on another server |
+| **Replica lag** | The delay before a read replica catches up. Causes "I saved it but it's not there" bugs |
+| **Connection pool** | A reusable set of connections. Postgres connections are expensive to create |
+| **CTE** | Common Table Expression — the `WITH ... AS (...)` syntax, a named subquery |
+| **Window function** | Calculates across a set of rows while still returning every row |
+
+---
 
 ## Table of Contents
 1. [PostgreSQL Architecture & How It Works](#q1-postgresql-architecture--how-it-works)

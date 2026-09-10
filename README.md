@@ -3,20 +3,22 @@
 > Comprehensive interview prep for **Senior/Lead Backend roles** targeting Bangladesh and international remote markets.
 > Stack: Node.js, NestJS, TypeScript, AWS Serverless, PostgreSQL, Redis, Kafka, RabbitMQ, Docker, Kubernetes.
 
-**Total Content:** 25 guides + 7 project walkthroughs | 80,000+ lines | 200+ Q&A sections with code examples
+**Total Content:** 67 guides + 7 project walkthroughs | 109,000+ lines | 1,100+ Q&A sections, 34 worked system design problems, 117 solved coding-interview problems, 250+ screening-test MCQs, 52 SQL challenges, 5 full-length timed mocks
 
 ---
 
 ## Table of Contents
 
 - [Preparation Plan](#preparation-plan)
+- [Resume, Profiles & Outreach](#resume-profiles--outreach)
+- [Phase 0: Online Assessments & Coding Interviews](#phase-0-online-assessments--coding-interviews-week-0--ongoing)
 - [Phase 1: Core Programming & Languages](#phase-1-core-programming--languages-week-12)
 - [Phase 2: APIs & Real-Time Systems](#phase-2-apis--real-time-systems-week-23)
 - [Phase 3: Databases & Data Management](#phase-3-databases--data-management-week-34)
 - [Phase 4: Cloud & Infrastructure](#phase-4-cloud--infrastructure-week-45)
+- [Phase 5: System Design & Architecture](#phase-5-system-design--architecture-week-57)
+- [Phase 6: Behavioral, Leadership & Market Fit](#phase-6-behavioral-leadership--market-fit-week-68)
 - [Hands-On Projects](#hands-on-projects-practice-throughout)
-- [Phase 5: System Design & Architecture](#phase-5-system-design--architecture-week-57) *(coming soon)*
-- [Phase 6: Behavioral, Leadership & Market Fit](#phase-6-behavioral-leadership--market-fit-week-68) *(coming soon)*
 
 ---
 
@@ -25,6 +27,81 @@
 | # | Resource | Description |
 |---|----------|-------------|
 | 0 | [prep.md](prep.md) | Master checklist — timeline, daily split, resources, all phases outlined |
+| 1 | [30-DAY-PLAN.md](30-DAY-PLAN.md) | Day-by-day 30-day sprint — 163 scheduled tasks, each linked to the guide it draws on |
+| 2 | [job-cracker/](job-cracker/) | **The platform.** Dockerised study + testing + progress tracker built around this repo |
+| 3 | [resume/](resume/README.md) | **The artifacts.** Resume system, master template, LinkedIn/GitHub, outreach scripts — the documents that run on every application |
+
+---
+
+## Job Cracker — the interactive platform
+
+```bash
+cd job-cracker && make up      # → http://localhost:8080
+```
+
+A self-hosted app that turns this repo into a trackable 30-day sprint. Everything below is
+still the source material; the app decides what you do today, runs your code, scores you, and
+remembers.
+
+| | |
+|---|---|
+| **Today / Plan** | 30 days, 175 tasks, each with a hiring-manager note on what the round is actually testing |
+| **Library** | Every guide in this repo, readable in the app — full-text search across all 74 files, per-document TOC, syntax highlighting, working cross-links |
+| **Practice** | 101 coding problems with real test cases executed in-browser — timed, weak-pattern, blind and spaced-review modes |
+| **Quiz** | 136 recall questions across 21 topics, scored with explanations |
+| **Design** | 18 timed design drills with weighted rubrics you score yourself against |
+| **Behavioral** | STAR bank with 14 prompts, each carrying "what good looks like" and "red flags" |
+| **Skills** | 32 skills rated against market demand; gap = `(demand − level) × demand` |
+| **Pipeline** | Application tracker with funnel conversion rates |
+| **Market analysis** | Where you get cut in the funnel, comp bands, channel strategy |
+
+Setup, architecture and how to edit the content: [job-cracker/README.md](job-cracker/README.md).
+
+---
+
+## Resume, Profiles & Outreach
+
+> Everything else in this repo is knowledge you might be asked about. These are the documents a
+> stranger actually reads — and they gate all 97,000 lines behind them.
+
+| Guide | Covers |
+|---|---|
+| [The Resume System](resume/00-resume-system.md) | How resumes are read by ATS, recruiter and hiring manager; the 6-second scan; the `verb + system + scale + outcome` formula; recovering numbers you think you don't have; what separates a Senior resume from a Lead one; layout rules; the seven failure modes; tailoring at volume; BD vs international remote |
+| [The Master Resume](resume/01-master-resume.md) | The fill-in template and a worked example; the bullet bank organised by the dimension each bullet proves; summary-line variants per posting type; the Selected Work section; a 90-minute filling session |
+| [LinkedIn, GitHub & the Public Surface](resume/02-linkedin-and-profiles.md) | Headline and About that survive recruiter search; the GitHub profile README; making two repos count; the written-English problem and the four cheapest fixes for it |
+| [Outreach, Referrals & Follow-ups](resume/03-outreach-and-referrals.md) | The volume arithmetic; the two-sentence note; three referral scripts; cold outreach to hiring managers; the salary question asked early; follow-ups; after the interview; after a rejection; a weekly rhythm |
+
+**Start here if you have one hour:** [the bullet formula](resume/00-resume-system.md#4-the-bullet-formula)
+and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting-numbers-when-you-think-you-have-none).
+
+---
+
+## Phase 0: Online Assessments & Coding Interviews (Week 0 / Ongoing)
+
+> **The gate before the gate.** Most candidates are filtered by an automated coding test before a human ever reads their CV. Run this phase in parallel with everything else.
+
+| # | Guide | Topics | Problems |
+|---|-------|--------|----------|
+| 0 | [Online Assessment Platform Playbook](phase-0-online-assessments/00-platform-playbook.md) | HackerRank, Codility, CodeSignal, TestGorilla, Talview, Mercer Mettl, iMocha, DevSkiller, Karat/CoderPad, Turing/Toptal/Arc/Andela funnels, scoring models, proctoring, time allocation, Node.js submission harness | — |
+| 1 | [Coding Interview — Problem Solving in JS (Part 1)](phase-0-online-assessments/03-coding-challenges-dsa-javascript.md) | The 6-step ritual, pattern-recognition table, complexity budget, JS interview toolkit + traps · **Hashing & frequency counting, prefix/running values, two pointers, sliding window, strings & ad-hoc, stack & monotonic stack, binary search (incl. on the answer), linked lists** | 55 (P1–P55) |
+| 2 | [Coding Interview — Advanced Patterns (Part 2)](phase-0-online-assessments/03b-coding-challenges-advanced-patterns.md) | **Trees & recursion, heaps & top-K, greedy, intervals, backtracking, dynamic programming, graphs, bit manipulation/math/matrix** · 4-week practice plan, timed-assessment triage, Top 40 must-do list, stuck-recovery script | 62 (P56–P117) |
+| 3 | [Node/Async & Simulation Tasks](phase-0-online-assessments/03c-nodejs-async-and-simulation-tasks.md) | The senior discriminators: implement `Promise.all`, concurrency-limited async pool, retry with backoff+jitter, O(1) LRU, debounce/throttle, EventEmitter, deep clone with cycles · log sessionisation, transaction validation, rate-limiter simulation · **the CodeSignal Level 1–4 growing-spec task** · edge-case checklist, complexity cheat sheet | 10 tasks + 1 multi-level |
+| 4 | [MCQ Bank — JavaScript & TypeScript](phase-0-online-assessments/01-mcq-bank-javascript-typescript.md) | Output prediction & event loop, coercion/equality, hoisting/TDZ/closures/`this`, arrays & built-ins, prototypes & classes, TypeScript (`unknown` vs `any`, `never`, utility types, `satisfies`, generics, decorator metadata), ESM vs CommonJS | 75 MCQs |
+| 5 | [MCQ Bank — Node.js & Backend](phase-0-online-assessments/02-mcq-bank-nodejs-backend.md) | libuv thread pool, streams & backpressure, clustering vs worker threads, npm/packaging, HTTP semantics & REST design, idempotency, auth & security (JWT, bcrypt, OWASP), NestJS pipeline & DI, caching/Kafka/isolation levels, testing | 84 MCQs |
+| 6 | [SQL Challenge Bank](phase-0-online-assessments/04-sql-challenge-bank.md) | Select/aggregate/join tiers, NULL & anti-join traps, CTEs & recursion, **window functions** (top-N per group, running totals, LAG, sessionisation, gaps & islands), cohort retention, funnels, EXPLAIN reading, indexing & keyset pagination | 52 + 18 MCQs |
+| 7 | [REST API, Debugging & Code Review](phase-0-online-assessments/05-rest-api-and-debugging-challenges.md) | HackerRank's REST API question type + universal paginated-fetch helper, 429/retry/timeout handling · **16 find-the-bug snippets** (races, injection, leaks, mass assignment, cache defects, shutdown) · code-review priority ladder · DevSkiller/take-home playbook & rubric | 6 + 16 |
+| 8 | [MCQ Bank — DevOps, Cloud, Linux & Git](phase-0-online-assessments/06-devops-cloud-mcq-bank.md) | Docker layers/multi-stage/exit codes, Kubernetes probes & QoS & zero-downtime, Linux triage, Git recovery & workflows, CI/CD & DORA, AWS (SG vs NACL, SQS, RDS, cost), NGINX/TLS/mTLS, observability & SLOs | 90 MCQs |
+| 9 | [Video, Aptitude & Psychometric](phase-0-online-assessments/07-video-interview-and-psychometric.md) | Talview/HireVue one-way video mechanics, the 90-second answer formula, **24 real questions**, situational judgement tests, Big-5/culture-fit inventories, numerical & logical & verbal aptitude, data interpretation, English fluency drills, recording setup | 24 Q + 40 drills |
+| 10 | [Timed Mock Assessments](phase-0-online-assessments/08-timed-mock-assessments.md) | Five full-length simulations — HackerRank enterprise (90 min), TestGorilla bundle (45 min), Codility/Toptal (60 min), Talview video (20 min), Mettl BD corporate (120 min) — with answer keys, diagnostic scorecard and a 14-day plan | 5 mocks |
+| 11 | [Take-Home Assignments](phase-0-online-assessments/09-take-home-assignments.md) | The rubric you are not shown, scoping discipline, the 4-hour time budget, senior-reading project structure, testing depth, the README and TRADEOFFS documents, commit hygiene, the follow-up call, 7 assignment archetypes, when and how to decline | 2 checklists |
+| 12 | [The Reverse Interview](phase-0-online-assessments/10-reverse-interview-bank.md) | Questions *you* ask — by who is in the room (recruiter, hiring manager, engineers, principal, CTO), the diagnostic set that decides whether to accept, remote-specific and lead-level questions, reading the answers, red flags, and the closing question | ~70 questions |
+| 13 | [Live Coding & Pairing](phase-0-online-assessments/11-live-coding-and-pairing.md) | The round a human scores: how it differs from an automated test, the minute-by-minute structure, **what to actually say** while narrating, the stuck-recovery script, pair-programming and debugging rounds, setup, practising with a human and the rubric to hand them, and the scoring dimensions interviewers write down | 1 rubric |
+| 14 | [The Interview Loop](phase-0-online-assessments/12-the-interview-loop.md) | **The map.** The standard 4–6 stage loop, what each stage is *actually* filtering for, loops by company type (BD product · international product · marketplaces · US enterprise), where your profile is most likely to be cut, timelines and running several in parallel, what happens in the debrief, and reading your own rejections | — |
+| 15 | [Offer to First 90 Days](phase-0-online-assessments/13-offer-to-first-90-days.md) | Evaluating total compensation (contractor vs employee for BD), negotiating and what is actually flexible, equity questions that matter, resigning well, then days 1–30 learn / 31–60 contribute / 61–90 own, remote-specific advice from GMT+6, and the mistakes that cost people the job | — |
+
+**Every coding problem follows one format:** Question → Signal (how to recognise it) → Strategy (the insight, in plain English) → JavaScript solution (commented) → Trace table → Complexity & Pitfalls. All 117 solutions are verified against 309 test assertions including edge cases.
+
+**Start here:** [phase-0-online-assessments/README.md](phase-0-online-assessments/README.md) — index, platform-by-platform study order, and the "one weekend before a test" plan.
 
 ---
 
@@ -37,6 +114,8 @@
 | 3 | [NestJS Mastery](phase-1-core-programming/03-nestjs-mastery.md) | Modules, DI, guards, interceptors, pipes, filters, middleware, decorators, microservices, testing, caching (Redis), transactions, cron/scheduling, Bull queues, config validation, circular deps | 19+ |
 | 4 | [Testing & Quality](phase-1-core-programming/04-testing-and-quality.md) | Jest, mocks/stubs/spies, TDD, testing pyramid, integration tests (Supertest, testcontainers), E2E, async/event testing, database testing, code quality, mutation testing | 13 |
 | 5 | [Design Patterns in Practice](phase-1-core-programming/05-design-patterns-in-practice.md) | SOLID, Strategy, Observer, Factory, Singleton, Decorator, Adapter, Repository, DTO, Unit of Work, Circuit Breaker, NestJS request pipeline, CQRS, Clean/Hexagonal Architecture | 14 |
+| 6 | [Reading Unfamiliar Code](phase-1-core-programming/06-reading-unfamiliar-code.md) | A real senior interview format *and* your first month on any job. Why breadth-first reading fails · orient in ten minutes · trace one behaviour end to end · build the map · **git as a research tool** (`blame`, `log -S`, files that change together) · making your first change safely with characterisation tests · working with genuinely bad code | 5 |
+| 7 | [AI-Assisted Development](phase-1-core-programming/07-ai-assisted-development.md) | Using AI tools, not building AI features. Where it genuinely helps vs where it hurts · the review discipline · **security risks specific to generated code** (slopsquatting, prompt injection via your own repo) · team policy a lead is expected to have a view on · using it in the interview itself · the skills that got *more* valuable | 5 |
 
 ---
 
@@ -50,6 +129,8 @@
 | 4 | [Event-Driven Architecture](phase-2-apis-realtime-systems/04-event-driven-architecture.md) | Events vs commands, Kafka/RabbitMQ/Redis, event sourcing, CQRS, saga pattern, outbox pattern, idempotency, schema registry (Avro/Protobuf), partition rebalancing, event versioning, DLQ handling, testing EDA | 16 |
 | 5 | [gRPC & Protocol Buffers](phase-2-apis-realtime-systems/05-grpc-protocol-buffers.md) | Protobuf schema, 4 RPC patterns, NestJS gRPC, error handling, auth (mTLS/JWT), performance, gRPC-Web, microservices communication, gRPC vs REST decision framework | 11 |
 | 6 | [AI & LLM Integrations](phase-2-apis-realtime-systems/06-ai-llm-integrations.md) | Integrating OpenAI/Anthropic APIs, Streaming responses (SSE), Vector Databases (Pinecone, pgvector), Basic RAG architecture | 3 |
+| 7 | [WebRTC & Real-Time Media Infrastructure](phase-2-apis-realtime-systems/07-webrtc-and-media-infrastructure.md) | **The differentiator guide.** Signalling and the SDP/ICE/DTLS handshake · NAT traversal, STUN vs TURN and why ~15% of users need a relay · mesh vs **SFU** vs MCU with the scaling arithmetic · simulcast, SVC, congestion control and codecs · building the signalling server, tokens and ephemeral TURN credentials · recording pipelines · **WebRTC vs LL-HLS for one-to-many** · capacity planning and cost · `getStats()` telemetry · a debugging table of the failures you will actually see · three system-design walkthroughs | 19 |
+| 8 | [Webhooks & Integration Reliability](phase-2-apis-realtime-systems/08-webhooks-and-integrations.md) | The five rules for receiving · HMAC signature verification with `timingSafeEqual` · **idempotency via unique constraint, not check-then-write** · fast ack and async processing · out-of-order and missing events · **reconciliation, the safety net** · sending webhooks, retry schedules and **SSRF** · testing and debugging | 8 |
 
 ---
 
@@ -65,6 +146,8 @@
 | 6 | [Database Migrations & Schema Evolution](phase-3-databases-data/06-database-migrations-schema-evolution.md) | Prisma/TypeORM/Knex migrations, zero-downtime (expand-contract), safe vs dangerous operations, backfill strategies, schema versioning, CI pipeline | 11 |
 | 7 | [ORMs & Query Builders](phase-3-databases-data/07-orms-query-builders.md) | Prisma vs TypeORM vs Knex, N+1 problem, query optimization, cursor pagination, soft delete, multi-tenancy, testing strategies | 10 |
 | 8 | [Database Architecture Fundamentals](phase-3-databases-data/08-database-architecture-fundamentals.md) | CAP Theorem, PACELC Theorem, Sharding vs Partitioning, Read Replica lag mitigation, MVCC Concurrency Control | 6 |
+| 9 | [Choosing the Right Database](phase-3-databases-data/09-choosing-the-right-database.md) | **The selection guide.** All 12 database types with worked examples — relational, key-value, document, wide-column, **search (Elasticsearch)**, **time-series (TimescaleDB)**, **graph (Neo4j)**, **columnar/OLAP (ClickHouse)**, **vector (pgvector)**, object storage, embedded, distributed SQL · the 30-second decision path · polyglot persistence and the outbox · **five complete systems worked end to end** (e-commerce, chat, IoT, social feed, RAG assistant) | 17 |
+| 10 | [Functions, Triggers & In-Database Jobs](phase-3-databases-data/10-functions-triggers-and-in-database-jobs.md) | **Server-side Postgres.** What belongs in the database vs the app · PL/pgSQL functions and `LANGUAGE sql` inlining · **volatility (`IMMUTABLE`/`STABLE`/`VOLATILE`) and expression indexes** · procedures and the batched-commit backfill · triggers (BEFORE/AFTER, ROW/STATEMENT, `WHEN`) · audit logs, counters, generated columns · **savepoints, the 64-subtransaction cliff, `ON CONFLICT` instead of EXCEPTION** · advisory locks · LISTEN/NOTIFY · **`pg_cron`** · `SECURITY DEFINER` and `search_path` hijacking · testing and migrating it | 10 |
 
 ---
 
@@ -80,6 +163,38 @@
 | 6 | [Security & Compliance](phase-4-cloud-infrastructure/06-security-compliance.md) | OWASP Top 10, JWT/OAuth2/RBAC/ABAC, secrets management, GDPR, SOC 2, BD Digital Security Act, supply chain security, infrastructure security, data protection | 10 |
 | 7 | [Performance Engineering](phase-4-cloud-infrastructure/07-performance-engineering.md) | Load testing (k6), Node.js profiling (clinic.js), database optimization, caching, worker threads, auto-scaling, benchmarking, capacity planning | 10 |
 | 8 | [CI/CD & DevOps](phase-4-cloud-infrastructure/08-cicd-devops.md) | GitHub Actions, Jenkins, Terraform, Prometheus+Grafana, Git workflows, release management, feature flags, environment management, DORA metrics, GitOps | 9 |
+| 9 | [DevOps Operations](phase-4-cloud-infrastructure/09-devops-operations.md) | Autoscaling (HPA/KEDA) in production, connection-pool exhaustion, read replicas, cache failure modes, backup strategy & restore drills, RPO/RTO & region failover, golden signals, cardinality/cost control, on-call & incident command, capacity planning, zero-downtime migrations & rollbacks, scenario drills | 10 |
+| 10 | [Networking Fundamentals](phase-4-cloud-infrastructure/10-networking-fundamentals.md) | Where the time actually goes (your handler is ~3% of it) · DNS, TCP, TLS · **HTTP/1.1 vs 2 vs 3 and head-of-line blocking** · connection management and pool sizing in Node · timeout budgets down a call chain · **reading `ECONNRESET`, `EAI_AGAIN`, `EMFILE`** · diagnosing a slow request | 6 |
+
+---
+
+## Phase 5: System Design & Architecture (Week 5–7)
+
+| # | Guide | Topics | Problems |
+|---|-------|--------|----------|
+| 0 | [Roadmap](phase-5-system-design/00-roadmap.md) | Full learning plan — fundamentals → HLD → LLD → architecture → governance, with book/resource list | — |
+| 1 | [System Design Fundamentals](phase-5-system-design/01-system-design-fundamentals.md) | The 7-step framework, requirements, back-of-envelope estimation, API design, data modelling, networking (TCP/UDP, HTTP/1–3, TLS), REST vs GraphQL vs gRPC vs WebSocket vs SSE, DNS/CDN, load balancing, consistent hashing, caching patterns & failure modes, datastore selection, blob storage, search, queues, trade-off framing | 15 Q&A |
+| 2 | [Architecture Patterns](phase-5-system-design/02-architecture-patterns.md) | Monolith vs microservices vs SOA, modular monolith, service decomposition, hexagonal/clean architecture, EDA, choreography vs orchestration, CQRS, event sourcing, saga, outbox, API gateway & BFF, service discovery & mesh, resilience patterns, strangler fig, serverless, cell-based | 17 Q&A |
+| 3 | [Distributed Systems](phase-5-system-design/03-distributed-systems.md) | Fallacies, CAP & PACELC, consistency models, isolation levels, replication, quorums, Raft, split brain & fencing tokens, Lamport/vector/hybrid clocks, CRDTs, sharding & resharding, distributed locks, rate limiting algorithms, 2PC vs saga, gossip/SWIM, failure modes at scale | 17 Q&A |
+| 4 | [DDD & Data Architecture](phase-5-system-design/04-ddd-and-data-architecture.md) | Strategic vs tactical DDD, bounded contexts, context mapping & ACL, ubiquitous language, entities/value objects/aggregates, domain vs integration events, repositories, event storming, OLTP vs OLAP, lakehouse, CDC/Debezium, stream processing & watermarks, Lambda vs Kappa, data mesh, polyglot persistence, governance & GDPR erasure | 17 Q&A |
+| 5 | [Reliability, Security & Cost](phase-5-system-design/05-reliability-security-cost.md) | SLIs/SLOs/error budgets, burn-rate alerting, RPO/RTO & DR, multi-region, graceful degradation, chaos engineering, capacity planning, deployment safety, incident management, zero trust, OAuth2/OIDC & PKCE, mTLS/SPIFFE, secrets, STRIDE, envelope encryption, multi-tenancy, FinOps, latency budgets, build vs buy | 19 Q&A |
+| 6 | [HLD Practice Problems](phase-5-system-design/06-hld-practice-problems.md) | URL shortener, rate limiter, notification system (41M users), chat, news feed, payments, **MFS (bKash/Nagad)**, video streaming, file storage, autocomplete, web crawler, ride-hailing (Pathao), ticket booking, **live streaming (Agora)**, **voucher system (Daraz)** | 15 designs |
+| 7 | [LLD Practice Problems](phase-5-system-design/07-lld-practice-problems.md) | LLD method, Node.js concurrency (async mutex, per-key locking, races across `await`), parking lot, elevator, vending machine, LRU cache, rate limiter, pub/sub, Splitwise, logging framework, task scheduler, file system + 7 rapid-fire designs | 19 designs |
+| 8 | [Architect-Level Practice](phase-5-system-design/08-architect-level-practice.md) | ADRs, RFCs, Conway's Law & Team Topologies, tech radar, technical debt, golden paths, code review, RCA/postmortems, compliance architecture — plus multi-tenant SaaS, global e-commerce, real-time bidding, monolith migration, IoT, healthcare, developer platform, multi-cloud | 18 topics |
+| 9 | [Multi-Tenancy & SaaS Architecture](phase-5-system-design/09-multi-tenancy-and-saas-architecture.md) | The three isolation models and the economics that decide between them · shared schema done safely in three layers · **Postgres Row-Level Security and the connection-pool trap** · carrying tenant context (and where it leaks) · noisy neighbours · migrations across N tenants · onboarding and GDPR offboarding · the bridge model | 6 |
+
+---
+
+## Phase 6: Behavioral, Leadership & Market Fit (Week 6–8)
+
+| # | Focus | Notes |
+|---|-------|-------|
+| 1 | Behavioral stories | STAR stories for leadership, incident response, mentoring, trade-offs |
+| 2 | BD market fit | Cost optimization, local compliance, telecom/fintech constraints, Bangladeshi salary context |
+| 3 | International remote readiness | Remote interview formats, async communication, timezone collaboration, contract negotiation |
+| 4 | Mock interview practice | Technical + behavioral mocks, system design drills, English communication |
+
+> Phase 6 prepares you for leadership-level interviews by combining technical depth with communication, decision-making, and market awareness.
 
 ---
 
@@ -98,26 +213,6 @@ Descriptive project walkthroughs with architecture diagrams, pseudo configs, dat
 | 7 | [Production Monitoring & Alerting](hands-on-projects/07-monitoring-alerting-setup.md) | Prometheus + Grafana + Loki + AlertManager | Observability, SLIs/SLOs, on-call | 5–6h |
 
 Each project includes: architecture diagrams, step-by-step flows, database schemas, scaling strategies, failure handling, BD context, and interview talking points.
-
----
-
-## Phase 5: System Design & Architecture (Week 5–7)
-
-*Coming soon — will cover:*
-- Microservices architecture deep dive
-- 10+ international system design problems (URL shortener, chat, payment system, etc.)
-- BD-relevant designs (notification service, MFS, e-commerce)
-- Technical leadership (RFCs, ADRs, technical debt management)
-
----
-
-## Phase 6: Behavioral, Leadership & Market Fit (Week 6–8)
-
-*Coming soon — will cover:*
-- STAR stories from real experience
-- BD market preparation (bKash/Nagad integration, BTRC, salary benchmarks)
-- International remote readiness (interview formats, async communication, salary negotiation)
-- Mock interview strategies
 
 ---
 

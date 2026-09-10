@@ -4,6 +4,52 @@
 > **Format:** Q&A with practical TypeScript, Node.js, and NestJS code examples
 > **Goal:** Confidently answer any database migration or schema evolution question in a senior backend interview
 
+## In 60 seconds
+
+1. **A migration is a version-controlled change to your database schema.** Same idea as git,
+   but for table structure — and unlike code, you cannot simply revert it once data has changed.
+2. **Zero-downtime migration has one governing rule: the old code and the new code must both
+   work against the database at every moment**, because during a deploy both are running.
+3. **That rule gives you expand/contract**, the pattern the whole guide turns on:
+
+   ```
+   1. EXPAND   add the new column (nullable), deploy. Old code ignores it.
+   2. BACKFILL fill it in batches. Nothing depends on it yet.
+   3. MIGRATE  deploy code that writes BOTH old and new, reads new.
+   4. CONTRACT once nothing reads the old column, drop it. Days or weeks later.
+   ```
+4. **Renaming a column is never one step.** `ALTER TABLE ... RENAME` breaks every running
+   instance of the old code instantly. Add, dual-write, migrate readers, then drop.
+5. **Adding an index on a big table locks it** unless you use `CREATE INDEX CONCURRENTLY` in
+   Postgres. This has taken down production at many companies.
+6. **Backfill in batches, never in one statement.** `UPDATE users SET x = y` on 50M rows holds
+   one enormous transaction, bloats the write-ahead log, and blocks everything.
+
+**The interview trap to expect:** "how do you rename a column on a table with 100M rows with
+zero downtime?" This is a favourite senior question, and the four-step expand/contract answer
+above is what they want to hear — plus the detail that step 4 happens in a *later* deploy.
+
+## Key terms in this guide
+
+| Term | Plain meaning |
+|---|---|
+| **Migration** | A versioned, ordered change to the database schema |
+| **Up / down migration** | Apply the change · undo it. Down migrations often cannot restore lost data |
+| **Expand/contract** | Add new alongside old, move over gradually, remove old last |
+| **Backfill** | Filling a new column with values for rows that already existed |
+| **Dual write** | Writing to both the old and new column during the transition |
+| **Zero-downtime** | Deploying without users noticing. Requires old and new code to coexist |
+| **Backward compatible** | Old code still works against the new schema |
+| **Lock** | The database blocking access to a table while it changes. Brief locks are fine; long ones are outages |
+| **`CREATE INDEX CONCURRENTLY`** | Builds an index in Postgres without blocking writes. Slower, safe |
+| **Shadow table** | Copy the table, change the copy, swap them. Used for very large changes |
+| **Migration drift** | The database no longer matches what the migration files say |
+| **Idempotent migration** | Safe to run twice without breaking |
+| **Seed data** | Initial reference data, distinct from schema changes |
+| **Prisma Migrate / TypeORM / Knex** | The three migration tools compared in this guide |
+
+---
+
 ## Table of Contents
 1. [What Are Database Migrations & Why They Matter](#q1-what-are-database-migrations--why-they-matter)
 2. [Prisma Migrate](#q2-prisma-migrate)
