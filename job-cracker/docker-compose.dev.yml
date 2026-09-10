@@ -1,0 +1,65 @@
+# Development overlay — live reload, no rebuild between code changes.
+#
+#   make dev        start in this mode
+#   make dev-logs   watch it
+#   make up         go back to the production images
+#
+# What changes versus docker-compose.yml:
+#
+#   api  → runs the multi-stage `build` target (devDependencies + Nest CLI),
+#          source is bind-mounted, `nest start --watch` restarts on save,
+#          and RESEED=true so edits to src/content/ re-import every restart.
+#   web  → runs Vite's dev server with HMR instead of the built bundle.
+#
+# Only source directories are mounted, never the whole context. Mounting
+# ./web over /app would shadow the image's node_modules and nothing would run.
+#
+# Markdown guides need no special handling in either mode: the repo is already
+# bind-mounted read-only at /repo, so a new or edited guide shows up in the
+# Library within the controller's 30-second cache window.
+
+services:
+  api:
+    build:
+      context: ./api
+      target: build # the stage that still has devDependencies
+    environment:
+      NODE_ENV: development
+      # Re-import content on every boot. The seeder upserts and never touches
+      # progress, attempts, notes or stories, so this is safe to leave on —
+      # and it is what makes edits to plan.ts appear without a manual reseed.
+      RESEED: 'true'
+      # Docker Desktop's filesystem does not deliver inotify events into the
+      # container, so every watcher has to poll. These are three different
+      # watchers and each needs telling separately:
+      CHOKIDAR_USEPOLLING: 'true' # chokidar (Nest CLI's own file watching)
+      TSC_WATCHFILE: PriorityPollingInterval # tsc — the one that actually
+      TSC_WATCHDIRECTORY: DynamicPriorityPolling # rebuilds your code
+    volumes:
+      - ../:/repo:ro
+      - ./api/src:/app/src
+      - ./api/prisma:/app/prisma
+      - ./api/scripts:/app/scripts
+    # `generate` before `push`: a schema change needs a regenerated client or
+    # the new column is invisible to the API even though the column exists.
+    # Production skips generate because the image already baked it in.
+    command: sh -c "npx prisma generate && npx prisma db push --accept-data-loss && npm run start:dev"
+
+  web:
+    build:
+      context: ./web
+      target: build
+    environment:
+      VITE_API_PROXY: http://api:4000
+    volumes:
+      - ./web/src:/app/src
+      - ./web/index.html:/app/index.html
+      - ./web/vite.config.ts:/app/vite.config.ts
+      - ./web/tailwind.config.js:/app/tailwind.config.js
+      - ./web/postcss.config.js:/app/postcss.config.js
+    # Same external port as production, so the URL you have bookmarked keeps
+    # working. `!override` is required: Compose MERGES list keys across files,
+    # so without it the base file's 8080:80 stays and the port is bound twice.
+    ports: !override
+      - '${WEB_PORT:-8080}:5173'
+    command: npm run dev

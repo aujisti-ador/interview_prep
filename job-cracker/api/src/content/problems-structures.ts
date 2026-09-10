@@ -28,6 +28,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function reverseList(head) {\n  let prev = null;\n  let curr = head;\n  while (curr) {\n    const next = curr.next;\n    curr.next = prev;\n    prev = curr;\n    curr = next;\n  }\n  return prev;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'reverse-linked-list',
     tests: {
       argTypes: ['list'],
       returnType: 'list',
@@ -52,6 +53,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function mergeTwoLists(list1, list2) {\n  const dummy = { val: 0, next: null };\n  let tail = dummy;\n  while (list1 && list2) {\n    if (list1.val <= list2.val) { tail.next = list1; list1 = list1.next; }\n    else { tail.next = list2; list2 = list2.next; }\n    tail = tail.next;\n  }\n  tail.next = list1 || list2;\n  return dummy.next;\n}',
     complexity: 'O(n + m) time, O(1) space.',
+    leetcode: 'merge-two-sorted-lists',
     tests: {
       argTypes: ['list', 'list'],
       returnType: 'list',
@@ -81,6 +83,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function hasCycle(head) {\n  let slow = head, fast = head;\n  while (fast && fast.next) {\n    slow = slow.next;\n    fast = fast.next.next;\n    if (slow === fast) return true;\n  }\n  return false;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'linked-list-cycle',
     tests: {
       argTypes: ['listCycle'],
       cases: [
@@ -108,6 +111,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function removeNthFromEnd(head, n) {\n  const dummy = { val: 0, next: head };\n  let fast = dummy, slow = dummy;\n  for (let i = 0; i < n; i++) fast = fast.next;\n  while (fast.next) { fast = fast.next; slow = slow.next; }\n  slow.next = slow.next.next;\n  return dummy.next;\n}',
     complexity: 'O(n) time, O(1) space, single pass.',
+    leetcode: 'remove-nth-node-from-end-of-list',
     tests: {
       argTypes: ['list', 'raw'],
       returnType: 'list',
@@ -137,6 +141,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function reorderList(head) {\n  if (!head || !head.next) return head;\n  let slow = head, fast = head.next;\n  while (fast && fast.next) { slow = slow.next; fast = fast.next.next; }\n  let second = slow.next;\n  slow.next = null;\n  let prev = null;\n  while (second) { const nx = second.next; second.next = prev; prev = second; second = nx; }\n  let first = head, back = prev;\n  while (back) {\n    const f = first.next, b = back.next;\n    first.next = back;\n    back.next = f;\n    first = f; back = b;\n  }\n  return head;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'reorder-list',
     tests: {
       argTypes: ['list'],
       returnType: 'list',
@@ -165,6 +170,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function mergeKLists(lists) {\n  const mergeTwo = (a, b) => {\n    const dummy = { val: 0, next: null };\n    let t = dummy;\n    while (a && b) {\n      if (a.val <= b.val) { t.next = a; a = a.next; } else { t.next = b; b = b.next; }\n      t = t.next;\n    }\n    t.next = a || b;\n    return dummy.next;\n  };\n  let queue = lists.filter(Boolean);\n  if (queue.length === 0) return null;\n  while (queue.length > 1) {\n    const next = [];\n    for (let i = 0; i < queue.length; i += 2) {\n      next.push(i + 1 < queue.length ? mergeTwo(queue[i], queue[i + 1]) : queue[i]);\n    }\n    queue = next;\n  }\n  return queue[0];\n}',
     complexity: 'O(N log k) time where N is total nodes, O(1) extra space beyond recursion/queue.',
+    leetcode: 'merge-k-sorted-lists',
     tests: {
       argTypes: ['listArray'],
       returnType: 'list',
@@ -193,6 +199,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function invertTree(root) {\n  if (!root) return null;\n  const tmp = root.left;\n  root.left = root.right;\n  root.right = tmp;\n  invertTree(root.left);\n  invertTree(root.right);\n  return root;\n}',
     complexity: 'O(n) time, O(h) space for the recursion stack.',
+    leetcode: 'invert-binary-tree',
     tests: {
       argTypes: ['tree'],
       returnType: 'tree',
@@ -217,6 +224,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function maxDepth(root) {\n  if (!root) return 0;\n  return 1 + Math.max(maxDepth(root.left), maxDepth(root.right));\n}',
     complexity: 'O(n) time, O(h) space.',
+    leetcode: 'maximum-depth-of-binary-tree',
     tests: {
       argTypes: ['tree'],
       cases: [
@@ -240,6 +248,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function isSameTree(p, q) {\n  if (!p && !q) return true;\n  if (!p || !q || p.val !== q.val) return false;\n  return isSameTree(p.left, q.left) && isSameTree(p.right, q.right);\n}',
     complexity: 'O(n) time, O(h) space.',
+    leetcode: 'same-tree',
     tests: {
       argTypes: ['tree', 'tree'],
       cases: [
@@ -264,6 +273,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function isSubtree(root, subRoot) {\n  const same = (a, b) => {\n    if (!a && !b) return true;\n    if (!a || !b || a.val !== b.val) return false;\n    return same(a.left, b.left) && same(a.right, b.right);\n  };\n  if (!subRoot) return true;\n  if (!root) return false;\n  if (same(root, subRoot)) return true;\n  return isSubtree(root.left, subRoot) || isSubtree(root.right, subRoot);\n}',
     complexity: 'O(n * m) worst case time, O(h) space.',
+    leetcode: 'subtree-of-another-tree',
     tests: {
       argTypes: ['tree', 'tree'],
       cases: [
@@ -290,6 +300,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function isBalanced(root) {\n  const height = (n) => {\n    if (!n) return 0;\n    const l = height(n.left);\n    if (l === -1) return -1;\n    const r = height(n.right);\n    if (r === -1) return -1;\n    if (Math.abs(l - r) > 1) return -1;\n    return 1 + Math.max(l, r);\n  };\n  return height(root) !== -1;\n}',
     complexity: 'O(n) time, O(h) space.',
+    leetcode: 'balanced-binary-tree',
     tests: {
       argTypes: ['tree'],
       cases: [
@@ -316,6 +327,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function diameterOfBinaryTree(root) {\n  let best = 0;\n  const height = (n) => {\n    if (!n) return 0;\n    const l = height(n.left);\n    const r = height(n.right);\n    best = Math.max(best, l + r);\n    return 1 + Math.max(l, r);\n  };\n  height(root);\n  return best;\n}',
     complexity: 'O(n) time, O(h) space.',
+    leetcode: 'diameter-of-binary-tree',
     tests: {
       argTypes: ['tree'],
       cases: [
@@ -339,6 +351,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function levelOrder(root) {\n  if (!root) return [];\n  const out = [];\n  let queue = [root];\n  while (queue.length) {\n    const level = [];\n    const next = [];\n    for (const node of queue) {\n      level.push(node.val);\n      if (node.left) next.push(node.left);\n      if (node.right) next.push(node.right);\n    }\n    out.push(level);\n    queue = next;\n  }\n  return out;\n}',
     complexity: 'O(n) time, O(n) space.',
+    leetcode: 'binary-tree-level-order-traversal',
     tests: {
       argTypes: ['tree'],
       cases: [
@@ -362,6 +375,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function rightSideView(root) {\n  if (!root) return [];\n  const out = [];\n  let queue = [root];\n  while (queue.length) {\n    out.push(queue[queue.length - 1].val);\n    const next = [];\n    for (const n of queue) {\n      if (n.left) next.push(n.left);\n      if (n.right) next.push(n.right);\n    }\n    queue = next;\n  }\n  return out;\n}',
     complexity: 'O(n) time, O(n) space.',
+    leetcode: 'binary-tree-right-side-view',
     tests: {
       argTypes: ['tree'],
       cases: [
@@ -389,6 +403,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function isValidBST(root) {\n  const check = (n, lo, hi) => {\n    if (!n) return true;\n    if ((lo !== null && n.val <= lo) || (hi !== null && n.val >= hi)) return false;\n    return check(n.left, lo, n.val) && check(n.right, n.val, hi);\n  };\n  return check(root, null, null);\n}',
     complexity: 'O(n) time, O(h) space.',
+    leetcode: 'validate-binary-search-tree',
     tests: {
       argTypes: ['tree'],
       cases: [
@@ -413,6 +428,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function kthSmallest(root, k) {\n  const stack = [];\n  let curr = root;\n  while (curr || stack.length) {\n    while (curr) { stack.push(curr); curr = curr.left; }\n    curr = stack.pop();\n    if (--k === 0) return curr.val;\n    curr = curr.right;\n  }\n  return -1;\n}',
     complexity: 'O(h + k) time, O(h) space.',
+    leetcode: 'kth-smallest-element-in-a-bst',
     tests: {
       argTypes: ['tree', 'raw'],
       cases: [
@@ -440,6 +456,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function lowestCommonAncestor(root, p, q) {\n  let node = root;\n  while (node) {\n    if (p < node.val && q < node.val) node = node.left;\n    else if (p > node.val && q > node.val) node = node.right;\n    else return node.val;\n  }\n  return null;\n}',
     complexity: 'O(h) time, O(1) space.',
+    leetcode: 'lowest-common-ancestor-of-a-binary-search-tree',
     tests: {
       argTypes: ['tree', 'raw', 'raw'],
       cases: [
@@ -468,6 +485,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function findKthLargest(nums, k) {\n  // Min-heap of size k, implemented as a binary heap on an array.\n  const heap = [];\n  const up = (i) => {\n    while (i > 0) {\n      const p = (i - 1) >> 1;\n      if (heap[p] <= heap[i]) break;\n      [heap[p], heap[i]] = [heap[i], heap[p]];\n      i = p;\n    }\n  };\n  const down = (i) => {\n    for (;;) {\n      const l = 2 * i + 1, r = l + 1;\n      let s = i;\n      if (l < heap.length && heap[l] < heap[s]) s = l;\n      if (r < heap.length && heap[r] < heap[s]) s = r;\n      if (s === i) break;\n      [heap[s], heap[i]] = [heap[i], heap[s]];\n      i = s;\n    }\n  };\n  for (const n of nums) {\n    heap.push(n);\n    up(heap.length - 1);\n    if (heap.length > k) {\n      heap[0] = heap[heap.length - 1];\n      heap.pop();\n      down(0);\n    }\n  }\n  return heap[0];\n}',
     complexity: 'O(n log k) time, O(k) space.',
+    leetcode: 'kth-largest-element-in-an-array',
     tests: {
       cases: [
         { args: [[3, 2, 1, 5, 6, 4], 2], expected: 5 },
@@ -491,6 +509,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function kClosest(points, k) {\n  return [...points]\n    .sort((a, b) => (a[0] * a[0] + a[1] * a[1]) - (b[0] * b[0] + b[1] * b[1]))\n    .slice(0, k);\n}',
     complexity: 'O(n log n) as written; O(n log k) with a size-k max-heap, O(n) average with quickselect.',
+    leetcode: 'k-closest-points-to-origin',
     tests: {
       compare: 'unorderedOuter',
       cases: [
@@ -518,6 +537,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function leastInterval(tasks, n) {\n  const counts = new Map();\n  for (const t of tasks) counts.set(t, (counts.get(t) || 0) + 1);\n  const values = [...counts.values()];\n  const maxCount = Math.max(...values);\n  const ties = values.filter((v) => v === maxCount).length;\n  return Math.max(tasks.length, (maxCount - 1) * (n + 1) + ties);\n}',
     complexity: 'O(n) time, O(26) space.',
+    leetcode: 'task-scheduler',
     tests: {
       cases: [
         { args: [['A', 'A', 'A', 'B', 'B', 'B'], 2], expected: 8 },
@@ -546,6 +566,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'class MedianFinder {\n  constructor() {\n    this.lo = []; // max-heap (negated)\n    this.hi = []; // min-heap\n  }\n  _push(heap, val) {\n    heap.push(val);\n    let i = heap.length - 1;\n    while (i > 0) {\n      const p = (i - 1) >> 1;\n      if (heap[p] <= heap[i]) break;\n      [heap[p], heap[i]] = [heap[i], heap[p]];\n      i = p;\n    }\n  }\n  _pop(heap) {\n    const top = heap[0];\n    const last = heap.pop();\n    if (heap.length) {\n      heap[0] = last;\n      let i = 0;\n      for (;;) {\n        const l = 2 * i + 1, r = l + 1;\n        let s = i;\n        if (l < heap.length && heap[l] < heap[s]) s = l;\n        if (r < heap.length && heap[r] < heap[s]) s = r;\n        if (s === i) break;\n        [heap[s], heap[i]] = [heap[i], heap[s]];\n        i = s;\n      }\n    }\n    return top;\n  }\n  addNum(num) {\n    this._push(this.lo, -num);\n    this._push(this.hi, -this._pop(this.lo));\n    if (this.hi.length > this.lo.length) this._push(this.lo, -this._pop(this.hi));\n  }\n  findMedian() {\n    if (this.lo.length > this.hi.length) return -this.lo[0];\n    return (-this.lo[0] + this.hi[0]) / 2;\n  }\n}',
     complexity: 'O(log n) per add, O(1) per median query.',
+    leetcode: 'find-median-from-data-stream',
     tests: {
       mode: 'ops',
       cases: [
@@ -583,6 +604,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'class Trie {\n  constructor() {\n    this.root = { children: new Map(), end: false };\n  }\n  insert(word) {\n    let node = this.root;\n    for (const ch of word) {\n      if (!node.children.has(ch)) node.children.set(ch, { children: new Map(), end: false });\n      node = node.children.get(ch);\n    }\n    node.end = true;\n  }\n  _walk(s) {\n    let node = this.root;\n    for (const ch of s) {\n      if (!node.children.has(ch)) return null;\n      node = node.children.get(ch);\n    }\n    return node;\n  }\n  search(word) {\n    const n = this._walk(word);\n    return !!n && n.end;\n  }\n  startsWith(prefix) {\n    return this._walk(prefix) !== null;\n  }\n}',
     complexity: 'O(L) per operation where L is word length, O(total characters) space.',
+    leetcode: 'implement-trie-prefix-tree',
     tests: {
       mode: 'ops',
       cases: [
@@ -615,6 +637,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'class WordDictionary {\n  constructor() {\n    this.root = { children: new Map(), end: false };\n  }\n  addWord(word) {\n    let node = this.root;\n    for (const ch of word) {\n      if (!node.children.has(ch)) node.children.set(ch, { children: new Map(), end: false });\n      node = node.children.get(ch);\n    }\n    node.end = true;\n  }\n  search(word) {\n    const dfs = (node, i) => {\n      if (i === word.length) return node.end;\n      const ch = word[i];\n      if (ch === ".") {\n        for (const child of node.children.values()) {\n          if (dfs(child, i + 1)) return true;\n        }\n        return false;\n      }\n      const next = node.children.get(ch);\n      return next ? dfs(next, i + 1) : false;\n    };\n    return dfs(this.root, 0);\n  }\n}',
     complexity: 'O(L) for add; O(26^d * L) worst case for search with d wildcards.',
+    leetcode: 'design-add-and-search-words-data-structure',
     tests: {
       mode: 'ops',
       cases: [
@@ -642,6 +665,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function hammingWeight(n) {\n  let count = 0;\n  while (n !== 0) {\n    n &= n - 1;\n    count++;\n  }\n  return count;\n}',
     complexity: 'O(number of set bits) time, O(1) space.',
+    leetcode: 'number-of-1-bits',
     tests: {
       cases: [
         { args: [11], expected: 3 },
@@ -665,6 +689,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function countBits(n) {\n  const ans = new Array(n + 1).fill(0);\n  for (let i = 1; i <= n; i++) ans[i] = ans[i >> 1] + (i & 1);\n  return ans;\n}',
     complexity: 'O(n) time, O(n) space.',
+    leetcode: 'counting-bits',
     tests: {
       cases: [
         { args: [2], expected: [0, 1, 1] },
@@ -690,6 +715,7 @@ export const structureProblems: ProblemSeed[] = [
     solution:
       'function missingNumber(nums) {\n  let x = nums.length;\n  for (let i = 0; i < nums.length; i++) x ^= i ^ nums[i];\n  return x;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'missing-number',
     tests: {
       cases: [
         { args: [[3, 0, 1]], expected: 2 },
@@ -712,6 +738,7 @@ export const structureProblems: ProblemSeed[] = [
     hints: ['The constant-space requirement rules out a hash set.', 'x ^ x === 0 and x ^ 0 === x, so XOR everything together.'],
     solution: 'function singleNumber(nums) {\n  let x = 0;\n  for (const n of nums) x ^= n;\n  return x;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'single-number',
     tests: {
       cases: [
         { args: [[2, 2, 1]], expected: 1 },

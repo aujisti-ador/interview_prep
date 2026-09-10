@@ -128,6 +128,7 @@ export class SeedService implements OnModuleInit {
         solution: p.solution,
         complexity: p.complexity ?? '',
         companies: p.companies ?? [],
+        leetcode: p.leetcode ?? '',
         tests: p.tests as any,
       };
       await this.prisma.problem.upsert({ where: { id: p.id }, create: { id: p.id, ...data }, update: data });

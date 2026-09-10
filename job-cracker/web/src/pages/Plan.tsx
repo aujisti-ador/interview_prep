@@ -18,7 +18,7 @@ export default function Plan() {
     queryFn: () => api.get<PlanDay[]>('/plan'),
   });
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => api.get<Stats>('/stats') });
-  const [openDay, setOpenDay] = useState<number | null>(stats.data?.dayNumber ?? 1);
+  const [openDay, setOpenDay] = useState<number | null>(stats.data?.sessionNumber ?? 1);
 
   if (isLoading) return <Loading />;
   if (error) return <ErrorBox error={error} />;
@@ -27,7 +27,7 @@ export default function Plan() {
   const weeks = [...new Set(days.map((d) => d.week))].sort();
   const totalDone = days.reduce((a, d) => a + (d.done ?? 0), 0);
   const totalTasks = days.reduce((a, d) => a + (d.total ?? 0), 0);
-  const currentDay = stats.data?.dayNumber ?? 1;
+  const currentDay = stats.data?.sessionNumber ?? 1;
 
   return (
     <>

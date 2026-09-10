@@ -19,6 +19,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function climbStairs(n) {\n  if (n <= 2) return n;\n  let a = 1, b = 2;\n  for (let i = 3; i <= n; i++) {\n    const c = a + b;\n    a = b;\n    b = c;\n  }\n  return b;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'climbing-stairs',
     tests: {
       cases: [
         { args: [2], expected: 2 },
@@ -46,6 +47,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function rob(nums) {\n  let prev = 0, curr = 0;\n  for (const n of nums) {\n    const next = Math.max(curr, prev + n);\n    prev = curr;\n    curr = next;\n  }\n  return curr;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'house-robber',
     tests: {
       cases: [
         { args: [[1, 2, 3, 1]], expected: 4 },
@@ -72,6 +74,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function robCircular(nums) {\n  if (nums.length === 0) return 0;\n  if (nums.length === 1) return nums[0];\n  const linear = (arr) => {\n    let prev = 0, curr = 0;\n    for (const n of arr) {\n      const next = Math.max(curr, prev + n);\n      prev = curr;\n      curr = next;\n    }\n    return curr;\n  };\n  return Math.max(linear(nums.slice(0, -1)), linear(nums.slice(1)));\n}',
     complexity: 'O(n) time, O(n) space for the slices (O(1) if you use index bounds).',
+    leetcode: 'house-robber-ii',
     tests: {
       cases: [
         { args: [[2, 3, 2]], expected: 3 },
@@ -99,6 +102,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function coinChange(coins, amount) {\n  const dp = new Array(amount + 1).fill(Infinity);\n  dp[0] = 0;\n  for (let a = 1; a <= amount; a++) {\n    for (const c of coins) {\n      if (c <= a && dp[a - c] + 1 < dp[a]) dp[a] = dp[a - c] + 1;\n    }\n  }\n  return dp[amount] === Infinity ? -1 : dp[amount];\n}',
     complexity: 'O(amount * coins) time, O(amount) space.',
+    leetcode: 'coin-change',
     tests: {
       cases: [
         { args: [[1, 2, 5], 11], expected: 3 },
@@ -125,6 +129,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function lengthOfLIS(nums) {\n  const tails = [];\n  for (const n of nums) {\n    let lo = 0, hi = tails.length;\n    while (lo < hi) {\n      const mid = (lo + hi) >> 1;\n      if (tails[mid] < n) lo = mid + 1;\n      else hi = mid;\n    }\n    tails[lo] = n;\n  }\n  return tails.length;\n}',
     complexity: 'O(n log n) time, O(n) space.',
+    leetcode: 'longest-increasing-subsequence',
     tests: {
       cases: [
         { args: [[10, 9, 2, 5, 3, 7, 101, 18]], expected: 4 },
@@ -151,6 +156,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function wordBreak(s, wordDict) {\n  const words = new Set(wordDict);\n  const dp = new Array(s.length + 1).fill(false);\n  dp[0] = true;\n  for (let i = 1; i <= s.length; i++) {\n    for (let j = 0; j < i; j++) {\n      if (dp[j] && words.has(s.slice(j, i))) { dp[i] = true; break; }\n    }\n  }\n  return dp[s.length];\n}',
     complexity: 'O(n^2 * k) time, O(n) space.',
+    leetcode: 'word-break',
     tests: {
       cases: [
         { args: ['leetcode', ['leet', 'code']], expected: true },
@@ -178,6 +184,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function numDecodings(s) {\n  if (!s || s[0] === "0") return 0;\n  let prev = 1, curr = 1;\n  for (let i = 1; i < s.length; i++) {\n    let count = 0;\n    if (s[i] !== "0") count += curr;\n    const two = Number(s.slice(i - 1, i + 1));\n    if (two >= 10 && two <= 26) count += prev;\n    prev = curr;\n    curr = count;\n  }\n  return curr;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'decode-ways',
     tests: {
       cases: [
         { args: ['12'], expected: 2 },
@@ -205,6 +212,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function longestPalindrome(s) {\n  if (s.length < 2) return s;\n  let bestStart = 0, bestLen = 1;\n  const expand = (l, r) => {\n    while (l >= 0 && r < s.length && s[l] === s[r]) { l--; r++; }\n    const len = r - l - 1;\n    if (len > bestLen) { bestLen = len; bestStart = l + 1; }\n  };\n  for (let i = 0; i < s.length; i++) {\n    expand(i, i);\n    expand(i, i + 1);\n  }\n  return s.slice(bestStart, bestStart + bestLen);\n}',
     complexity: 'O(n^2) time, O(1) space.',
+    leetcode: 'longest-palindromic-substring',
     tests: {
       cases: [
         { args: ['babad'], expected: 'bab' },
@@ -228,6 +236,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function uniquePaths(m, n) {\n  let row = new Array(n).fill(1);\n  for (let r = 1; r < m; r++) {\n    for (let c = 1; c < n; c++) row[c] += row[c - 1];\n  }\n  return row[n - 1];\n}',
     complexity: 'O(m*n) time, O(n) space.',
+    leetcode: 'unique-paths',
     tests: {
       cases: [
         { args: [3, 7], expected: 28 },
@@ -254,6 +263,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function longestCommonSubsequence(text1, text2) {\n  const m = text1.length, n = text2.length;\n  let prev = new Array(n + 1).fill(0);\n  for (let i = 1; i <= m; i++) {\n    const curr = new Array(n + 1).fill(0);\n    for (let j = 1; j <= n; j++) {\n      curr[j] = text1[i - 1] === text2[j - 1]\n        ? prev[j - 1] + 1\n        : Math.max(prev[j], curr[j - 1]);\n    }\n    prev = curr;\n  }\n  return prev[n];\n}',
     complexity: 'O(m*n) time, O(n) space.',
+    leetcode: 'longest-common-subsequence',
     tests: {
       cases: [
         { args: ['abcde', 'ace'], expected: 3 },
@@ -281,6 +291,7 @@ export const dpProblems: ProblemSeed[] = [
     solution:
       'function minDistance(word1, word2) {\n  const m = word1.length, n = word2.length;\n  let prev = Array.from({ length: n + 1 }, (_, j) => j);\n  for (let i = 1; i <= m; i++) {\n    const curr = new Array(n + 1).fill(0);\n    curr[0] = i;\n    for (let j = 1; j <= n; j++) {\n      curr[j] = word1[i - 1] === word2[j - 1]\n        ? prev[j - 1]\n        : 1 + Math.min(prev[j], curr[j - 1], prev[j - 1]);\n    }\n    prev = curr;\n  }\n  return prev[n];\n}',
     complexity: 'O(m*n) time, O(n) space.',
+    leetcode: 'edit-distance',
     tests: {
       cases: [
         { args: ['horse', 'ros'], expected: 3 },

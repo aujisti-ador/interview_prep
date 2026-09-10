@@ -58,12 +58,77 @@ const SECTION_LABELS: Record<string, { label: string; blurb: string; order: numb
   },
 };
 
+interface LibraryTerm {
+  term: string;
+  meaning: string;
+}
+
 interface LibraryFile {
   path: string;
   name: string;
   title: string;
   bytes: number;
   headings: number;
+  /** Estimated reading time at ~200 wpm, so the card can say what it costs you. */
+  readingMinutes: number;
+  /** One line describing the guide, lifted from its own opening. */
+  blurb: string;
+  /** Top-level `## ` section names, for the "what is in here" preview. */
+  sections: string[];
+  /** Parsed from the guide's "Key terms in this guide" table. */
+  terms: LibraryTerm[];
+}
+
+/** Strip markdown emphasis/links so a heading or term reads as plain text. */
+function plain(s: string): string {
+  return s
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/[*_`]/g, '')
+    .trim();
+}
+
+/**
+ * The first sentence that actually says something.
+ *
+ * Guides open with a blockquote intro, then "In 60 seconds", then a numbered
+ * list. The first numbered point is the most informative single line, so
+ * prefer it and fall back to the blockquote.
+ */
+function extractBlurb(markdown: string): string {
+  const lines = markdown.split('\n');
+  const sixty = lines.findIndex((l) => /^##\s+In 60 seconds/i.test(l));
+  if (sixty !== -1) {
+    for (let i = sixty + 1; i < Math.min(sixty + 14, lines.length); i++) {
+      const m = lines[i].match(/^\s*1\.\s+(.*)$/);
+      if (m) {
+        // The point may wrap over the following indented lines.
+        let out = m[1];
+        for (let j = i + 1; j < lines.length && /^\s{2,}\S/.test(lines[j]); j++) out += ' ' + lines[j].trim();
+        return plain(out).replace(/\s+/g, ' ').slice(0, 240);
+      }
+    }
+  }
+  for (const l of lines) {
+    const m = l.match(/^>\s*(?:\*\*)?(.+)$/);
+    if (m && m[1].length > 40) return plain(m[1]).replace(/\s+/g, ' ').slice(0, 240);
+  }
+  return '';
+}
+
+/** Rows of the "Key terms in this guide" table, if the guide has one. */
+function extractTerms(markdown: string): LibraryTerm[] {
+  const lines = markdown.split('\n');
+  const start = lines.findIndex((l) => /^##\s+Key terms/i.test(l));
+  if (start === -1) return [];
+  const out: LibraryTerm[] = [];
+  for (let i = start + 1; i < lines.length; i++) {
+    const l = lines[i];
+    if (l.startsWith('## ')) break;
+    if (/^\|\s*-+/.test(l.replace(/\s/g, '')) || /^\|\s*Term\s*\|/i.test(l)) continue;
+    const m = l.match(/^\|\s*(.+?)\s*\|\s*(.+?)\s*\|\s*$/);
+    if (m) out.push({ term: plain(m[1]), meaning: plain(m[2]) });
+  }
+  return out;
 }
 
 /** True if any segment of a root-relative path is one `walk` refuses to descend into. */
@@ -144,12 +209,21 @@ export class LibraryController {
       const body = await fs.readFile(full, 'utf8');
       const rel = relative(REPO_ROOT, full);
       const name = rel.split(sep).pop()!;
+      // Section list excludes the scaffolding every guide now carries, so the
+      // preview shows subject matter rather than "In 60 seconds, Key terms".
+      const sections = (body.match(/^##\s+(.+)$/gm) ?? [])
+        .map((h) => plain(h.replace(/^##\s+/, '')))
+        .filter((h) => !/^(in 60 seconds|key terms|table of contents|related|glossary)/i.test(h));
       files.push({
         path: rel.split(sep).join('/'),
         name,
         title: extractTitle(body, name),
         bytes: Buffer.byteLength(body),
         headings: (body.match(/^##\s+/gm) ?? []).length,
+        readingMinutes: Math.max(1, Math.round(body.split(/\s+/).length / 200)),
+        blurb: extractBlurb(body),
+        sections,
+        terms: extractTerms(body),
       });
     }
     files.sort((a, b) => a.path.localeCompare(b.path));
@@ -178,6 +252,51 @@ export class LibraryController {
         files: items,
       }))
       .sort((a, b) => a.order - b.order || a.dir.localeCompare(b.dir));
+  }
+
+  /**
+   * The topic index.
+   *
+   * Built from the "Key terms in this guide" table every guide carries, so it
+   * is a real cross-corpus glossary rather than a hand-maintained list: one
+   * entry per term, the plainest definition found for it, and every guide that
+   * covers it. Answering "where is backpressure explained?" is one lookup
+   * instead of a full-text search that returns forty passing mentions.
+   */
+  @Get('topics')
+  async topics(@Query('q') q?: string) {
+    const files = await this.allFiles();
+    const index = new Map<
+      string,
+      { term: string; meaning: string; guides: { path: string; title: string }[] }
+    >();
+
+    for (const file of files) {
+      for (const { term, meaning } of file.terms) {
+        const key = term.toLowerCase();
+        const entry = index.get(key) ?? { term, meaning, guides: [] };
+        // Keep the shortest definition — the terse one is usually the clearest,
+        // and a term defined in several guides gets several attempts at it.
+        if (meaning.length < entry.meaning.length) entry.meaning = meaning;
+        if (!entry.guides.some((g) => g.path === file.path)) {
+          entry.guides.push({ path: file.path, title: file.title });
+        }
+        index.set(key, entry);
+      }
+    }
+
+    let topics = [...index.values()];
+    const query = (q ?? '').trim().toLowerCase();
+    if (query) {
+      topics = topics.filter(
+        (t) => t.term.toLowerCase().includes(query) || t.meaning.toLowerCase().includes(query),
+      );
+    }
+
+    // Terms covered by several guides first — those are the load-bearing
+    // concepts, and they are what someone browsing wants to see.
+    topics.sort((a, b) => b.guides.length - a.guides.length || a.term.localeCompare(b.term));
+    return { query, total: topics.length, topics };
   }
 
   /** Full-text search across every guide. Beats Ctrl+F, which only sees one file. */

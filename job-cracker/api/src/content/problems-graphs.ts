@@ -22,6 +22,7 @@ export const graphProblems: ProblemSeed[] = [
       'function numIslands(grid) {\n  if (!grid.length) return 0;\n  const rows = grid.length, cols = grid[0].length;\n  let count = 0;\n  const sink = (r, c) => {\n    const stack = [[r, c]];\n    while (stack.length) {\n      const [cr, cc] = stack.pop();\n      if (cr < 0 || cc < 0 || cr >= rows || cc >= cols || grid[cr][cc] !== "1") continue;\n      grid[cr][cc] = "0";\n      stack.push([cr + 1, cc], [cr - 1, cc], [cr, cc + 1], [cr, cc - 1]);\n    }\n  };\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (grid[r][c] === "1") { count++; sink(r, c); }\n    }\n  }\n  return count;\n}',
     complexity: 'O(m*n) time, O(m*n) worst-case stack space.',
     companies: ['Very common in remote screens'],
+    leetcode: 'number-of-islands',
     tests: {
       cases: [
         {
@@ -50,6 +51,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function maxAreaOfIsland(grid) {\n  const rows = grid.length, cols = grid[0].length;\n  let best = 0;\n  const fill = (r, c) => {\n    if (r < 0 || c < 0 || r >= rows || c >= cols || grid[r][c] !== 1) return 0;\n    grid[r][c] = 0;\n    return 1 + fill(r + 1, c) + fill(r - 1, c) + fill(r, c + 1) + fill(r, c - 1);\n  };\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (grid[r][c] === 1) best = Math.max(best, fill(r, c));\n    }\n  }\n  return best;\n}',
     complexity: 'O(m*n) time and space.',
+    leetcode: 'max-area-of-island',
     tests: {
       cases: [
         { args: [[[1, 1, 0, 0], [1, 0, 0, 1], [0, 0, 1, 1]]], expected: 3 },
@@ -76,6 +78,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function cloneGraph(node) {\n  if (!node) return null;\n  const seen = new Map();\n  const dfs = (n) => {\n    if (seen.has(n)) return seen.get(n);\n    const copy = { val: n.val, neighbors: [] };\n    seen.set(n, copy);\n    for (const nb of n.neighbors) copy.neighbors.push(dfs(nb));\n    return copy;\n  };\n  return dfs(node);\n}',
     complexity: 'O(V + E) time, O(V) space.',
+    leetcode: 'clone-graph',
     tests: {
       argTypes: ['graph'],
       returnType: 'graph',
@@ -104,6 +107,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function orangesRotting(grid) {\n  const rows = grid.length, cols = grid[0].length;\n  let fresh = 0;\n  let queue = [];\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (grid[r][c] === 1) fresh++;\n      else if (grid[r][c] === 2) queue.push([r, c]);\n    }\n  }\n  let minutes = 0;\n  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];\n  while (queue.length && fresh > 0) {\n    const next = [];\n    for (const [r, c] of queue) {\n      for (const [dr, dc] of dirs) {\n        const nr = r + dr, nc = c + dc;\n        if (nr < 0 || nc < 0 || nr >= rows || nc >= cols || grid[nr][nc] !== 1) continue;\n        grid[nr][nc] = 2;\n        fresh--;\n        next.push([nr, nc]);\n      }\n    }\n    queue = next;\n    minutes++;\n  }\n  return fresh === 0 ? minutes : -1;\n}',
     complexity: 'O(m*n) time and space.',
+    leetcode: 'rotting-oranges',
     tests: {
       cases: [
         { args: [[[2, 1, 1], [1, 1, 0], [0, 1, 1]]], expected: 4 },
@@ -130,6 +134,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function pacificAtlantic(heights) {\n  if (!heights.length) return [];\n  const rows = heights.length, cols = heights[0].length;\n  const pac = Array.from({ length: rows }, () => new Array(cols).fill(false));\n  const atl = Array.from({ length: rows }, () => new Array(cols).fill(false));\n  const dirs = [[1, 0], [-1, 0], [0, 1], [0, -1]];\n  const dfs = (r, c, seen) => {\n    seen[r][c] = true;\n    for (const [dr, dc] of dirs) {\n      const nr = r + dr, nc = c + dc;\n      if (nr < 0 || nc < 0 || nr >= rows || nc >= cols) continue;\n      if (seen[nr][nc] || heights[nr][nc] < heights[r][c]) continue;\n      dfs(nr, nc, seen);\n    }\n  };\n  for (let c = 0; c < cols; c++) { dfs(0, c, pac); dfs(rows - 1, c, atl); }\n  for (let r = 0; r < rows; r++) { dfs(r, 0, pac); dfs(r, cols - 1, atl); }\n  const out = [];\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (pac[r][c] && atl[r][c]) out.push([r, c]);\n    }\n  }\n  return out;\n}',
     complexity: 'O(m*n) time and space.',
+    leetcode: 'pacific-atlantic-water-flow',
     tests: {
       compare: 'unorderedOuter',
       cases: [
@@ -159,6 +164,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function canFinish(numCourses, prerequisites) {\n  const adj = Array.from({ length: numCourses }, () => []);\n  const indeg = new Array(numCourses).fill(0);\n  for (const [a, b] of prerequisites) {\n    adj[b].push(a);\n    indeg[a]++;\n  }\n  const queue = [];\n  for (let i = 0; i < numCourses; i++) if (indeg[i] === 0) queue.push(i);\n  let taken = 0;\n  while (queue.length) {\n    const n = queue.pop();\n    taken++;\n    for (const nb of adj[n]) {\n      if (--indeg[nb] === 0) queue.push(nb);\n    }\n  }\n  return taken === numCourses;\n}',
     complexity: 'O(V + E) time and space.',
+    leetcode: 'course-schedule',
     tests: {
       cases: [
         { args: [2, [[1, 0]]], expected: true },
@@ -183,6 +189,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function findOrder(numCourses, prerequisites) {\n  const adj = Array.from({ length: numCourses }, () => []);\n  const indeg = new Array(numCourses).fill(0);\n  for (const [a, b] of prerequisites) {\n    adj[b].push(a);\n    indeg[a]++;\n  }\n  const queue = [];\n  for (let i = 0; i < numCourses; i++) if (indeg[i] === 0) queue.push(i);\n  const order = [];\n  while (queue.length) {\n    const n = queue.shift();\n    order.push(n);\n    for (const nb of adj[n]) {\n      if (--indeg[nb] === 0) queue.push(nb);\n    }\n  }\n  return order.length === numCourses ? order : [];\n}',
     complexity: 'O(V + E) time and space.',
+    leetcode: 'course-schedule-ii',
     tests: {
       compare: 'oneOf',
       cases: [
@@ -211,6 +218,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function networkDelayTime(times, n, k) {\n  const adj = new Map();\n  for (const [u, v, w] of times) {\n    if (!adj.has(u)) adj.set(u, []);\n    adj.get(u).push([v, w]);\n  }\n  const dist = new Map();\n  // Small n, so a linear-scan priority queue is fine and easy to defend.\n  const pq = [[0, k]];\n  while (pq.length) {\n    pq.sort((a, b) => a[0] - b[0]);\n    const [d, node] = pq.shift();\n    if (dist.has(node)) continue;\n    dist.set(node, d);\n    for (const [nb, w] of adj.get(node) || []) {\n      if (!dist.has(nb)) pq.push([d + w, nb]);\n    }\n  }\n  if (dist.size !== n) return -1;\n  return Math.max(...dist.values());\n}',
     complexity: 'O(E log V) with a real heap; the linear-scan queue here is O(E * V).',
+    leetcode: 'network-delay-time',
     tests: {
       cases: [
         { args: [[[2, 1, 1], [2, 3, 1], [3, 4, 1]], 4, 2], expected: 2 },
@@ -233,6 +241,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function countComponents(n, edges) {\n  const parent = Array.from({ length: n }, (_, i) => i);\n  const find = (x) => {\n    while (parent[x] !== x) {\n      parent[x] = parent[parent[x]];\n      x = parent[x];\n    }\n    return x;\n  };\n  let components = n;\n  for (const [a, b] of edges) {\n    const ra = find(a), rb = find(b);\n    if (ra !== rb) { parent[ra] = rb; components--; }\n  }\n  return components;\n}',
     complexity: 'Near O(E * α(n)) time, O(n) space.',
+    leetcode: 'number-of-connected-components',
     tests: {
       cases: [
         { args: [5, [[0, 1], [1, 2], [3, 4]]], expected: 2 },
@@ -260,6 +269,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function subsets(nums) {\n  const out = [];\n  const path = [];\n  const backtrack = (start) => {\n    out.push([...path]);\n    for (let i = start; i < nums.length; i++) {\n      path.push(nums[i]);\n      backtrack(i + 1);\n      path.pop();\n    }\n  };\n  backtrack(0);\n  return out;\n}',
     complexity: 'O(n * 2^n) time, O(n) recursion depth.',
+    leetcode: 'subsets',
     tests: {
       compare: 'unorderedNested',
       cases: [
@@ -286,6 +296,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function combinationSum(candidates, target) {\n  const out = [];\n  const path = [];\n  const backtrack = (start, remaining) => {\n    if (remaining === 0) { out.push([...path]); return; }\n    if (remaining < 0) return;\n    for (let i = start; i < candidates.length; i++) {\n      path.push(candidates[i]);\n      backtrack(i, remaining - candidates[i]);\n      path.pop();\n    }\n  };\n  backtrack(0, target);\n  return out;\n}',
     complexity: 'Exponential in the worst case; bounded by target / min(candidates) depth.',
+    leetcode: 'combination-sum',
     tests: {
       compare: 'unorderedNested',
       cases: [
@@ -309,6 +320,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function permute(nums) {\n  const out = [];\n  const path = [];\n  const used = new Array(nums.length).fill(false);\n  const backtrack = () => {\n    if (path.length === nums.length) { out.push([...path]); return; }\n    for (let i = 0; i < nums.length; i++) {\n      if (used[i]) continue;\n      used[i] = true;\n      path.push(nums[i]);\n      backtrack();\n      path.pop();\n      used[i] = false;\n    }\n  };\n  backtrack();\n  return out;\n}',
     complexity: 'O(n * n!) time, O(n) recursion depth.',
+    leetcode: 'permutations',
     tests: {
       compare: 'unorderedOuter',
       cases: [
@@ -339,6 +351,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function exist(board, word) {\n  const rows = board.length, cols = board[0].length;\n  const dfs = (r, c, i) => {\n    if (i === word.length) return true;\n    if (r < 0 || c < 0 || r >= rows || c >= cols || board[r][c] !== word[i]) return false;\n    const tmp = board[r][c];\n    board[r][c] = "#";\n    const found =\n      dfs(r + 1, c, i + 1) || dfs(r - 1, c, i + 1) || dfs(r, c + 1, i + 1) || dfs(r, c - 1, i + 1);\n    board[r][c] = tmp;\n    return found;\n  };\n  for (let r = 0; r < rows; r++) {\n    for (let c = 0; c < cols; c++) {\n      if (dfs(r, c, 0)) return true;\n    }\n  }\n  return false;\n}',
     complexity: 'O(m * n * 4^L) time, O(L) recursion depth.',
+    leetcode: 'word-search',
     tests: {
       cases: [
         { args: [[['A', 'B', 'C', 'E'], ['S', 'F', 'C', 'S'], ['A', 'D', 'E', 'E']], 'ABCCED'], expected: true },
@@ -361,6 +374,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function partition(s) {\n  const out = [];\n  const path = [];\n  const isPal = (l, r) => {\n    while (l < r) {\n      if (s[l] !== s[r]) return false;\n      l++; r--;\n    }\n    return true;\n  };\n  const backtrack = (start) => {\n    if (start === s.length) { out.push([...path]); return; }\n    for (let end = start; end < s.length; end++) {\n      if (!isPal(start, end)) continue;\n      path.push(s.slice(start, end + 1));\n      backtrack(end + 1);\n      path.pop();\n    }\n  };\n  backtrack(0);\n  return out;\n}',
     complexity: 'O(n * 2^n) time.',
+    leetcode: 'palindrome-partitioning',
     tests: {
       compare: 'unorderedOuter',
       cases: [
@@ -386,6 +400,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function insertInterval(intervals, newInterval) {\n  const out = [];\n  let [start, end] = newInterval;\n  let i = 0;\n  while (i < intervals.length && intervals[i][1] < start) out.push(intervals[i++]);\n  while (i < intervals.length && intervals[i][0] <= end) {\n    start = Math.min(start, intervals[i][0]);\n    end = Math.max(end, intervals[i][1]);\n    i++;\n  }\n  out.push([start, end]);\n  while (i < intervals.length) out.push(intervals[i++]);\n  return out;\n}',
     complexity: 'O(n) time, O(n) space.',
+    leetcode: 'insert-interval',
     tests: {
       cases: [
         { args: [[[1, 3], [6, 9]], [2, 5]], expected: [[1, 5], [6, 9]] },
@@ -408,6 +423,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function mergeIntervals(intervals) {\n  if (intervals.length === 0) return [];\n  const sorted = [...intervals].sort((a, b) => a[0] - b[0]);\n  const out = [sorted[0].slice()];\n  for (let i = 1; i < sorted.length; i++) {\n    const last = out[out.length - 1];\n    if (sorted[i][0] <= last[1]) last[1] = Math.max(last[1], sorted[i][1]);\n    else out.push(sorted[i].slice());\n  }\n  return out;\n}',
     complexity: 'O(n log n) time, O(n) space.',
+    leetcode: 'merge-intervals',
     tests: {
       cases: [
         { args: [[[1, 3], [2, 6], [8, 10], [15, 18]]], expected: [[1, 6], [8, 10], [15, 18]] },
@@ -434,6 +450,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function eraseOverlapIntervals(intervals) {\n  if (intervals.length === 0) return 0;\n  const sorted = [...intervals].sort((a, b) => a[1] - b[1]);\n  let kept = 1;\n  let end = sorted[0][1];\n  for (let i = 1; i < sorted.length; i++) {\n    if (sorted[i][0] >= end) { kept++; end = sorted[i][1]; }\n  }\n  return intervals.length - kept;\n}',
     complexity: 'O(n log n) time, O(1) extra space.',
+    leetcode: 'non-overlapping-intervals',
     tests: {
       cases: [
         { args: [[[1, 2], [2, 3], [3, 4], [1, 3]]], expected: 1 },
@@ -459,6 +476,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function minMeetingRooms(intervals) {\n  const starts = intervals.map((i) => i[0]).sort((a, b) => a - b);\n  const ends = intervals.map((i) => i[1]).sort((a, b) => a - b);\n  let rooms = 0, best = 0, e = 0;\n  for (let s = 0; s < starts.length; s++) {\n    while (e < ends.length && ends[e] <= starts[s]) { rooms--; e++; }\n    rooms++;\n    best = Math.max(best, rooms);\n  }\n  return best;\n}',
     complexity: 'O(n log n) time, O(n) space.',
+    leetcode: 'meeting-rooms-ii',
     tests: {
       cases: [
         { args: [[[0, 30], [5, 10], [15, 20]]], expected: 2 },
@@ -487,6 +505,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function maxSubArray(nums) {\n  let best = -Infinity, curr = 0;\n  for (const n of nums) {\n    curr = Math.max(n, curr + n);\n    best = Math.max(best, curr);\n  }\n  return best;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'maximum-subarray',
     tests: {
       cases: [
         { args: [[-2, 1, -3, 4, -1, 2, 1, -5, 4]], expected: 6 },
@@ -514,6 +533,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function canJump(nums) {\n  let reach = 0;\n  for (let i = 0; i < nums.length; i++) {\n    if (i > reach) return false;\n    reach = Math.max(reach, i + nums[i]);\n  }\n  return true;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'jump-game',
     tests: {
       cases: [
         { args: [[2, 3, 1, 1, 4]], expected: true },
@@ -541,6 +561,7 @@ export const graphProblems: ProblemSeed[] = [
     solution:
       'function canCompleteCircuit(gas, cost) {\n  let total = 0, tank = 0, start = 0;\n  for (let i = 0; i < gas.length; i++) {\n    const diff = gas[i] - cost[i];\n    total += diff;\n    tank += diff;\n    if (tank < 0) { start = i + 1; tank = 0; }\n  }\n  return total < 0 ? -1 : start;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'gas-station',
     tests: {
       cases: [
         { args: [[1, 2, 3, 4, 5], [3, 4, 5, 1, 2]], expected: 3 },

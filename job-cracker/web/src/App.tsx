@@ -18,7 +18,7 @@ import Library from './pages/Library';
 
 const NAV = [
   { to: '/', label: 'Today', end: true },
-  { to: '/plan', label: '30-day plan' },
+  { to: '/plan', label: 'Plan' },
   { to: '/library', label: 'Library' },
   { to: '/practice', label: 'Practice' },
   { to: '/quiz', label: 'Quiz' },
@@ -42,7 +42,7 @@ function Sidebar() {
     <aside className="flex w-60 shrink-0 flex-col border-r border-ink-850 bg-ink-900/50">
       <div className="border-b border-ink-850 px-5 py-5">
         <div className="text-sm font-semibold tracking-tight text-ink-100">Job Cracker</div>
-        <div className="mt-0.5 text-xs text-ink-500">Senior / Lead Backend sprint</div>
+        <div className="mt-0.5 text-xs text-ink-500">Senior / Lead Backend prep</div>
       </div>
 
       {stats && (
@@ -65,7 +65,7 @@ function Sidebar() {
             />
           </div>
           <div className="mt-2 text-xs text-ink-500">
-            Day {stats.dayNumber} of 30 · {stats.daysRemaining} left
+            Session {stats.sessionNumber} of {stats.sessionsTotal} · {stats.sessionsDone} complete
           </div>
         </div>
       )}

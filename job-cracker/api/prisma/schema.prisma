@@ -75,6 +75,7 @@ model Problem {
   solution     String
   complexity   String   @default("")
   companies    String[]
+  leetcode     String   @default("") // LeetCode slug, empty for Node practicals
   tests        Json
   status       ProblemStatus?
   attempts     ProblemAttempt[]

@@ -26,8 +26,9 @@ export const api = {
 
 export interface Stats {
   readiness: number;
-  dayNumber: number;
-  daysRemaining: number;
+  sessionNumber: number;
+  sessionsTotal: number;
+  sessionsDone: number;
   components: { dsa: number; design: number; recall: number; narrative: number; plan: number };
   counts: {
     tasksDone: number;
@@ -98,6 +99,8 @@ export interface Problem {
   solution: string;
   complexity: string;
   companies: string[];
+  /** LeetCode slug. Empty for the Node Practical set, which has no equivalent. */
+  leetcode: string;
   tests: any;
   status?: { status: string; savedCode: string; confidence: number; timesSolved: number } | null;
 }

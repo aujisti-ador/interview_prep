@@ -206,6 +206,20 @@ export default function ProblemPage() {
         <h1 className="text-xl font-semibold text-ink-100">{data.title}</h1>
         <Chip tone={difficultyTone(data.difficulty) as any}>{data.difficulty}</Chip>
         <Chip>{data.pattern}</Chip>
+        {data.leetcode && (
+          // The same problem on LeetCode: a much larger hidden test set, an
+          // editorial, and the discussion thread. Worth solving in both places.
+          <a
+            href={`https://leetcode.com/problems/${data.leetcode}/`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-ink-700 px-2 py-0.5
+                       text-[11px] font-medium text-ink-300 transition hover:border-warn hover:text-warn"
+            title="Open this problem on LeetCode"
+          >
+            LeetCode ↗
+          </a>
+        )}
         {data.status?.status && data.status.status !== 'todo' && (
           <Chip tone={data.status.status === 'todo' ? 'neutral' : 'good'}>{data.status.status}</Chip>
         )}

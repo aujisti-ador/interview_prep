@@ -67,7 +67,7 @@ export default function Progress() {
         right={
           <div className="text-right">
             <div className="text-3xl font-semibold text-ink-100">{s.readiness}%</div>
-            <div className="label">day {s.dayNumber} of 30</div>
+            <div className="label">session {s.sessionNumber} of {s.sessionsTotal}</div>
           </div>
         }
       />

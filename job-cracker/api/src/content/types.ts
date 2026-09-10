@@ -77,6 +77,13 @@ export interface ProblemSeed {
   solution: string;
   complexity?: string;
   companies?: string[];
+  /**
+   * LeetCode problem slug, so the same problem can be drilled there too —
+   * their editorial, discussion and much larger hidden test set are worth
+   * having. Omitted for the Node Practical set, which has no LeetCode
+   * equivalent.
+   */
+  leetcode?: string;
   tests: TestSpec;
 }
 

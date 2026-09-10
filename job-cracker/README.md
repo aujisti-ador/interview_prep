@@ -37,8 +37,8 @@ are taken on your machine.
 | Tab | What it does |
 |---|---|
 | **Today** | The current day of the plan, its tasks, and the hiring-manager note explaining why the day exists |
-| **30-day plan** | All 30 days, 163 tasks, each linked to the guide in this repo it draws on |
-| **Library** | All 59 markdown guides in the repo, readable in the app — full-text search, per-document table of contents, syntax highlighting, and working cross-links between guides |
+| **30-day plan** | All 30 days, 175 tasks, each linked to the guide in this repo it draws on |
+| **Library** | All 74 markdown guides in the repo, readable in the app — full-text search, per-document table of contents, syntax highlighting, and working cross-links between guides |
 | **Practice** | 101 coding problems with real test cases, run in your browser. Timed / weak-pattern / blind / spaced-review session modes |
 | **Quiz** | 136 rapid-recall questions across 21 topics, scored server-side with explanations |
 | **Design** | 18 timed design drills (12 HLD, 4 LLD, 2 architecture) with weighted rubrics you score yourself against |

@@ -9,14 +9,14 @@ const COMPONENT_LABELS: Record<string, { label: string; weight: string; why: str
   design: { label: 'System design', weight: '25%', why: 'Decides senior vs lead' },
   recall: { label: 'Rapid recall', weight: '15%', why: 'Deep-dive rounds' },
   narrative: { label: 'Narrative', weight: '15%', why: 'Behavioral and bar raiser' },
-  plan: { label: 'Plan adherence', weight: '15%', why: 'Consistency compounds' },
+  plan: { label: 'Plan progress', weight: '15%', why: 'Finishing what you start compounds' },
 };
 
 export default function Dashboard() {
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => api.get<Stats>('/stats') });
   const today = useQuery({
     queryKey: ['today'],
-    queryFn: () => api.get<{ dayId: number; elapsedDays: number; day: PlanDay }>('/plan/today'),
+    queryFn: () => api.get<{ dayId: number; sessionNumber: number; totalSessions: number; completedSessions: number; allComplete: boolean; day: PlanDay }>('/plan/today'),
   });
   const due = useQuery({ queryKey: ['due'], queryFn: () => api.get<any[]>('/problems/due') });
   const skills = useQuery({ queryKey: ['skills'], queryFn: () => api.get<Skill[]>('/skills') });

@@ -290,7 +290,7 @@ You have 30 days. This app exists so you never have to ask "what should I do tod
 ## The tabs
 
 - **Today / Plan** — the 30-day trace. Every task links to the relevant guide, and the \`read →\` link opens it right here in the Library.
-- **Library** — all 59 guides in the repo, readable in the app. Full-text search across every file (better than Ctrl+F, which only sees one document), a table of contents per guide, and cross-links between guides that actually navigate.
+- **Library** — all 74 guides in the repo, readable in the app. Full-text search across every file (better than Ctrl+F, which only sees one document), a table of contents per guide, and cross-links between guides that actually navigate.
 - **Practice** — the coding bank. Run your solution against real test cases in the browser. Use *Timed* mode at least twice a week: it is the only mode that simulates an actual assessment.
 - **Quiz** — rapid recall. Cheap, fast, and it exposes the topics you *think* you know.
 - **Design** — timed design drills. Write your answer, then score yourself against the rubric honestly. The rubric is the point; scoring yourself generously wastes the exercise.

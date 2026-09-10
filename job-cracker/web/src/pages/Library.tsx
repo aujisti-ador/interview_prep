@@ -67,7 +67,7 @@ function SearchPanel({ onPick }: { onPick: () => void }) {
         id="library-search"
         type="search"
         className="input text-sm"
-        placeholder="Search all 59 guides…"
+        placeholder="Search all 74 guides…"
         value={term}
         onChange={(e) => setTerm(e.target.value)}
       />

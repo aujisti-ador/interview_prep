@@ -21,22 +21,35 @@ export class PlanController {
     }));
   }
 
+  /**
+   * The session to work on now.
+   *
+   * Progress-driven, not calendar-driven: this is the first session with
+   * unfinished tasks, wherever you happen to be. Missing a day used to shove
+   * you forward past work you had not done, which made the plan a source of
+   * guilt rather than a queue. Now the sequence simply waits for you.
+   */
   @Get('today')
   async today() {
-    const profile = await this.prisma.profile.findUnique({ where: { id: 1 } });
-    const start = profile?.startDate ?? new Date();
-    const startDay = new Date(start);
-    startDay.setHours(0, 0, 0, 0);
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const elapsed = Math.floor((now.getTime() - startDay.getTime()) / 86400000);
-    const dayId = Math.min(30, Math.max(1, elapsed + 1));
-
-    const day = await this.prisma.planDay.findUnique({
-      where: { id: dayId },
+    const days = await this.prisma.planDay.findMany({
+      orderBy: { id: 'asc' },
       include: { tasks: { orderBy: { order: 'asc' }, include: { progress: true } } },
     });
-    return { dayId, elapsedDays: elapsed, day };
+
+    const isDone = (d: (typeof days)[number]) =>
+      d.tasks.length > 0 && d.tasks.every((t) => t.progress?.status === 'done');
+
+    const current = days.find((d) => !isDone(d)) ?? days[days.length - 1];
+    const completedSessions = days.filter(isDone).length;
+
+    return {
+      dayId: current?.id ?? 1,
+      sessionNumber: current?.id ?? 1,
+      totalSessions: days.length,
+      completedSessions,
+      allComplete: completedSessions === days.length,
+      day: current,
+    };
   }
 
   @Get(':id')

@@ -119,19 +119,27 @@ export class MetaController {
       dsaPct * 0.3 + designPct * 0.25 + quizPct * 0.15 + narrativePct * 0.15 + planPct * 0.15,
     );
 
-    const startDate = profile?.startDate ?? new Date();
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dayNumber = Math.min(30, Math.max(1, Math.floor((today.getTime() - start.getTime()) / 86400000) + 1));
+    // Position in the plan is measured by what is finished, not by the
+    // calendar. A day off should not move you forward past work you have
+    // not done. Grouped from `tasks`, which is already loaded with progress.
+    const bySession = new Map<number, { total: number; done: number }>();
+    for (const t of tasks) {
+      const e = bySession.get(t.dayId) ?? { total: 0, done: 0 };
+      e.total += 1;
+      if (t.progress?.status === 'done') e.done += 1;
+      bySession.set(t.dayId, e);
+    }
+    const sessionsTotal = bySession.size;
+    const sessionsDone = [...bySession.values()].filter((e) => e.total > 0 && e.done === e.total).length;
+    const currentSession = Math.min(sessionsTotal, sessionsDone + 1);
 
     const unratedSkills = skills.filter((s) => s.level < 0).length;
 
     return {
       readiness,
-      dayNumber,
-      daysRemaining: Math.max(0, 30 - dayNumber),
+      sessionNumber: currentSession,
+      sessionsTotal,
+      sessionsDone,
       components: {
         dsa: Math.round(dsaPct),
         design: Math.round(designPct),

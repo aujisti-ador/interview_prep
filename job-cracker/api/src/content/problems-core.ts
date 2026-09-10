@@ -23,6 +23,7 @@ export const coreProblems: ProblemSeed[] = [
       'function twoSum(nums, target) {\n  const seen = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const need = target - nums[i];\n    if (seen.has(need)) return [seen.get(need), i];\n    seen.set(nums[i], i);\n  }\n  return [];\n}',
     complexity: 'O(n) time, O(n) space. One pass, hash map of value -> index.',
     companies: ['Almost every OA', 'Pathao', 'Toptal screen'],
+    leetcode: 'two-sum',
     tests: {
       compare: 'unordered',
       cases: [
@@ -47,6 +48,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function containsDuplicate(nums) {\n  const seen = new Set();\n  for (const n of nums) {\n    if (seen.has(n)) return true;\n    seen.add(n);\n  }\n  return false;\n}',
     complexity: 'O(n) time, O(n) space.',
+    leetcode: 'contains-duplicate',
     tests: {
       cases: [
         { args: [[1, 2, 3, 1]], expected: true },
@@ -73,6 +75,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function isAnagram(s, t) {\n  if (s.length !== t.length) return false;\n  const count = new Map();\n  for (const ch of s) count.set(ch, (count.get(ch) || 0) + 1);\n  for (const ch of t) {\n    const c = count.get(ch);\n    if (!c) return false;\n    count.set(ch, c - 1);\n  }\n  return true;\n}',
     complexity: 'O(n) time, O(k) space where k is the alphabet size.',
+    leetcode: 'valid-anagram',
     tests: {
       cases: [
         { args: ['anagram', 'nagaram'], expected: true },
@@ -100,6 +103,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function groupAnagrams(strs) {\n  const groups = new Map();\n  for (const s of strs) {\n    const count = new Array(26).fill(0);\n    for (const ch of s) count[ch.charCodeAt(0) - 97]++;\n    const key = count.join("#");\n    if (!groups.has(key)) groups.set(key, []);\n    groups.get(key).push(s);\n  }\n  return [...groups.values()];\n}',
     complexity: 'O(n * k) time with the count signature, O(n * k) space.',
+    leetcode: 'group-anagrams',
     tests: {
       compare: 'unorderedNested',
       cases: [
@@ -126,6 +130,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function topKFrequent(nums, k) {\n  const freq = new Map();\n  for (const n of nums) freq.set(n, (freq.get(n) || 0) + 1);\n  const buckets = Array.from({ length: nums.length + 1 }, () => []);\n  for (const [val, c] of freq) buckets[c].push(val);\n  const out = [];\n  for (let c = buckets.length - 1; c >= 0 && out.length < k; c--) {\n    for (const v of buckets[c]) {\n      out.push(v);\n      if (out.length === k) break;\n    }\n  }\n  return out;\n}',
     complexity: 'O(n) time, O(n) space using bucket sort on frequency.',
+    leetcode: 'top-k-frequent-elements',
     tests: {
       compare: 'unordered',
       cases: [
@@ -153,6 +158,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function productExceptSelf(nums) {\n  const n = nums.length;\n  const out = new Array(n).fill(1);\n  let prefix = 1;\n  for (let i = 0; i < n; i++) {\n    out[i] = prefix;\n    prefix *= nums[i];\n  }\n  let suffix = 1;\n  for (let i = n - 1; i >= 0; i--) {\n    out[i] *= suffix;\n    suffix *= nums[i];\n  }\n  return out;\n}',
     complexity: 'O(n) time, O(1) extra space (output array excluded).',
+    leetcode: 'product-of-array-except-self',
     tests: {
       cases: [
         { args: [[1, 2, 3, 4]], expected: [24, 12, 8, 6] },
@@ -179,6 +185,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function longestConsecutive(nums) {\n  const set = new Set(nums);\n  let best = 0;\n  for (const n of set) {\n    if (set.has(n - 1)) continue;\n    let len = 1;\n    while (set.has(n + len)) len++;\n    if (len > best) best = len;\n  }\n  return best;\n}',
     complexity: 'O(n) time, O(n) space. Each element is visited at most twice.',
+    leetcode: 'longest-consecutive-sequence',
     tests: {
       cases: [
         { args: [[100, 4, 200, 1, 3, 2]], expected: 4 },
@@ -208,6 +215,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function isPalindrome(s) {\n  const ok = (c) => /[a-z0-9]/i.test(c);\n  let l = 0, r = s.length - 1;\n  while (l < r) {\n    while (l < r && !ok(s[l])) l++;\n    while (l < r && !ok(s[r])) r--;\n    if (s[l].toLowerCase() !== s[r].toLowerCase()) return false;\n    l++; r--;\n  }\n  return true;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'valid-palindrome',
     tests: {
       cases: [
         { args: ['A man, a plan, a canal: Panama'], expected: true },
@@ -235,6 +243,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function twoSumII(numbers, target) {\n  let l = 0, r = numbers.length - 1;\n  while (l < r) {\n    const sum = numbers[l] + numbers[r];\n    if (sum === target) return [l + 1, r + 1];\n    if (sum < target) l++;\n    else r--;\n  }\n  return [];\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'two-sum-ii-input-array-is-sorted',
     tests: {
       cases: [
         { args: [[2, 7, 11, 15], 9], expected: [1, 2] },
@@ -261,6 +270,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function threeSum(nums) {\n  const a = [...nums].sort((x, y) => x - y);\n  const out = [];\n  for (let i = 0; i < a.length - 2; i++) {\n    if (a[i] > 0) break;\n    if (i > 0 && a[i] === a[i - 1]) continue;\n    let l = i + 1, r = a.length - 1;\n    while (l < r) {\n      const sum = a[i] + a[l] + a[r];\n      if (sum < 0) l++;\n      else if (sum > 0) r--;\n      else {\n        out.push([a[i], a[l], a[r]]);\n        l++; r--;\n        while (l < r && a[l] === a[l - 1]) l++;\n        while (l < r && a[r] === a[r + 1]) r--;\n      }\n    }\n  }\n  return out;\n}',
     complexity: 'O(n^2) time, O(1) extra space beyond the sort.',
+    leetcode: '3sum',
     tests: {
       compare: 'unorderedNested',
       cases: [
@@ -289,6 +299,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function maxArea(height) {\n  let l = 0, r = height.length - 1, best = 0;\n  while (l < r) {\n    const area = Math.min(height[l], height[r]) * (r - l);\n    if (area > best) best = area;\n    if (height[l] < height[r]) l++;\n    else r--;\n  }\n  return best;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'container-with-most-water',
     tests: {
       cases: [
         { args: [[1, 8, 6, 2, 5, 4, 8, 3, 7]], expected: 49 },
@@ -315,6 +326,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function trap(height) {\n  if (height.length === 0) return 0;\n  let l = 0, r = height.length - 1;\n  let leftMax = height[l], rightMax = height[r], total = 0;\n  while (l < r) {\n    if (leftMax < rightMax) {\n      l++;\n      leftMax = Math.max(leftMax, height[l]);\n      total += leftMax - height[l];\n    } else {\n      r--;\n      rightMax = Math.max(rightMax, height[r]);\n      total += rightMax - height[r];\n    }\n  }\n  return total;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'trapping-rain-water',
     tests: {
       cases: [
         { args: [[0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1]], expected: 6 },
@@ -341,6 +353,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function maxProfit(prices) {\n  let min = Infinity, best = 0;\n  for (const p of prices) {\n    if (p < min) min = p;\n    else if (p - min > best) best = p - min;\n  }\n  return best;\n}',
     complexity: 'O(n) time, O(1) space.',
+    leetcode: 'best-time-to-buy-and-sell-stock',
     tests: {
       cases: [
         { args: [[7, 1, 5, 3, 6, 4]], expected: 5 },
@@ -367,6 +380,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function lengthOfLongestSubstring(s) {\n  const last = new Map();\n  let left = 0, best = 0;\n  for (let r = 0; r < s.length; r++) {\n    const ch = s[r];\n    if (last.has(ch) && last.get(ch) >= left) left = last.get(ch) + 1;\n    last.set(ch, r);\n    best = Math.max(best, r - left + 1);\n  }\n  return best;\n}',
     complexity: 'O(n) time, O(k) space.',
+    leetcode: 'longest-substring-without-repeating-characters',
     tests: {
       cases: [
         { args: ['abcabcbb'], expected: 3 },
@@ -395,6 +409,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function characterReplacement(s, k) {\n  const count = new Map();\n  let left = 0, maxCount = 0, best = 0;\n  for (let r = 0; r < s.length; r++) {\n    count.set(s[r], (count.get(s[r]) || 0) + 1);\n    maxCount = Math.max(maxCount, count.get(s[r]));\n    while (r - left + 1 - maxCount > k) {\n      count.set(s[left], count.get(s[left]) - 1);\n      left++;\n    }\n    best = Math.max(best, r - left + 1);\n  }\n  return best;\n}',
     complexity: 'O(n) time, O(26) space.',
+    leetcode: 'longest-repeating-character-replacement',
     tests: {
       cases: [
         { args: ['ABAB', 2], expected: 4 },
@@ -421,6 +436,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function checkInclusion(s1, s2) {\n  if (s1.length > s2.length) return false;\n  const need = new Array(26).fill(0);\n  const win = new Array(26).fill(0);\n  const idx = (c) => c.charCodeAt(0) - 97;\n  for (let i = 0; i < s1.length; i++) {\n    need[idx(s1[i])]++;\n    win[idx(s2[i])]++;\n  }\n  const same = () => need.every((v, i) => v === win[i]);\n  if (same()) return true;\n  for (let r = s1.length; r < s2.length; r++) {\n    win[idx(s2[r])]++;\n    win[idx(s2[r - s1.length])]--;\n    if (same()) return true;\n  }\n  return false;\n}',
     complexity: 'O(26n) time, O(26) space.',
+    leetcode: 'permutation-in-string',
     tests: {
       cases: [
         { args: ['ab', 'eidbaooo'], expected: true },
@@ -448,6 +464,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function minWindow(s, t) {\n  if (!t || !s || s.length < t.length) return "";\n  const need = new Map();\n  for (const c of t) need.set(c, (need.get(c) || 0) + 1);\n  let missing = t.length, left = 0, bestLen = Infinity, bestStart = 0;\n  for (let r = 0; r < s.length; r++) {\n    const c = s[r];\n    if (need.has(c)) {\n      if (need.get(c) > 0) missing--;\n      need.set(c, need.get(c) - 1);\n    }\n    while (missing === 0) {\n      if (r - left + 1 < bestLen) { bestLen = r - left + 1; bestStart = left; }\n      const lc = s[left];\n      if (need.has(lc)) {\n        need.set(lc, need.get(lc) + 1);\n        if (need.get(lc) > 0) missing++;\n      }\n      left++;\n    }\n  }\n  return bestLen === Infinity ? "" : s.slice(bestStart, bestStart + bestLen);\n}',
     complexity: 'O(n + m) time, O(m) space.',
+    leetcode: 'minimum-window-substring',
     tests: {
       cases: [
         { args: ['ADOBECODEBANC', 'ABC'], expected: 'BANC' },
@@ -474,6 +491,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function isValidParentheses(s) {\n  const pairs = { ")": "(", "]": "[", "}": "{" };\n  const stack = [];\n  for (const ch of s) {\n    if (ch in pairs) {\n      if (stack.pop() !== pairs[ch]) return false;\n    } else {\n      stack.push(ch);\n    }\n  }\n  return stack.length === 0;\n}',
     complexity: 'O(n) time, O(n) space.',
+    leetcode: 'valid-parentheses',
     tests: {
       cases: [
         { args: ['()'], expected: true },
@@ -504,6 +522,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'class MinStack {\n  constructor() {\n    this.stack = [];\n    this.mins = [];\n  }\n  push(val) {\n    this.stack.push(val);\n    const m = this.mins.length === 0 ? val : Math.min(val, this.mins[this.mins.length - 1]);\n    this.mins.push(m);\n  }\n  pop() {\n    this.mins.pop();\n    return this.stack.pop();\n  }\n  top() {\n    return this.stack[this.stack.length - 1];\n  }\n  getMin() {\n    return this.mins[this.mins.length - 1];\n  }\n}',
     complexity: 'O(1) per operation, O(n) space.',
+    leetcode: 'min-stack',
     tests: {
       mode: 'ops',
       cases: [
@@ -535,6 +554,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function evalRPN(tokens) {\n  const st = [];\n  for (const t of tokens) {\n    if (t === "+" || t === "-" || t === "*" || t === "/") {\n      const b = st.pop(), a = st.pop();\n      if (t === "+") st.push(a + b);\n      else if (t === "-") st.push(a - b);\n      else if (t === "*") st.push(a * b);\n      else st.push(Math.trunc(a / b));\n    } else {\n      st.push(Number(t));\n    }\n  }\n  return st.pop();\n}',
     complexity: 'O(n) time, O(n) space.',
+    leetcode: 'evaluate-reverse-polish-notation',
     tests: {
       cases: [
         { args: [['2', '1', '+', '3', '*']], expected: 9 },
@@ -562,6 +582,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function dailyTemperatures(temperatures) {\n  const out = new Array(temperatures.length).fill(0);\n  const stack = [];\n  for (let i = 0; i < temperatures.length; i++) {\n    while (stack.length && temperatures[i] > temperatures[stack[stack.length - 1]]) {\n      const j = stack.pop();\n      out[j] = i - j;\n    }\n    stack.push(i);\n  }\n  return out;\n}',
     complexity: 'O(n) time, O(n) space. Each index is pushed and popped once.',
+    leetcode: 'daily-temperatures',
     tests: {
       cases: [
         { args: [[73, 74, 75, 71, 69, 72, 76, 73]], expected: [1, 1, 4, 2, 1, 1, 0, 0] },
@@ -586,6 +607,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function search(nums, target) {\n  let lo = 0, hi = nums.length - 1;\n  while (lo <= hi) {\n    const mid = lo + Math.floor((hi - lo) / 2);\n    if (nums[mid] === target) return mid;\n    if (nums[mid] < target) lo = mid + 1;\n    else hi = mid - 1;\n  }\n  return -1;\n}',
     complexity: 'O(log n) time, O(1) space.',
+    leetcode: 'binary-search',
     tests: {
       cases: [
         { args: [[-1, 0, 3, 5, 9, 12], 9], expected: 4 },
@@ -610,6 +632,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function searchMatrix(matrix, target) {\n  const m = matrix.length;\n  if (m === 0) return false;\n  const n = matrix[0].length;\n  let lo = 0, hi = m * n - 1;\n  while (lo <= hi) {\n    const mid = lo + Math.floor((hi - lo) / 2);\n    const val = matrix[Math.floor(mid / n)][mid % n];\n    if (val === target) return true;\n    if (val < target) lo = mid + 1;\n    else hi = mid - 1;\n  }\n  return false;\n}',
     complexity: 'O(log(m*n)) time, O(1) space.',
+    leetcode: 'search-a-2d-matrix',
     tests: {
       cases: [
         { args: [[[1, 3, 5, 7], [10, 11, 16, 20], [23, 30, 34, 60]], 3], expected: true },
@@ -637,6 +660,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function minEatingSpeed(piles, h) {\n  const hours = (k) => piles.reduce((acc, p) => acc + Math.ceil(p / k), 0);\n  let lo = 1, hi = Math.max(...piles);\n  while (lo < hi) {\n    const mid = lo + Math.floor((hi - lo) / 2);\n    if (hours(mid) <= h) hi = mid;\n    else lo = mid + 1;\n  }\n  return lo;\n}',
     complexity: 'O(n log(max pile)) time, O(1) space.',
+    leetcode: 'koko-eating-bananas',
     tests: {
       cases: [
         { args: [[3, 6, 7, 11], 8], expected: 4 },
@@ -664,6 +688,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function searchRotated(nums, target) {\n  let lo = 0, hi = nums.length - 1;\n  while (lo <= hi) {\n    const mid = lo + Math.floor((hi - lo) / 2);\n    if (nums[mid] === target) return mid;\n    if (nums[lo] <= nums[mid]) {\n      if (nums[lo] <= target && target < nums[mid]) hi = mid - 1;\n      else lo = mid + 1;\n    } else {\n      if (nums[mid] < target && target <= nums[hi]) lo = mid + 1;\n      else hi = mid - 1;\n    }\n  }\n  return -1;\n}',
     complexity: 'O(log n) time, O(1) space.',
+    leetcode: 'search-in-rotated-sorted-array',
     tests: {
       cases: [
         { args: [[4, 5, 6, 7, 0, 1, 2], 0], expected: 4 },
@@ -690,6 +715,7 @@ export const coreProblems: ProblemSeed[] = [
     solution:
       'function findMin(nums) {\n  let lo = 0, hi = nums.length - 1;\n  while (lo < hi) {\n    const mid = lo + Math.floor((hi - lo) / 2);\n    if (nums[mid] > nums[hi]) lo = mid + 1;\n    else hi = mid;\n  }\n  return nums[lo];\n}',
     complexity: 'O(log n) time, O(1) space.',
+    leetcode: 'find-minimum-in-rotated-sorted-array',
     tests: {
       cases: [
         { args: [[3, 4, 5, 1, 2]], expected: 1 },

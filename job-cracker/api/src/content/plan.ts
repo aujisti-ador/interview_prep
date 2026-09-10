@@ -63,6 +63,14 @@ export const plan: PlanDaySeed[] = [
         minutes: 35,
       },
       {
+        kind: 'read',
+        title: 'The interview loop — what you are actually walking into',
+        detail:
+          'Read before anything else. Four to six stages over three to six weeks, and each one filters for something different — so preparing evenly across them is the wrong strategy. It also names where your profile is most likely to be cut, which is what the weighting of this whole plan is built on. The offer and first-90-days material is at the end of it, for later.',
+        ref: 'phase-0-online-assessments/12-the-interview-loop.md',
+        minutes: 20,
+      },
+      {
         kind: 'admin',
         title: 'Set your target list — 15 BD, 15 remote',
         detail:
@@ -353,6 +361,14 @@ export const plan: PlanDaySeed[] = [
         ref: 'phase-0-online-assessments/08-timed-mock-assessments.md',
         minutes: 25,
       },
+      {
+        kind: 'read',
+        title: 'Reading unfamiliar code — the method',
+        detail:
+          'A real senior interview format ("here is our repo, add this feature") and literally your first month on whatever job you win. Do not read top-to-bottom: orient in ten minutes, trace one behaviour end to end, sketch it. The AI-assisted development guide is linked at the end and is worth the same sitting — "how do you use AI in your workflow" is now a routine question with no safe default answer.',
+        ref: 'phase-1-core-programming/06-reading-unfamiliar-code.md',
+        minutes: 30,
+      },
       { kind: 'admin', title: 'Review the week — mark weak patterns, adjust', ref: 'progress', minutes: 20 },
     ],
   },
@@ -379,6 +395,14 @@ export const plan: PlanDaySeed[] = [
         title: 'PostgreSQL deep dive — MVCC, indexing, isolation, EXPLAIN',
         ref: 'phase-3-databases-data/01-postgresql-deep-dive.md',
         minutes: 60,
+      },
+      {
+        kind: 'read',
+        title: 'Functions, triggers & in-database jobs',
+        detail:
+          'The other half of Postgres: PL/pgSQL functions, procedures (the only thing that can COMMIT, which is how you backfill 50M rows safely), triggers, advisory locks, LISTEN/NOTIFY and pg_cron. The question underneath all of it is what belongs in the database — data integrity yes, business decisions no. Know the volatility markings: labelling a table-reading function IMMUTABLE is a correctness bug the planner will hide from you.',
+        ref: 'phase-3-databases-data/10-functions-triggers-and-in-database-jobs.md',
+        minutes: 40,
       },
       { kind: 'quiz', title: 'Quiz: PostgreSQL', ref: 'quiz?topic=PostgreSQL', minutes: 15 },
       {
@@ -476,8 +500,15 @@ export const plan: PlanDaySeed[] = [
         minutes: 50,
       },
       {
-        kind: 'design',
-        title: 'LLD drill — Rate limiter class (token bucket + sliding window)',
+        kind: 'read',
+        title: 'Webhooks & third-party integration reliability',
+        detail:
+          'Ubiquitous backend work, and a small surface that exposes everything you know about idempotency, security and failure handling. The canonical question: a payment webhook arrived twice and the customer was charged twice. The answer is a unique constraint doing the deduplication, because a check-then-write has a race window. Also reconciliation — what makes the system correct when webhooks silently never arrive at all.',
+        ref: 'phase-2-apis-realtime-systems/08-webhooks-and-integrations.md',
+        minutes: 35,
+      },
+      {
+        kind: 'design',        title: 'LLD drill — Rate limiter class (token bucket + sliding window)',
         ref: 'design/lld-rate-limiter',
         minutes: 40,
       },
@@ -518,8 +549,8 @@ export const plan: PlanDaySeed[] = [
         kind: 'project',
         title: 'Build 1/4 — walking skeleton, public repo, CI green',
         detail:
-          'The artifact is one of the three highest-leverage things in this whole month: it closes the AI gap, the testing gap and the "show me your written work" gap at once. Today: pick the scope (a small RAG service over your own notes is ideal), create the repo, one endpoint, one real test, GitHub Actions running green, and a README that states the problem and the trade-offs. Ship it thin — the link becomes CV-usable today, and the next three sessions deepen it. If you would rather build something you already know cold, the walkthroughs in hands-on-projects/ (notification system, order processing, subscription chat, k8s ingress) are all fair alternatives.',
-        ref: 'hands-on-projects/04-serverless-graphql-api-aws.md',
+          'The artifact is one of the three highest-leverage things in this whole month: it closes the AI gap, the testing gap and the "show me your written work" gap at once. Start at the chooser — it maps each project to the gap it closes, and the default (a small RAG service over your own notes) is the default because your AI/LLM bullet bank is empty. Today: pick one, create the repo, one endpoint, one real test, GitHub Actions running green, and a README that states the problem and the trade-offs. Ship it thin — the link becomes CV-usable today, and the next three sessions deepen it.',
+        ref: 'hands-on-projects/README.md',
         minutes: 50,
       },
     ],
@@ -556,8 +587,15 @@ export const plan: PlanDaySeed[] = [
         minutes: 35,
       },
       {
-        kind: 'behavioral',
-        title: 'STAR story #4 — a production incident you owned',
+        kind: 'read',
+        title: 'Live coding & pairing — the round a human scores',
+        detail:
+          'Everything else in this repo is scored by a machine or by you. This is different, and being strong at automated tests does not make you strong here — silence is the failure mode. Then book two mock interviews for weeks 3 and 4. Self-scoring has a known inflation problem and a human is the only fix; give them the rubric at the end of the guide.',
+        ref: 'phase-0-online-assessments/11-live-coding-and-pairing.md',
+        minutes: 30,
+      },
+      {
+        kind: 'behavioral',        title: 'STAR story #4 — a production incident you owned',
         detail: 'Detection -> mitigation -> root cause -> the systemic fix. Blameless framing. Name your own mistake if there was one; that reads as senior, not weak.',
         ref: 'behavioral',
         minutes: 30,
@@ -569,10 +607,10 @@ export const plan: PlanDaySeed[] = [
     id: 13,
     week: 2,
     title: 'Backtracking & real-time systems',
-    theme: 'Exhaustive search + WebSockets at scale',
-    focus: 'Subsets/permutations/combination templates, plus horizontal WebSocket scaling.',
+    theme: 'Exhaustive search + the one thing on your CV nobody else has',
+    focus: 'Subsets/permutations/combination templates, plus WebSocket scaling and the WebRTC media layer.',
     hiringLens:
-      'Real-time is a differentiator on your CV. Expect "how do you scale Socket.io past one box" — the answer is the Redis adapter plus sticky sessions plus what breaks anyway.',
+      'Real-time is THE differentiator on your CV. Expect "how do you scale Socket.io past one box" — Redis adapter, sticky sessions, and what breaks anyway. If the role touches video, expect "why does a mesh call die at five people" and "your call works in the office and fails at home, why". Most candidates cannot answer either.',
     tasks: [
       {
         kind: 'dsa',
@@ -590,11 +628,19 @@ export const plan: PlanDaySeed[] = [
       { kind: 'quiz', title: 'Quiz: Real-time systems', ref: 'quiz?topic=Real-Time%20Systems', minutes: 15 },
       {
         kind: 'read',
-        title: 'GraphQL & AWS AppSync — schema, resolvers, subscriptions, DataLoader',
+        title: 'WebRTC & media infrastructure — the differentiator round',
         detail:
-          'AppSync is on your CV, so it is fair game in any round. Subscriptions also belong with today\'s real-time theme. Know the N+1 story and how you bound query cost.',
+          'Agora and live streaming is the rarest thing on your CV, and until now the repo armed you for WebSockets but not the media layer. Learn cold: the mesh arithmetic (why five people breaks), SFU vs MCU, why ~15% of users need TURN, and why you would put a million viewers on HLS rather than WebRTC. Do the numbers out loud — the capacity maths in section 10 is the estimation skill the design round tests.',
+        ref: 'phase-2-apis-realtime-systems/07-webrtc-and-media-infrastructure.md',
+        minutes: 45,
+      },
+      {
+        kind: 'read',
+        title: 'GraphQL — subscriptions, DataLoader and query cost',
+        detail:
+          'Scoped deliberately: today read only the subscriptions, N+1/DataLoader, and depth/complexity-limiting sections — those are what the real-time theme and the API round actually test. AppSync is on your CV so the rest of the guide is fair game, but it reads better on its own day than stacked behind two other reads.',
         ref: 'phase-2-apis-realtime-systems/01-graphql-aws-appsync.md',
-        minutes: 50,
+        minutes: 35,
       },
       {
         kind: 'design',
@@ -659,6 +705,14 @@ export const plan: PlanDaySeed[] = [
         minutes: 55,
       },
       { kind: 'quiz', title: 'Quiz: NoSQL', ref: 'quiz?topic=NoSQL', minutes: 15 },
+      {
+        kind: 'read',
+        title: 'Choosing the right database — the synthesis read',
+        detail:
+          'You have now seen Postgres, Redis, Kafka, RabbitMQ, Mongo and DynamoDB individually. This ties them together and adds the categories the deep dives skip — search, time-series, graph, columnar and vector. Learn the 30-second decision path and the five worked systems; in a design round the reasoning is scored, not the product name.',
+        ref: 'phase-3-databases-data/09-choosing-the-right-database.md',
+        minutes: 35,
+      },
       {
         kind: 'read',
         title: 'ORMs & query builders — the N+1 problem and how to prove you fixed it',
@@ -832,6 +886,14 @@ export const plan: PlanDaySeed[] = [
         ref: 'phase-4-cloud-infrastructure/01-nginx-deep-dive.md',
         minutes: 35,
       },
+      {
+        kind: 'read',
+        title: 'Networking fundamentals — where the time actually goes',
+        detail:
+          'The layer under everything in phase 4. The question to be able to answer cold: a request takes 900ms and your handler logs 12ms — where did the rest go? DNS, TCP handshake, TLS handshake, load-balancer queueing, connection-pool wait. Naming the layers is the answer. Also read the error table; knowing that ECONNRESET usually means a keep-alive mismatch turns a mystery into a diagnosis.',
+        ref: 'phase-4-cloud-infrastructure/10-networking-fundamentals.md',
+        minutes: 35,
+      },
       { kind: 'design', title: 'LLD drill — Pub/Sub system with at-least-once delivery', ref: 'design/lld-pubsub', minutes: 40 },
       { kind: 'admin', title: 'Apply to 3 roles + follow-ups', ref: 'pipeline', minutes: 25 },
     ],
@@ -905,6 +967,14 @@ export const plan: PlanDaySeed[] = [
         minutes: 55,
       },
       { kind: 'quiz', title: 'Quiz: DDD & data architecture', ref: 'quiz?topic=DDD%20%26%20Data', minutes: 15 },
+      {
+        kind: 'read',
+        title: 'Multi-tenancy & SaaS architecture',
+        detail:
+          'Most remote backend roles you will apply to are SaaS, so "how do you isolate tenants?" is routine. The weak answer is "we filter by tenant_id in every query". The strong one is that this is necessary but insufficient, and names a mechanism that fails safe — Postgres Row-Level Security, so a forgotten filter returns nothing rather than everything. Note the connection-pool trap: set_config without the transaction-local flag leaks one tenant\'s context into the next request.',
+        ref: 'phase-5-system-design/09-multi-tenancy-and-saas-architecture.md',
+        minutes: 35,
+      },
       { kind: 'design', title: 'HLD drill — Video streaming platform (Netflix-like)', ref: 'design/hld-video-streaming', minutes: 50 },
       { kind: 'admin', title: 'Apply to 4 roles', ref: 'pipeline', minutes: 30 },
     ],

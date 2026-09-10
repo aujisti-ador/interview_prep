@@ -5,8 +5,8 @@
  * would otherwise teach the wrong thing and waste the candidate's time debugging
  * a correct solution. Run with `npm run validate`.
  */
-import { existsSync, readdirSync } from 'fs';
-import { join, relative } from 'path';
+import { existsSync, readdirSync, readFileSync } from 'fs';
+import { dirname, join, relative, resolve } from 'path';
 import { runTests } from '../src/common/harness';
 import { problems, plan, quiz, drills, skills, starPrompts, docs } from '../src/content';
 
@@ -123,10 +123,41 @@ async function main() {
     return acc;
   };
 
+  /*
+   * A guide is also reachable if a guide the plan DOES schedule links to it.
+   * The projects are the case that matters: the plan schedules one build and
+   * points at hands-on-projects/README.md, which maps each project to the gap
+   * it closes. Counting those seven as "unscheduled" would report a coverage
+   * hole that does not exist — and would push us toward padding the plan with
+   * tasks nobody should do, to satisfy a number.
+   *
+   * One hop only. Transitive closure would mark almost everything reachable
+   * (the guides cross-link heavily) and the report would stop meaning anything.
+   */
+  const linkedFrom = (relPath: string): string[] => {
+    const dir = dirname(relPath);
+    const body = readFileSync(join(REPO_ROOT, relPath), 'utf8');
+    return [...body.matchAll(/\]\((?!https?:|#)([^)#]+\.md)[^)]*\)/g)]
+      .map((m) => relative(REPO_ROOT, resolve(REPO_ROOT, dir, m[1])))
+      .filter((p) => !p.startsWith('..'));
+  };
+
+  const reachable = new Set(referenced);
+  for (const entry of referenced) {
+    if (!existsSync(join(REPO_ROOT, entry))) continue;
+    for (const link of linkedFrom(entry)) reachable.add(link);
+  }
+
   // Index/plan documents are not study material, so they need no reference.
-  const INDEX_DOCS = new Set(['README.md', 'prep.md', '30-DAY-PLAN.md', 'phase-0-online-assessments/README.md']);
+  const INDEX_DOCS = new Set([
+    'README.md',
+    'prep.md',
+    '30-DAY-PLAN.md',
+    'phase-0-online-assessments/README.md',
+    'resume/README.md',
+  ]);
   const uncovered = walk(REPO_ROOT)
-    .filter((p) => !referenced.has(p) && !INDEX_DOCS.has(p))
+    .filter((p) => !reachable.has(p) && !INDEX_DOCS.has(p))
     .sort();
 
   const byPattern = new Map<string, number>();
