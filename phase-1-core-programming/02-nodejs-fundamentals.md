@@ -49,6 +49,12 @@ The answer involves the event loop, not the database. See Performance & Memory.
 4. [Clustering](#clustering)
 5. [Performance & Memory](#performance--memory)
 6. [Node.js Architecture](#nodejs-architecture)
+7. [Q16: Graceful Shutdown & Health Checks](#q16-graceful-shutdown--health-checks)
+8. [Q17: Node.js Security Best Practices](#q17-nodejs-security-best-practices)
+9. [Q18: Node.js Performance Profiling & Optimization](#q18-nodejs-performance-profiling--optimization)
+10. [Q19: Signal Handling & Process Management](#q19-signal-handling--process-management)
+11. [Quick Reference](#quick-reference)
+12. [Common Interview Questions](#common-interview-questions)
 
 ---
 

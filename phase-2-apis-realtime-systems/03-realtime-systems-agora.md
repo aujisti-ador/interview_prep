@@ -61,6 +61,22 @@ fix is a shared pub/sub layer.
 10. [Live Streaming Architecture](#live-streaming-architecture)
 11. [Latency vs Cost Trade-offs](#latency-vs-cost-trade-offs)
 
+12. [Quick Reference](#quick-reference)
+13. [Common Interview Questions](#common-interview-questions)
+14. [Scaling WebSocket Servers Horizontally](#scaling-websocket-servers-horizontally)
+15. [Socket.io Rooms and Namespaces](#socketio-rooms-and-namespaces)
+16. [Connection State Recovery and Resilience](#connection-state-recovery-and-resilience)
+17. [Real-Time Performance Optimization](#real-time-performance-optimization)
+18. [Real-Time Patterns for Common Use Cases](#real-time-patterns-for-common-use-cases)
+19. [Q12: Scaling WebSocket Servers Horizontally](#q12-scaling-websocket-servers-horizontally)
+20. [Q13: Socket.io Rooms & Namespaces](#q13-socketio-rooms--namespaces)
+21. [Q14: Connection State Recovery & Resilience](#q14-connection-state-recovery--resilience)
+22. [Q15: WebSocket Memory Management & Performance](#q15-websocket-memory-management--performance)
+23. [Q16: Scaling WebSocket Servers — NestJS & Redis Adapter Implementation](#q16-scaling-websocket-servers--nestjs--redis-adapter-implementation)
+24. [Q17: Socket.io Rooms & Namespaces — NestJS Implementation](#q17-socketio-rooms--namespaces--nestjs-implementation)
+25. [Q18: Connection State Recovery — Offline Queue & Reconnection](#q18-connection-state-recovery--offline-queue--reconnection)
+26. [Q19: WebSocket Memory Management — Limits, Batching & Monitoring](#q19-websocket-memory-management--limits-batching--monitoring)
+
 ---
 
 ## Real-Time Communication Fundamentals
@@ -4296,7 +4312,7 @@ setInterval(() => {
 
 ---
 
-## Q12: Scaling WebSocket Servers Horizontally
+## Q16: Scaling WebSocket Servers — NestJS & Redis Adapter Implementation
 
 **Q: How do you scale WebSocket connections across multiple server instances?**
 
@@ -4425,7 +4441,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
 ---
 
-## Q13: Socket.io Rooms & Namespaces
+## Q17: Socket.io Rooms & Namespaces — NestJS Implementation
 
 **Q: How do you organize real-time connections in Socket.io?**
 
@@ -4563,7 +4579,7 @@ client.join(`presence:dashboard`);
 
 ---
 
-## Q14: Connection State Recovery & Resilience
+## Q18: Connection State Recovery — Offline Queue & Reconnection
 
 **Q: How do you handle disconnections and state recovery in real-time systems?**
 
@@ -4764,7 +4780,7 @@ Client reconnects:
 
 ---
 
-## Q15: WebSocket Memory Management & Performance
+## Q19: WebSocket Memory Management — Limits, Batching & Monitoring
 
 **Q: How do you prevent memory leaks and optimize performance in WebSocket servers?**
 

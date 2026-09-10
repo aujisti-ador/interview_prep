@@ -59,6 +59,18 @@ transaction" is wrong — your database and your broker cannot share one.
 9. [Outbox Pattern](#outbox-pattern)
 10. [Idempotency & Deduplication](#idempotency--deduplication)
 11. [Best Practices](#best-practices)
+12. [Quick Reference](#quick-reference)
+13. [Common Interview Questions](#common-interview-questions)
+14. [Schema Registry and Event Serialization](#schema-registry-and-event-serialization)
+15. [Kafka Advanced — Partition Rebalancing and Consumer Groups](#kafka-advanced--partition-rebalancing-and-consumer-groups)
+16. [Event Versioning Strategies](#event-versioning-strategies)
+17. [Testing Event-Driven Systems](#testing-event-driven-systems)
+18. [Observability in Event-Driven Architecture](#observability-in-event-driven-architecture)
+19. [Q12: Schema Registry & Event Serialization](#q12-schema-registry--event-serialization)
+20. [Q13: Kafka Partition Rebalancing & Consumer Groups](#q13-kafka-partition-rebalancing--consumer-groups)
+21. [Q14: Event Versioning & Evolution Strategies](#q14-event-versioning--evolution-strategies)
+22. [Q15: Dead Letter Queue (DLQ) Handling Patterns](#q15-dead-letter-queue-dlq-handling-patterns)
+23. [Q16: Testing Event-Driven Systems](#q16-testing-event-driven-systems)
 
 ---
 

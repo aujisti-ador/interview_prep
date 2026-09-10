@@ -3,7 +3,7 @@
 > Comprehensive interview prep for **Senior/Lead Backend roles** targeting Bangladesh and international remote markets.
 > Stack: Node.js, NestJS, TypeScript, AWS Serverless, PostgreSQL, Redis, Kafka, RabbitMQ, Docker, Kubernetes.
 
-**Total Content:** 45 guides + 7 project walkthroughs | 100,000+ lines | 290+ Q&A sections, 34 worked system design problems, 117 solved coding-interview problems, 250+ screening-test MCQs, 52 SQL challenges, 5 full-length timed mocks
+**Total Content:** 67 guides + 7 project walkthroughs | 109,000+ lines | 1,100+ Q&A sections, 34 worked system design problems, 117 solved coding-interview problems, 250+ screening-test MCQs, 52 SQL challenges, 5 full-length timed mocks
 
 ---
 
@@ -11,7 +11,7 @@
 
 - [Preparation Plan](#preparation-plan)
 - [Resume, Profiles & Outreach](#resume-profiles--outreach)
-- [Phase 0: Online Assessments & Coding Interviews](#phase-0-online-assessments--coding-interviews-week-0-ongoing)
+- [Phase 0: Online Assessments & Coding Interviews](#phase-0-online-assessments--coding-interviews-week-0--ongoing)
 - [Phase 1: Core Programming & Languages](#phase-1-core-programming--languages-week-12)
 - [Phase 2: APIs & Real-Time Systems](#phase-2-apis--real-time-systems-week-23)
 - [Phase 3: Databases & Data Management](#phase-3-databases--data-management-week-34)
@@ -45,8 +45,8 @@ remembers.
 
 | | |
 |---|---|
-| **Today / Plan** | 30 days, 163 tasks, each with a hiring-manager note on what the round is actually testing |
-| **Library** | Every guide in this repo, readable in the app — full-text search across all 59 files, per-document TOC, syntax highlighting, working cross-links |
+| **Today / Plan** | 30 days, 175 tasks, each with a hiring-manager note on what the round is actually testing |
+| **Library** | Every guide in this repo, readable in the app — full-text search across all 74 files, per-document TOC, syntax highlighting, working cross-links |
 | **Practice** | 101 coding problems with real test cases executed in-browser — timed, weak-pattern, blind and spaced-review modes |
 | **Quiz** | 136 recall questions across 21 topics, scored with explanations |
 | **Design** | 18 timed design drills with weighted rubrics you score yourself against |
@@ -95,6 +95,9 @@ and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting
 | 10 | [Timed Mock Assessments](phase-0-online-assessments/08-timed-mock-assessments.md) | Five full-length simulations — HackerRank enterprise (90 min), TestGorilla bundle (45 min), Codility/Toptal (60 min), Talview video (20 min), Mettl BD corporate (120 min) — with answer keys, diagnostic scorecard and a 14-day plan | 5 mocks |
 | 11 | [Take-Home Assignments](phase-0-online-assessments/09-take-home-assignments.md) | The rubric you are not shown, scoping discipline, the 4-hour time budget, senior-reading project structure, testing depth, the README and TRADEOFFS documents, commit hygiene, the follow-up call, 7 assignment archetypes, when and how to decline | 2 checklists |
 | 12 | [The Reverse Interview](phase-0-online-assessments/10-reverse-interview-bank.md) | Questions *you* ask — by who is in the room (recruiter, hiring manager, engineers, principal, CTO), the diagnostic set that decides whether to accept, remote-specific and lead-level questions, reading the answers, red flags, and the closing question | ~70 questions |
+| 13 | [Live Coding & Pairing](phase-0-online-assessments/11-live-coding-and-pairing.md) | The round a human scores: how it differs from an automated test, the minute-by-minute structure, **what to actually say** while narrating, the stuck-recovery script, pair-programming and debugging rounds, setup, practising with a human and the rubric to hand them, and the scoring dimensions interviewers write down | 1 rubric |
+| 14 | [The Interview Loop](phase-0-online-assessments/12-the-interview-loop.md) | **The map.** The standard 4–6 stage loop, what each stage is *actually* filtering for, loops by company type (BD product · international product · marketplaces · US enterprise), where your profile is most likely to be cut, timelines and running several in parallel, what happens in the debrief, and reading your own rejections | — |
+| 15 | [Offer to First 90 Days](phase-0-online-assessments/13-offer-to-first-90-days.md) | Evaluating total compensation (contractor vs employee for BD), negotiating and what is actually flexible, equity questions that matter, resigning well, then days 1–30 learn / 31–60 contribute / 61–90 own, remote-specific advice from GMT+6, and the mistakes that cost people the job | — |
 
 **Every coding problem follows one format:** Question → Signal (how to recognise it) → Strategy (the insight, in plain English) → JavaScript solution (commented) → Trace table → Complexity & Pitfalls. All 117 solutions are verified against 309 test assertions including edge cases.
 
@@ -111,6 +114,8 @@ and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting
 | 3 | [NestJS Mastery](phase-1-core-programming/03-nestjs-mastery.md) | Modules, DI, guards, interceptors, pipes, filters, middleware, decorators, microservices, testing, caching (Redis), transactions, cron/scheduling, Bull queues, config validation, circular deps | 19+ |
 | 4 | [Testing & Quality](phase-1-core-programming/04-testing-and-quality.md) | Jest, mocks/stubs/spies, TDD, testing pyramid, integration tests (Supertest, testcontainers), E2E, async/event testing, database testing, code quality, mutation testing | 13 |
 | 5 | [Design Patterns in Practice](phase-1-core-programming/05-design-patterns-in-practice.md) | SOLID, Strategy, Observer, Factory, Singleton, Decorator, Adapter, Repository, DTO, Unit of Work, Circuit Breaker, NestJS request pipeline, CQRS, Clean/Hexagonal Architecture | 14 |
+| 6 | [Reading Unfamiliar Code](phase-1-core-programming/06-reading-unfamiliar-code.md) | A real senior interview format *and* your first month on any job. Why breadth-first reading fails · orient in ten minutes · trace one behaviour end to end · build the map · **git as a research tool** (`blame`, `log -S`, files that change together) · making your first change safely with characterisation tests · working with genuinely bad code | 5 |
+| 7 | [AI-Assisted Development](phase-1-core-programming/07-ai-assisted-development.md) | Using AI tools, not building AI features. Where it genuinely helps vs where it hurts · the review discipline · **security risks specific to generated code** (slopsquatting, prompt injection via your own repo) · team policy a lead is expected to have a view on · using it in the interview itself · the skills that got *more* valuable | 5 |
 
 ---
 
@@ -124,6 +129,8 @@ and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting
 | 4 | [Event-Driven Architecture](phase-2-apis-realtime-systems/04-event-driven-architecture.md) | Events vs commands, Kafka/RabbitMQ/Redis, event sourcing, CQRS, saga pattern, outbox pattern, idempotency, schema registry (Avro/Protobuf), partition rebalancing, event versioning, DLQ handling, testing EDA | 16 |
 | 5 | [gRPC & Protocol Buffers](phase-2-apis-realtime-systems/05-grpc-protocol-buffers.md) | Protobuf schema, 4 RPC patterns, NestJS gRPC, error handling, auth (mTLS/JWT), performance, gRPC-Web, microservices communication, gRPC vs REST decision framework | 11 |
 | 6 | [AI & LLM Integrations](phase-2-apis-realtime-systems/06-ai-llm-integrations.md) | Integrating OpenAI/Anthropic APIs, Streaming responses (SSE), Vector Databases (Pinecone, pgvector), Basic RAG architecture | 3 |
+| 7 | [WebRTC & Real-Time Media Infrastructure](phase-2-apis-realtime-systems/07-webrtc-and-media-infrastructure.md) | **The differentiator guide.** Signalling and the SDP/ICE/DTLS handshake · NAT traversal, STUN vs TURN and why ~15% of users need a relay · mesh vs **SFU** vs MCU with the scaling arithmetic · simulcast, SVC, congestion control and codecs · building the signalling server, tokens and ephemeral TURN credentials · recording pipelines · **WebRTC vs LL-HLS for one-to-many** · capacity planning and cost · `getStats()` telemetry · a debugging table of the failures you will actually see · three system-design walkthroughs | 19 |
+| 8 | [Webhooks & Integration Reliability](phase-2-apis-realtime-systems/08-webhooks-and-integrations.md) | The five rules for receiving · HMAC signature verification with `timingSafeEqual` · **idempotency via unique constraint, not check-then-write** · fast ack and async processing · out-of-order and missing events · **reconciliation, the safety net** · sending webhooks, retry schedules and **SSRF** · testing and debugging | 8 |
 
 ---
 
@@ -139,6 +146,8 @@ and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting
 | 6 | [Database Migrations & Schema Evolution](phase-3-databases-data/06-database-migrations-schema-evolution.md) | Prisma/TypeORM/Knex migrations, zero-downtime (expand-contract), safe vs dangerous operations, backfill strategies, schema versioning, CI pipeline | 11 |
 | 7 | [ORMs & Query Builders](phase-3-databases-data/07-orms-query-builders.md) | Prisma vs TypeORM vs Knex, N+1 problem, query optimization, cursor pagination, soft delete, multi-tenancy, testing strategies | 10 |
 | 8 | [Database Architecture Fundamentals](phase-3-databases-data/08-database-architecture-fundamentals.md) | CAP Theorem, PACELC Theorem, Sharding vs Partitioning, Read Replica lag mitigation, MVCC Concurrency Control | 6 |
+| 9 | [Choosing the Right Database](phase-3-databases-data/09-choosing-the-right-database.md) | **The selection guide.** All 12 database types with worked examples — relational, key-value, document, wide-column, **search (Elasticsearch)**, **time-series (TimescaleDB)**, **graph (Neo4j)**, **columnar/OLAP (ClickHouse)**, **vector (pgvector)**, object storage, embedded, distributed SQL · the 30-second decision path · polyglot persistence and the outbox · **five complete systems worked end to end** (e-commerce, chat, IoT, social feed, RAG assistant) | 17 |
+| 10 | [Functions, Triggers & In-Database Jobs](phase-3-databases-data/10-functions-triggers-and-in-database-jobs.md) | **Server-side Postgres.** What belongs in the database vs the app · PL/pgSQL functions and `LANGUAGE sql` inlining · **volatility (`IMMUTABLE`/`STABLE`/`VOLATILE`) and expression indexes** · procedures and the batched-commit backfill · triggers (BEFORE/AFTER, ROW/STATEMENT, `WHEN`) · audit logs, counters, generated columns · **savepoints, the 64-subtransaction cliff, `ON CONFLICT` instead of EXCEPTION** · advisory locks · LISTEN/NOTIFY · **`pg_cron`** · `SECURITY DEFINER` and `search_path` hijacking · testing and migrating it | 10 |
 
 ---
 
@@ -155,6 +164,7 @@ and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting
 | 7 | [Performance Engineering](phase-4-cloud-infrastructure/07-performance-engineering.md) | Load testing (k6), Node.js profiling (clinic.js), database optimization, caching, worker threads, auto-scaling, benchmarking, capacity planning | 10 |
 | 8 | [CI/CD & DevOps](phase-4-cloud-infrastructure/08-cicd-devops.md) | GitHub Actions, Jenkins, Terraform, Prometheus+Grafana, Git workflows, release management, feature flags, environment management, DORA metrics, GitOps | 9 |
 | 9 | [DevOps Operations](phase-4-cloud-infrastructure/09-devops-operations.md) | Autoscaling (HPA/KEDA) in production, connection-pool exhaustion, read replicas, cache failure modes, backup strategy & restore drills, RPO/RTO & region failover, golden signals, cardinality/cost control, on-call & incident command, capacity planning, zero-downtime migrations & rollbacks, scenario drills | 10 |
+| 10 | [Networking Fundamentals](phase-4-cloud-infrastructure/10-networking-fundamentals.md) | Where the time actually goes (your handler is ~3% of it) · DNS, TCP, TLS · **HTTP/1.1 vs 2 vs 3 and head-of-line blocking** · connection management and pool sizing in Node · timeout budgets down a call chain · **reading `ECONNRESET`, `EAI_AGAIN`, `EMFILE`** · diagnosing a slow request | 6 |
 
 ---
 
@@ -171,6 +181,7 @@ and [the six angles for recovering numbers](resume/00-resume-system.md#5-getting
 | 6 | [HLD Practice Problems](phase-5-system-design/06-hld-practice-problems.md) | URL shortener, rate limiter, notification system (41M users), chat, news feed, payments, **MFS (bKash/Nagad)**, video streaming, file storage, autocomplete, web crawler, ride-hailing (Pathao), ticket booking, **live streaming (Agora)**, **voucher system (Daraz)** | 15 designs |
 | 7 | [LLD Practice Problems](phase-5-system-design/07-lld-practice-problems.md) | LLD method, Node.js concurrency (async mutex, per-key locking, races across `await`), parking lot, elevator, vending machine, LRU cache, rate limiter, pub/sub, Splitwise, logging framework, task scheduler, file system + 7 rapid-fire designs | 19 designs |
 | 8 | [Architect-Level Practice](phase-5-system-design/08-architect-level-practice.md) | ADRs, RFCs, Conway's Law & Team Topologies, tech radar, technical debt, golden paths, code review, RCA/postmortems, compliance architecture — plus multi-tenant SaaS, global e-commerce, real-time bidding, monolith migration, IoT, healthcare, developer platform, multi-cloud | 18 topics |
+| 9 | [Multi-Tenancy & SaaS Architecture](phase-5-system-design/09-multi-tenancy-and-saas-architecture.md) | The three isolation models and the economics that decide between them · shared schema done safely in three layers · **Postgres Row-Level Security and the connection-pool trap** · carrying tenant context (and where it leaks) · noisy neighbours · migrations across N tenants · onboarding and GDPR offboarding · the bridge model | 6 |
 
 ---
 

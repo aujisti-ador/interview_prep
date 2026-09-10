@@ -33,6 +33,9 @@
 - [ ] [One-way video, aptitude & psychometric](phase-0-online-assessments/07-video-interview-and-psychometric.md) — record the five STAR stories, drill numerical/logical reasoning
 - [ ] [Take-home assignments](phase-0-online-assessments/09-take-home-assignments.md) — the hidden rubric, scoping, the README and TRADEOFFS docs, the follow-up call
 - [ ] [The reverse interview](phase-0-online-assessments/10-reverse-interview-bank.md) — build your shortlist of questions before the first screen, not during it
+- [ ] [The interview loop](phase-0-online-assessments/12-the-interview-loop.md) — **read this first**: the full 4–6 stage process, what each stage really filters for, and where your profile is most likely to be cut
+- [ ] [Live coding & pairing](phase-0-online-assessments/11-live-coding-and-pairing.md) — the round a human scores; book two mock interviews, because self-scoring inflates
+- [ ] [Offer to first 90 days](phase-0-online-assessments/13-offer-to-first-90-days.md) — negotiating, resigning well, and the first three months
 - [ ] Earn the free HackerRank certifications: **Node.js (Intermediate)**, **SQL (Advanced)**, **Problem Solving (Intermediate)** — recruiters filter by these badges
 - [ ] Re-take Mock A after two weeks and compare scores
 
@@ -49,6 +52,9 @@
 - [ ] Set up the [outreach rhythm](resume/03-outreach-and-referrals.md) — ~8 applications and 2 warm touches per week
 
 ## Phase 1: Core Programming & Languages (Week 1–2)
+
+- [ ] [Reading unfamiliar code](phase-1-core-programming/06-reading-unfamiliar-code.md) — orient, trace, map; git as a research tool; characterisation tests before you change anything
+- [ ] [AI-assisted development](phase-1-core-programming/07-ai-assisted-development.md) — where it helps, where it hurts, the review discipline, and having a policy when asked
 
 - [ ] JavaScript / TypeScript Deep Dive
   - Event loop, closures, prototypes, async/await, promises, error handling
@@ -84,6 +90,9 @@
   - (International note: FAANG-adjacent remote companies test harder — aim for 100+ if targeting Toptal/FAANG-remote)
 
 ## Phase 2: APIs & Real-Time Systems (Week 2–3)
+
+- [ ] [WebRTC & real-time media](phase-2-apis-realtime-systems/07-webrtc-and-media-infrastructure.md) — **your differentiator**: mesh vs SFU vs MCU, NAT traversal, WebRTC vs HLS at scale
+- [ ] [Webhooks & integration reliability](phase-2-apis-realtime-systems/08-webhooks-and-integrations.md) — signature verification, idempotency via unique constraint, reconciliation, SSRF
 
 - [ ] GraphQL + AWS AppSync
   - Schema design, resolvers, subscriptions, batching
@@ -123,6 +132,12 @@
 
 ## Phase 3: Databases & Data Management (Week 3–4)
 
+- [ ] [Choosing the Right Database](phase-3-databases-data/09-choosing-the-right-database.md) — **read this first**
+- [ ] [Functions, triggers & in-database jobs](phase-3-databases-data/10-functions-triggers-and-in-database-jobs.md) — PL/pgSQL, procedures, triggers, savepoints, advisory locks, LISTEN/NOTIFY, pg_cron, and where to draw the line
+  - The 12 database types, what each is genuinely for, and the access pattern that decides it
+  - Search, time-series, graph, columnar and vector stores — the categories the other guides do not cover
+  - The 30-second decision path, and why "PostgreSQL until it hurts" is the right default
+  - Five complete systems worked end to end, plus the mistakes that get noticed in interviews
 - [ ] [Database Architecture Fundamentals](phase-3-databases-data/08-database-architecture-fundamentals.md)
   - CAP Theorem & PACELC Theorem Deep Dive (Crucial for System Design)
   - Sharding algorithms (Consistent Hashing), Partitioning vs Sharding

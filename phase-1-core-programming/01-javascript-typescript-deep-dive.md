@@ -53,6 +53,18 @@ If you read nothing else in this guide, know these:
 7. [Hoisting](#hoisting)
 8. [The `this` Keyword](#the-this-keyword)
 9. [TypeScript Specific](#typescript-specific)
+10. [Generators and Iterators](#generators-and-iterators)
+11. [WeakMap and WeakSet](#weakmap-and-weakset)
+12. [Proxy and Reflect](#proxy-and-reflect)
+13. [JavaScript Symbols](#javascript-symbols)
+14. [Advanced TypeScript — Template Literal Types & Branded Types](#advanced-typescript--template-literal-types--branded-types)
+15. [TypeScript Decorators](#typescript-decorators)
+16. [Practice Questions](#practice-questions)
+17. [Q21: WeakMap, WeakSet & Memory-Efficient Data Structures](#q21-weakmap-weakset--memory-efficient-data-structures)
+18. [Q22: Promise Concurrency Patterns](#q22-promise-concurrency-patterns)
+19. [Q23: Object Immutability & Property Descriptors](#q23-object-immutability--property-descriptors)
+20. [Q24: Advanced TypeScript — Conditional Types, Template Literals & Type Guards](#q24-advanced-typescript--conditional-types-template-literals--type-guards)
+21. [Quick Reference Card](#quick-reference-card)
 
 ---
 

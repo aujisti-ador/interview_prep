@@ -50,9 +50,24 @@ within one tick of the event loop).
 5. [Batching & DataLoader](#batching--dataloader)
 6. [AWS AppSync](#aws-appsync)
 7. [Authentication & Authorization](#authentication--authorization)
-8. [Caching](#caching)
+8. [Caching in AppSync](#q9-how-do-you-implement-caching-in-appsync)
 9. [Federation vs Standalone](#federation-vs-standalone)
 10. [Best Practices](#best-practices)
+
+11. [Quick Reference](#quick-reference)
+12. [Common Interview Questions](#common-interview-questions)
+13. [GraphQL Security](#graphql-security)
+14. [GraphQL Error Handling](#graphql-error-handling)
+15. [Schema Stitching vs Federation](#schema-stitching-vs-federation)
+16. [Advanced Pagination](#advanced-pagination)
+17. [Q13: GraphQL Security — Query Depth & Complexity Analysis](#q13-graphql-security--query-depth--complexity-analysis)
+18. [Q14: GraphQL Error Handling Patterns](#q14-graphql-error-handling-patterns)
+19. [Q15: Relay-Style Cursor Pagination](#q15-relay-style-cursor-pagination)
+20. [Q16: Schema Stitching vs Federation](#q16-schema-stitching-vs-federation)
+21. [Q17: GraphQL Security — Depth & Complexity Limiting in NestJS](#q17-graphql-security--depth--complexity-limiting-in-nestjs)
+22. [Q18: GraphQL Error Handling — NestJS Implementation](#q18-graphql-error-handling--nestjs-implementation)
+23. [Q19: Relay-Style Cursor Pagination — NestJS Implementation](#q19-relay-style-cursor-pagination--nestjs-implementation)
+24. [Q20: Schema Stitching vs Federation — Implementation Comparison](#q20-schema-stitching-vs-federation--implementation-comparison)
 
 ---
 
@@ -3715,7 +3730,7 @@ type Order @key(fields: "id") {
 
 ---
 
-## Q13: GraphQL Security — Query Complexity & Depth Limiting
+## Q17: GraphQL Security — Depth & Complexity Limiting in NestJS
 
 **Q: How do you prevent malicious or expensive GraphQL queries?**
 
@@ -3854,7 +3869,7 @@ const server = new ApolloServer({
 
 ---
 
-## Q14: GraphQL Error Handling Strategies
+## Q18: GraphQL Error Handling — NestJS Implementation
 
 **Q: How do you handle errors properly in a GraphQL API?**
 
@@ -4046,7 +4061,7 @@ async createOrder(@Args('input') input: CreateOrderInput) {
 
 ---
 
-## Q15: Relay-Style Cursor Pagination
+## Q19: Relay-Style Cursor Pagination — NestJS Implementation
 
 **Q: How do you implement efficient pagination in GraphQL?**
 
@@ -4180,7 +4195,7 @@ LIMIT 11;
 
 ---
 
-## Q16: Schema Stitching vs Federation
+## Q20: Schema Stitching vs Federation — Implementation Comparison
 
 **Q: How do you compose multiple GraphQL schemas in a microservices architecture?**
 

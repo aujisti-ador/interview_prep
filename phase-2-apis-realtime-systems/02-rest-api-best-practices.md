@@ -57,6 +57,16 @@ one of the most common senior backend questions there is.
 8. [OWASP Top 10](#owasp-top-10)
 9. [API Design Patterns](#api-design-patterns)
 10. [Error Handling](#error-handling)
+11. [Quick Reference](#quick-reference)
+12. [Common Interview Questions](#common-interview-questions)
+13. [Webhook Design Patterns](#webhook-design-patterns)
+14. [API Gateway Patterns](#api-gateway-patterns)
+15. [API Backward Compatibility & Deprecation](#api-backward-compatibility--deprecation)
+16. [OpenAPI/Swagger Documentation](#openapiswagger-documentation)
+17. [Q12: Webhook Patterns & Reliability](#q12-webhook-patterns--reliability)
+18. [Q13: API Gateway Pattern](#q13-api-gateway-pattern)
+19. [Q14: API Backward Compatibility & Versioning Strategy](#q14-api-backward-compatibility--versioning-strategy)
+20. [Q15: API Documentation with OpenAPI/Swagger](#q15-api-documentation-with-openapiswagger)
 
 ---
 

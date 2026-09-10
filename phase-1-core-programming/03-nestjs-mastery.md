@@ -60,6 +60,12 @@ interceptor?" There is a defensible answer for each, and they want your *reasoni
 12. [Microservices](#microservices)
 13. [Testing](#testing)
 14. [Best Practices](#best-practices)
+15. [Q15: Caching Strategies with Redis in NestJS](#q15-caching-strategies-with-redis-in-nestjs)
+16. [Q16: Configuration & Environment Validation](#q16-configuration--environment-validation)
+17. [Q17: Circular Dependencies in NestJS](#q17-circular-dependencies-in-nestjs)
+18. [Q18: NestJS Database Transactions](#q18-nestjs-database-transactions)
+19. [Q19: NestJS Task Scheduling & Queue Processing](#q19-nestjs-task-scheduling--queue-processing)
+20. [Quick Reference Table](#quick-reference-table)
 
 ---
 

@@ -66,7 +66,7 @@ syntax.
 10. [DynamoDB Indexes & Query Patterns](#q10-dynamodb-indexes--query-patterns)
 11. [DynamoDB Advanced Features](#q11-dynamodb-advanced-features)
 12. [DynamoDB with Node.js & NestJS](#q12-dynamodb-with-nodejs--nestjs)
-13. [MongoDB vs DynamoDB -- When to Use Which](#q13-mongodb-vs-dynamodb--when-to-use-which)
+13. [MongoDB vs DynamoDB -- When to Use Which](#q13-mongodb-vs-dynamodb----when-to-use-which)
 14. [NoSQL Data Modeling Best Practices](#q14-nosql-data-modeling-best-practices)
 15. [Quick Reference](#quick-reference)
 

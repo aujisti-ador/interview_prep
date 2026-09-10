@@ -3,7 +3,7 @@
 > Generated from the Job Cracker platform (`job-cracker/`). Run `cd job-cracker && make up` and open
 > http://localhost:8080 to work through this with progress tracking, a code runner, and scoring.
 
-**Contents:** 30 days · 167 tasks · 101 coding problems · 136 recall questions · 18 design drills · 32 tracked skills · 14 behavioral prompts
+**Contents:** 30 days · 176 tasks · 101 coding problems · 136 recall questions · 18 design drills · 32 tracked skills · 14 behavioral prompts
 
 ## The bet behind this plan
 
@@ -29,7 +29,7 @@ You already have deep written material in this repo. What kills candidates at yo
 | 10 | 2 | [Trees I & REST/API design](#day-10) | Recursion discipline + the API design round |
 | 11 | 2 | [Trees II / BFS & event-driven architecture](#day-11) | Level-order thinking + your strongest differentiator |
 | 12 | 2 | [Heaps & Kafka](#day-12) | Top-K thinking + the streaming round |
-| 13 | 2 | [Backtracking & real-time systems](#day-13) | Exhaustive search + WebSockets at scale |
+| 13 | 2 | [Backtracking & real-time systems](#day-13) | Exhaustive search + the one thing on your CV nobody else has |
 | 14 | 2 | [Week 2 checkpoint + first full mock](#day-14) | Put it together under pressure |
 | 15 | 3 | [Graphs I & MongoDB/DynamoDB](#day-15) | Grid and adjacency traversal + NoSQL modelling |
 | 16 | 3 | [Graphs II / topological sort & AWS serverless](#day-16) | Dependency ordering + the cloud round |
@@ -55,7 +55,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-1"></a>
 ### Day 1 — Baseline & honest diagnosis
 
-*Measure before you train* · ~3h 50m
+*Measure before you train* · ~4h 10m
 
 **Focus.** Take a cold timed OA and a cold system design. Whatever hurts is the plan.
 
@@ -70,6 +70,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 35m** — Platform playbook — how each assessment platform actually scores you
       HackerRank, Codility, CodeSignal, TestGorilla, Talview, Mettl. Question types, timers, proctoring, and the Node stdin harness. Knowing the format is worth more than one extra pattern.
       `phase-0-online-assessments/00-platform-playbook.md`
+- [ ] **Read · 20m** — The interview loop — what you are actually walking into
+      Read before anything else. Four to six stages over three to six weeks, and each one filters for something different — so preparing evenly across them is the wrong strategy. It also names where your profile is most likely to be cut, which is what the weighting of this whole plan is built on. The offer and first-90-days material is at the end of it, for later.
+      `phase-0-online-assessments/12-the-interview-loop.md`
 - [ ] **Admin · 30m** — Set your target list — 15 BD, 15 remote
       Add them in the Pipeline tab as wishlist. You cannot run a 30-day sprint against an abstract "get a job" goal.
 - [ ] **Story · 25m** — Write your 2-minute "tell me about yourself"
@@ -189,7 +192,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-7"></a>
 ### Day 7 — Week 1 checkpoint
 
-*Retrieval under time, then rest* · ~3h 50m
+*Retrieval under time, then rest* · ~4h 20m
 
 **Focus.** Timed retest of week 1 patterns + first application batch out the door.
 
@@ -205,6 +208,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 25m** — Timed mock formats + the diagnostic scorecard
       Five full-length platform simulations and a scorecard that names your weakest bucket. Use it to pick which platform to rehearse before a real invite.
       `phase-0-online-assessments/08-timed-mock-assessments.md`
+- [ ] **Read · 30m** — Reading unfamiliar code — the method
+      A real senior interview format ("here is our repo, add this feature") and literally your first month on whatever job you win. Do not read top-to-bottom: orient in ten minutes, trace one behaviour end to end, sketch it. The AI-assisted development guide is linked at the end and is worth the same sitting — "how do you use AI in your workflow" is now a routine question with no safe default answer.
+      `phase-1-core-programming/06-reading-unfamiliar-code.md`
 - [ ] **Admin · 20m** — Review the week — mark weak patterns, adjust
 
 ## Week 2
@@ -212,7 +218,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-8"></a>
 ### Day 8 — Binary search & PostgreSQL depth
 
-*Search-space thinking + the database round* · ~4h 40m
+*Search-space thinking + the database round* · ~5h 20m
 
 **Focus.** Binary search on answer (Koko, rotated arrays) and Postgres internals: MVCC, indexes, EXPLAIN.
 
@@ -222,6 +228,9 @@ You already have deep written material in this repo. What kills candidates at yo
       Binary Search, Search 2D Matrix, Koko Eating Bananas, Search in Rotated Sorted Array, Find Minimum in Rotated Sorted Array.
 - [ ] **Read · 60m** — PostgreSQL deep dive — MVCC, indexing, isolation, EXPLAIN
       `phase-3-databases-data/01-postgresql-deep-dive.md`
+- [ ] **Read · 40m** — Functions, triggers & in-database jobs
+      The other half of Postgres: PL/pgSQL functions, procedures (the only thing that can COMMIT, which is how you backfill 50M rows safely), triggers, advisory locks, LISTEN/NOTIFY and pg_cron. The question underneath all of it is what belongs in the database — data integrity yes, business decisions no. Know the volatility markings: labelling a table-reading function IMMUTABLE is a correctness bug the planner will hide from you.
+      `phase-3-databases-data/10-functions-triggers-and-in-database-jobs.md`
 - [ ] **Quiz · 15m** — Quiz: PostgreSQL
 - [ ] **Coding · 55m** — SQL challenge bank — joins, aggregation, CTEs (20 problems)
       Highest points-per-minute section on any mixed assessment, and the one most backend candidates skip. Write the queries, do not just read them.
@@ -254,7 +263,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-10"></a>
 ### Day 10 — Trees I & REST/API design
 
-*Recursion discipline + the API design round* · ~4h 20m
+*Recursion discipline + the API design round* · ~4h 55m
 
 **Focus.** Tree traversal in all three orders without thinking, plus idempotency and versioning.
 
@@ -268,6 +277,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Coding · 50m** — REST API & find-the-bug challenges
       HackerRank's REST API question type and 16 debugging snippets. A distinct assessment format — you are given working-ish code and scored on the fix.
       `phase-0-online-assessments/05-rest-api-and-debugging-challenges.md`
+- [ ] **Read · 35m** — Webhooks & third-party integration reliability
+      Ubiquitous backend work, and a small surface that exposes everything you know about idempotency, security and failure handling. The canonical question: a payment webhook arrived twice and the customer was charged twice. The answer is a unique constraint doing the deduplication, because a check-then-write has a race window. Also reconciliation — what makes the system correct when webhooks silently never arrive at all.
+      `phase-2-apis-realtime-systems/08-webhooks-and-integrations.md`
 - [ ] **Design · 40m** — LLD drill — Rate limiter class (token bucket + sliding window)
 - [ ] **Admin · 25m** — Apply to 3 roles
 
@@ -288,13 +300,13 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Design · 50m** — HLD drill — Notification system at 41M users (your home turf, 45 min)
       Do it timed and cold anyway. Familiar territory is where people ramble.
 - [ ] **Build · 50m** — Build 1/4 — walking skeleton, public repo, CI green
-      The artifact is one of the three highest-leverage things in this whole month: it closes the AI gap, the testing gap and the "show me your written work" gap at once. Today: pick the scope (a small RAG service over your own notes is ideal), create the repo, one endpoint, one real test, GitHub Actions running green, and a README that states the problem and the trade-offs. Ship it thin — the link becomes CV-usable today, and the next three sessions deepen it. If you would rather build something you already know cold, the walkthroughs in hands-on-projects/ (notification system, order processing, subscription chat, k8s ingress) are all fair alternatives.
-      `hands-on-projects/04-serverless-graphql-api-aws.md`
+      The artifact is one of the three highest-leverage things in this whole month: it closes the AI gap, the testing gap and the "show me your written work" gap at once. Start at the chooser — it maps each project to the gap it closes, and the default (a small RAG service over your own notes) is the default because your AI/LLM bullet bank is empty. Today: pick one, create the repo, one endpoint, one real test, GitHub Actions running green, and a README that states the problem and the trade-offs. Ship it thin — the link becomes CV-usable today, and the next three sessions deepen it.
+      `hands-on-projects/README.md`
 
 <a id="day-12"></a>
 ### Day 12 — Heaps & Kafka
 
-*Top-K thinking + the streaming round* · ~4h 0m
+*Top-K thinking + the streaming round* · ~4h 30m
 
 **Focus.** Priority queue patterns, and Kafka semantics you can defend under pressure.
 
@@ -308,6 +320,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 35m** — RabbitMQ deep dive — and when you would pick it over Kafka
       "Kafka vs RabbitMQ" is asked constantly and answered badly. Log versus smart broker: replay and retention favour Kafka, per-message routing and ack semantics favour Rabbit.
       `phase-3-databases-data/04-rabbitmq-deep-dive.md`
+- [ ] **Read · 30m** — Live coding & pairing — the round a human scores
+      Everything else in this repo is scored by a machine or by you. This is different, and being strong at automated tests does not make you strong here — silence is the failure mode. Then book two mock interviews for weeks 3 and 4. Self-scoring has a known inflation problem and a human is the only fix; give them the rubric at the end of the guide.
+      `phase-0-online-assessments/11-live-coding-and-pairing.md`
 - [ ] **Story · 30m** — STAR story #4 — a production incident you owned
       Detection -> mitigation -> root cause -> the systemic fix. Blameless framing. Name your own mistake if there was one; that reads as senior, not weak.
 - [ ] **Admin · 25m** — Apply to 3 roles
@@ -315,19 +330,22 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-13"></a>
 ### Day 13 — Backtracking & real-time systems
 
-*Exhaustive search + WebSockets at scale* · ~4h 10m
+*Exhaustive search + the one thing on your CV nobody else has* · ~4h 40m
 
-**Focus.** Subsets/permutations/combination templates, plus horizontal WebSocket scaling.
+**Focus.** Subsets/permutations/combination templates, plus WebSocket scaling and the WebRTC media layer.
 
-> **What a hiring manager is testing here.** Real-time is a differentiator on your CV. Expect "how do you scale Socket.io past one box" — the answer is the Redis adapter plus sticky sessions plus what breaks anyway.
+> **What a hiring manager is testing here.** Real-time is THE differentiator on your CV. Expect "how do you scale Socket.io past one box" — Redis adapter, sticky sessions, and what breaks anyway. If the role touches video, expect "why does a mesh call die at five people" and "your call works in the office and fails at home, why". Most candidates cannot answer either.
 
 - [ ] **Coding · 85m** — Backtracking — 5 problems
       Subsets, Combination Sum, Permutations, Word Search, Palindrome Partitioning.
 - [ ] **Read · 50m** — Real-time systems & Agora — WebSockets, SSE, scaling, recovery
       `phase-2-apis-realtime-systems/03-realtime-systems-agora.md`
 - [ ] **Quiz · 15m** — Quiz: Real-time systems
-- [ ] **Read · 50m** — GraphQL & AWS AppSync — schema, resolvers, subscriptions, DataLoader
-      AppSync is on your CV, so it is fair game in any round. Subscriptions also belong with today's real-time theme. Know the N+1 story and how you bound query cost.
+- [ ] **Read · 45m** — WebRTC & media infrastructure — the differentiator round
+      Agora and live streaming is the rarest thing on your CV, and until now the repo armed you for WebSockets but not the media layer. Learn cold: the mesh arithmetic (why five people breaks), SFU vs MCU, why ~15% of users need TURN, and why you would put a million viewers on HLS rather than WebRTC. Do the numbers out loud — the capacity maths in section 10 is the estimation skill the design round tests.
+      `phase-2-apis-realtime-systems/07-webrtc-and-media-infrastructure.md`
+- [ ] **Read · 35m** — GraphQL — subscriptions, DataLoader and query cost
+      Scoped deliberately: today read only the subscriptions, N+1/DataLoader, and depth/complexity-limiting sections — those are what the real-time theme and the API round actually test. AppSync is on your CV so the rest of the guide is fair game, but it reads better on its own day than stacked behind two other reads.
       `phase-2-apis-realtime-systems/01-graphql-aws-appsync.md`
 - [ ] **Design · 50m** — HLD drill — Chat system (WhatsApp-like, 45 min)
 
@@ -355,7 +373,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-15"></a>
 ### Day 15 — Graphs I & MongoDB/DynamoDB
 
-*Grid and adjacency traversal + NoSQL modelling* · ~4h 20m
+*Grid and adjacency traversal + NoSQL modelling* · ~4h 55m
 
 **Focus.** Island/matrix BFS-DFS, and DynamoDB single-table design.
 
@@ -366,6 +384,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 55m** — NoSQL — MongoDB & DynamoDB single-table design
       `phase-3-databases-data/05-nosql-mongodb-dynamodb.md`
 - [ ] **Quiz · 15m** — Quiz: NoSQL
+- [ ] **Read · 35m** — Choosing the right database — the synthesis read
+      You have now seen Postgres, Redis, Kafka, RabbitMQ, Mongo and DynamoDB individually. This ties them together and adds the categories the deep dives skip — search, time-series, graph, columnar and vector. Learn the 30-second decision path and the five worked systems; in a design round the reasoning is scored, not the product name.
+      `phase-3-databases-data/09-choosing-the-right-database.md`
 - [ ] **Read · 30m** — ORMs & query builders — the N+1 problem and how to prove you fixed it
       Prisma vs TypeORM vs Knex trade-offs, cursor pagination, soft delete, multi-tenancy. N+1 comes up in almost every backend code review round.
       `phase-3-databases-data/07-orms-query-builders.md`
@@ -451,7 +472,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-20"></a>
 ### Day 20 — Tries, bit manipulation & distributed systems theory
 
-*Niche-but-cheap patterns + the theory that anchors design rounds* · ~4h 15m
+*Niche-but-cheap patterns + the theory that anchors design rounds* · ~4h 50m
 
 **Focus.** Trie implementation, bit tricks, and CAP/PACELC/consensus you can reason with, not recite.
 
@@ -465,6 +486,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 35m** — NGINX deep dive — reverse proxy, load balancing, TLS, rate limiting
       Layer 4 vs Layer 7, the six balancing algorithms, WebSocket proxying, and NGINX as an ingress. Cheap, concrete, and disproportionately valued in BD infrastructure rounds.
       `phase-4-cloud-infrastructure/01-nginx-deep-dive.md`
+- [ ] **Read · 35m** — Networking fundamentals — where the time actually goes
+      The layer under everything in phase 4. The question to be able to answer cold: a request takes 900ms and your handler logs 12ms — where did the rest go? DNS, TCP handshake, TLS handshake, load-balancer queueing, connection-pool wait. Naming the layers is the answer. Also read the error table; knowing that ECONNRESET usually means a keep-alive mismatch turns a mystery into a diagnosis.
+      `phase-4-cloud-infrastructure/10-networking-fundamentals.md`
 - [ ] **Design · 40m** — LLD drill — Pub/Sub system with at-least-once delivery
 - [ ] **Admin · 25m** — Apply to 3 roles + follow-ups
 
@@ -507,7 +531,7 @@ You already have deep written material in this repo. What kills candidates at yo
 <a id="day-23"></a>
 ### Day 23 — Mixed-pattern speed & DDD / data architecture
 
-*Pattern recognition speed is the real OA skill* · ~4h 0m
+*Pattern recognition speed is the real OA skill* · ~4h 35m
 
 **Focus.** Random-order problems (no pattern label) — that is the actual test condition.
 
@@ -517,6 +541,9 @@ You already have deep written material in this repo. What kills candidates at yo
 - [ ] **Read · 55m** — DDD & data architecture — bounded contexts, aggregates, CDC, streaming
       `phase-5-system-design/04-ddd-and-data-architecture.md`
 - [ ] **Quiz · 15m** — Quiz: DDD & data architecture
+- [ ] **Read · 35m** — Multi-tenancy & SaaS architecture
+      Most remote backend roles you will apply to are SaaS, so "how do you isolate tenants?" is routine. The weak answer is "we filter by tenant_id in every query". The strong one is that this is necessary but insufficient, and names a mechanism that fails safe — Postgres Row-Level Security, so a forgotten filter returns nothing rather than everything. Note the connection-pool trap: set_config without the transaction-local flag leaks one tenant's context into the next request.
+      `phase-5-system-design/09-multi-tenancy-and-saas-architecture.md`
 - [ ] **Design · 50m** — HLD drill — Video streaming platform (Netflix-like)
 - [ ] **Admin · 30m** — Apply to 4 roles
 
